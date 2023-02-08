@@ -1,0 +1,11 @@
+node_modules
+yarn.lock
+yarn-error.log
+.expo
+coverage
+.vscode/
+keys
+web-build
+dist
+deploy_backend-EXLUDEDFROMGIT.sh
+code-analysis
