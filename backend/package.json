@@ -1,0 +1,21 @@
+{
+	"name": "tamed-stripe-backend",
+	"version": "1.0.0",
+	"description": "The backend library for the tamed-stripe",
+	"repository": "https://github.com/MehmetKaplan/tamed-stripe",
+	"main": "tamed-stripe-backend.js",
+	"author": "Mehmet Kaplan",
+	"license": "MIT",
+	"private": false,
+	"scripts": {
+		"test": "jest --runInBand --coverage --no-cache --forceExit "
+	},
+	"devDependencies": {
+		"jest": "^29.3.1"
+	},
+	"dependencies": {
+		"stripe": "^11.9.1",
+		"tamed-pg": "^2.0.0",
+		"tick-log": "^1.1.4"
+	}
+}
