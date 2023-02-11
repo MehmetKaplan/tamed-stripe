@@ -27,16 +27,30 @@ const init = (p_params) => new Promise(async (resolve, reject) => {
 	}
 });
 
-const generateAccount = (props) => new Promise(async (resolve, reject) => {
-	let { email, description, payoutAccount } = props;
+const generateCustomer = (props) => new Promise(async (resolve, reject) => {
 	try {
-		delete props.payoutAccount;
+		let { description, email, metadata, name, phone, address } = props;
+		const customer = await stripe.customers.create({ description, email, metadata, name, phone, address});
+		if (debugMode) tickLog.success(`generated customer: ${JSON.stringify(customer)}`, true);
+		return resolve({
+			result: 'OK',
+			payload: customer,
+		});
+	} catch (error) {
+		if (debugMode) tickLog.error(`tamed-stripe-backend related error. Failure while calling generateCustomer(${JSON.stringify(props)}). Error: ${JSON.stringify(error)}`, true);
+		return reject(error);
+	}
+});
+
+const generateAccount = (props) => new Promise(async (resolve, reject) => {
+	let { email, description } = props;
+	try {
 		const accountGenerationParams = {
-			email: email,
-			description: description,
 			type: 'express',
+			email: email,
 			capabilities: {
 				card_payments: { requested: true },
+				transfers: { requested: true }
 			},
 			settings: {
 				payouts: {
@@ -46,11 +60,8 @@ const generateAccount = (props) => new Promise(async (resolve, reject) => {
 				}
 			}
 		};
-		if (payoutAccount) accountGenerationParams.capabilities.transfers = { requested: true };
-
 		const account = await stripe.accounts.create(accountGenerationParams);
 		if (debugMode) tickLog.success(`generated account: ${JSON.stringify(account)}`, true);
-
 		return resolve({
 			result: 'OK',
 			payload: account,
@@ -61,12 +72,15 @@ const generateAccount = (props) => new Promise(async (resolve, reject) => {
 	}
 });
 
+
+// USED both for normal payments and payouts
 const paymentSheetHandler = (props) => new Promise(async (resolve, reject) => {
 	try {
-		let { customerId, payInAmount, currency, transferData, payoutData } = props;
+		let { customerId, payInAmount, currency, payoutData } = props;
+		let transferData = undefined;
 		if (payoutData) transferData = {
 			amount: payoutData.payoutAmount,
-			destination: payoutData.payoutCustomerId,
+			destination: payoutData.payoutAccountId,
 		};
 		let paymentIntentParams = {
 			amount: payInAmount,
@@ -79,7 +93,7 @@ const paymentSheetHandler = (props) => new Promise(async (resolve, reject) => {
 		if (transferData) paymentIntentParams.transfer_data = transferData;
 		const ephemeralKey = await stripe.ephemeralKeys.create(
 			{ customer: customerId },
-			// { apiVersion: '2022-11-15' } // Do we need to provide an API version?
+			{ apiVersion: '2022-11-15' }
 		);
 		const paymentIntent = await stripe.paymentIntents.create(paymentIntentParams);
 
@@ -117,5 +131,8 @@ const refundHandler = (props) => new Promise(async (resolve, reject) => {
 
 module.exports = {
 	init,
-	generateAccount, paymentSheetHandler, refundHandler
+	generateAccount,
+	generateCustomer,
+	paymentSheetHandler, 
+	refundHandler
 }
