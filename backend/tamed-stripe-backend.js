@@ -2,12 +2,10 @@ const sqls = require('./sqls.json');
 const uiTexts = require('./ui-texts-english.json');
 const stripeSK = require('./config.js').secretKey;
 const stripePK = require('./config.js').publishableKey;
-// const stripe = require('stripe')(stripeSK);
-const stripe = require('stripe')('sk_test_51MVglyCDKfcpGwAfWlYSKHZnjZrERjGeHvWJn5LjjgKOyWTZZCsfG4bgtclIJjxGIFdfHMqdO2VVgCVXK1iEyr5E00Qz97PQNH'); // deleteme
+const stripe = require('stripe')(stripeSK);
 
 const { connect, runSQL } = require('tamed-pg');
 const tickLog = require('tick-log');
-const { truncate } = require('fs');
 
 let poolName;
 const poolInfoForTests = {};

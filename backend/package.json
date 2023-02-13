@@ -1,6 +1,6 @@
 {
 	"name": "tamed-stripe-backend",
-	"version": "1.0.0",
+	"version": "0.0.1",
 	"description": "The backend library for the tamed-stripe",
 	"repository": "https://github.com/MehmetKaplan/tamed-stripe",
 	"main": "tamed-stripe-backend.js",
@@ -8,10 +8,14 @@
 	"license": "MIT",
 	"private": false,
 	"scripts": {
-		"test": "jest --runInBand --coverage --no-cache --forceExit "
+		"test": "reset && jest --runInBand --coverage --no-cache --forceExit "
 	},
 	"devDependencies": {
-		"jest": "^29.3.1"
+		"babel-cli": "^6.26.0",
+		"babel-preset-env": "^1.7.0",
+		"jest": "^29.4.2",
+		"superagent": "^8.0.9",
+		"supertest": "^6.3.3"
 	},
 	"dependencies": {
 		"stripe": "^11.9.1",
