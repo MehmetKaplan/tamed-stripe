@@ -8,7 +8,7 @@
 	"license": "MIT",
 	"private": false,
 	"scripts": {
-		"test": "reset && jest --runInBand --coverage --no-cache --forceExit "
+		"test": "jest --runInBand --coverage --no-cache --forceExit "
 	},
 	"devDependencies": {
 		"babel-cli": "^6.26.0",

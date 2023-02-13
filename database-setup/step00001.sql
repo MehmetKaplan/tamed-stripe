@@ -62,9 +62,7 @@ create table tamedstripe.payment_sheets (
 	currency varchar(3) not null,
 	payout_stripe_account_id varchar(255), -- in case of payout
 	pay_out_amount money, -- in case of payout
-	payment_intent varchar(255) not null,
-	ephemeral_key varchar(255) not null,
-	publishable_key varchar(255) not null
+	ephemeral_key varchar(255) not null
 );
 
 grant all on tamedstripe.payment_sheets to tamedstripeapp;

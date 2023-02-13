@@ -1,2 +1,7 @@
 {
+	"customerExists": "select count(*) as \"count\" from tamedstripe.customers where stripe_customer_id = $1",
+	"insertCustomer": "insert into tamedstripe.customers (stripe_customer_id, update_time, email, name, phone, address, metadata, customer_object) values ($1, now(), $2, $3, $4, $5, $6, $7) ",
+	"connectedAccountsExists": "select count(*) as \"count\" from tamedstripe.connected_accounts where stripe_account_id = $1",
+	"insertConnectedAccount": "insert into tamedstripe.connected_accounts (stripe_account_id, update_time, capabilities, email, payment_schedule, account_object) values ($1, now(), $2, $3, $4, $5) ",
+	"insertPaymentSheet": "insert into tamedstripe.payment_sheets( stripe_customer_id, pay_in_amount, currency, payout_stripe_account_id, pay_out_amount, ephemeral_key ) values ($1, $2, $3, $4, $5, $6) "
 }

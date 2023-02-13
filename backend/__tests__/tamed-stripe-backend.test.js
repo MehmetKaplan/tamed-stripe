@@ -4,10 +4,11 @@ const tsb = require("../tamed-stripe-backend.js");
 beforeAll(async () => {
 	await tsb.init({
 		debugMode: true,
+		// coming from database-setup
 		pgKeys: {
-			user: 'serialentrepreneurapp',
-			password: 'serialentrepreneurapp.', // coming from database-setup/step00001.sql
-			database: 'serialentdb',
+			user: 'tamedstripeapp',
+			password: 'tamedstripeapp.', 
+			database: 'tamedstripedb',
 			host: 'localhost',
 			port: 5432,
 		},
