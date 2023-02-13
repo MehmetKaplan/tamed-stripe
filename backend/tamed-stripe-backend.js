@@ -53,7 +53,7 @@ const generateCustomer = (props) => new Promise(async (resolve, reject) => {
 });
 
 const generateAccount = (props) => new Promise(async (resolve, reject) => {
-	let { email, description } = props;
+	let { email } = props;
 	try {
 		const accountGenerationParams = {
 			type: 'express',

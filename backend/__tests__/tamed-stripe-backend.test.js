@@ -101,7 +101,7 @@ test('paymentSheetHandler normal payment', async () => {
 	//let payoutData
 	// 		let { customerId, payInAmount, currency, transferData, payoutData } = props;
 	let paymentSheet_ = await tsb.paymentSheetHandler({ customerId, payInAmount, currency });
-	let paymentSheet = paymentSheet_.payload;;
+	let paymentSheet = paymentSheet_.payload;
 	tickLog.info(`Generated Payment Sheet: ${JSON.stringify(paymentSheet)}}`, true);
 	expect(paymentSheet).toHaveProperty('paymentIntent');
 	expect(paymentSheet).toHaveProperty('ephemeralKey');
