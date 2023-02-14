@@ -9,3 +9,5 @@ web-build
 dist
 deploy_backend-EXLUDEDFROMGIT.sh
 code-analysis
+test-routes-remote.sh
+tamed-stripe-backend-example

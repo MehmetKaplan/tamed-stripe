@@ -11,5 +11,5 @@ module.exports = {
 		keyPath: undefined, // modify this if https is to be used
 		certPath: undefined, // modify this if https is to be used
 	},
-	port: process.env.TSM_PORT || 3000
+	port: process.env.TAMED_STRIPE_PORT || 3000
 }
