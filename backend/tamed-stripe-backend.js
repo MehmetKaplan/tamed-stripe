@@ -158,5 +158,8 @@ module.exports = {
 	generateAccount,
 	generateCustomer,
 	paymentSheetHandler,
-	refundHandler
+	refundHandler,
+	exportedForTesting: {
+		poolInfoForTests: poolInfoForTests,
+	}	
 }

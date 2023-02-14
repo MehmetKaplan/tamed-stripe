@@ -1,5 +1,9 @@
 const tickLog = require("tick-log");
 const tsb = require("../tamed-stripe-backend.js");
+const sqls = require("../sqls.json");
+const { runSQL, } = require('tamed-pg');
+
+let poolName;
 
 beforeAll(async () => {
 	await tsb.init({
@@ -13,6 +17,8 @@ beforeAll(async () => {
 			port: 5432,
 		},
 	});
+	poolName = tsb.exportedForTesting.poolInfoForTests.poolName;
+
 });
 
 test('generateCustomer', async () => {
@@ -50,6 +56,10 @@ test('generateCustomer', async () => {
 	expect(customerData).toHaveProperty('phone');
 	expect(customerData).toHaveProperty('address');
 	expect(customerData.email).toEqual(email);
+	let customerAtDB = await runSQL(poolName, sqls.selectCustomer, [customerData.id], true);
+	expect(customerAtDB.rows.length).toBe(1);
+	expect(customerAtDB.rows[0].stripe_customer_id).toEqual(customerData.id);
+	expect(customerAtDB.rows[0].customer_object).toEqual(customerData);
 });
 
 test('generateAccount (connected account for payouts)', async () => {
@@ -67,6 +77,10 @@ test('generateAccount (connected account for payouts)', async () => {
 	expect(accountData.capabilities).toEqual({ "card_payments": "inactive", "transfers": "inactive" });
 	expect(accountData.email).toEqual(email);
 	expect(accountData.settings.payouts.schedule.interval).toEqual('daily');
+	let accountAtDB = await runSQL(poolName, sqls.selectAccount, [accountData.id], true);
+	expect(accountAtDB.rows.length).toBe(1);
+	expect(accountAtDB.rows[0].stripe_account_id).toEqual(accountData.id);
+	expect(accountAtDB.rows[0].account_object).toEqual(accountData);
 });
 
 test('paymentSheetHandler normal payment', async () => {
@@ -108,6 +122,12 @@ test('paymentSheetHandler normal payment', async () => {
 	expect(paymentSheet).toHaveProperty('customer');
 	expect(paymentSheet).toHaveProperty('publishableKey');
 	expect(paymentSheet.customer).toBe(customerId);
+	let paymentSheetAtDB = await runSQL(poolName, sqls.selectPaymentSheets, [customerData.id], true);
+	expect(paymentSheetAtDB.rows.length).toBeGreaterThanOrEqual(1);
+	expect(paymentSheetAtDB.rows[0].stripe_customer_id).toEqual(customerData.id);
+	expect(parseFloat(paymentSheetAtDB.rows[0].pay_in_amount)).toEqual(payInAmount);
+	expect(paymentSheetAtDB.rows[0].payout_stripe_account_id).toBe(null);
+	expect(paymentSheetAtDB.rows[0].pay_out_amount).toBe(null);
 });
 
 test('paymentSheetHandler payment with payout', async () => {
@@ -158,4 +178,10 @@ test('paymentSheetHandler payment with payout', async () => {
 	expect(paymentSheet).toHaveProperty('customer');
 	expect(paymentSheet).toHaveProperty('publishableKey');
 	expect(paymentSheet.customer).toBe(customerId);
+	let paymentSheetAtDB = await runSQL(poolName, sqls.selectPaymentSheets, [customerData.id], true);
+	expect(paymentSheetAtDB.rows.length).toBeGreaterThanOrEqual(1);
+	expect(paymentSheetAtDB.rows[0].stripe_customer_id).toEqual(customerData.id);
+	expect(parseFloat(paymentSheetAtDB.rows[0].pay_in_amount)).toEqual(payInAmount);
+	expect(paymentSheetAtDB.rows[0].payout_stripe_account_id).toBe(accountData.id);
+	expect(parseFloat(paymentSheetAtDB.rows[0].pay_out_amount)).toBe(payoutData.amount);
 });
