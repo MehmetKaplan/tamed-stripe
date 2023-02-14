@@ -37,7 +37,6 @@ const generateCustomer = (props) => new Promise(async (resolve, reject) => {
 			// insert
 			// (stripe_customer_id, email, name, phone, address, metadata, customer_object) 
 			let insertResult = await runSQL(poolName, sqls.insertCustomer, [customer.id, customer.email, customer.name, customer.phone, customer.address, JSON.stringify(customer.metadata), JSON.stringify(customer)]);
-			if (debugMode) tickLog.info(`Database insert result: ${JSON.stringify(insertResult)}`, true);
 		} else /* istanbul ignore next */ {
 			// can not come here
 			// placed just to satisfy istanbul
@@ -78,7 +77,6 @@ const generateAccount = (props) => new Promise(async (resolve, reject) => {
 			// insert
 			// (stripe_customer_id, email, name, phone, address, metadata, customer_object) 
 			let insertResult = await runSQL(poolName, sqls.insertConnectedAccount, [account.id, JSON.stringify(account.capabilities), account.email, JSON.stringify(account.settings.payouts.schedule), JSON.stringify(account)]);
-			if (debugMode) tickLog.info(`Database insert result: ${JSON.stringify(insertResult)}`, true);
 		} else /* istanbul ignore next */ {
 			// can not come here
 			// placed just to satisfy istanbul
@@ -120,7 +118,6 @@ const paymentSheetHandler = (props) => new Promise(async (resolve, reject) => {
 		if (debugMode) tickLog.success(`generated ephemeralKey: ${JSON.stringify(ephemeralKey)}`, true);
 		if (debugMode) tickLog.success(`generated paymentIntent: ${JSON.stringify(paymentIntent)}`, true);
 		let insertResult = await runSQL(poolName, sqls.insertPaymentSheet, [customerId, payInAmount, currency, payoutData?.destination /*account id*/, payoutData?.amount, ephemeralKey.secret]);
-		if (debugMode) tickLog.info(`Database insert result: ${JSON.stringify(insertResult)}`, true);
 		return resolve({
 			result: 'OK',
 			payload: {
