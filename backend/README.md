@@ -12,7 +12,7 @@ yarn add tamed-stripe-backend
 
 2. Initialize parameters (modify below object according to your environment)
 
-	Use [this file](https://github.com/MehmetKaplan/tamed-stripe/blob/master/example/server-parameters.js) as a template for your backend configuration. This file is to be `require`d by your express server in the next step. **You should modify the credentials, according to your environment.**
+	Use [this file](https://github.com/MehmetKaplan/tamed-stripe/blob/master/example/backend/server-parameters.js) as a template for your backend configuration. This file is to be `require`d by your express server in the next step. **You should modify the credentials, according to your environment.**
 
 	| Key | Type | Value |
 	| --- | --- | --- |
@@ -20,7 +20,7 @@ yarn add tamed-stripe-backend
 	| httpsKeys | Object | HTTPS connection parameters. |
 	| port | Number | Port number for the server. |
 	
-3. Call the `init` function of the library to initialize the db connection pool. And then start your server. As a reference you can use [this file](https://github.com/MehmetKaplan/tamed-stripe/blob/master/example/server.js).
+3. Call the `init` function of the library to initialize the db connection pool. And then start your server. As a reference you can use [this file](https://github.com/MehmetKaplan/tamed-stripe/blob/master/example/backend/server.js).
 
 ## API
 
@@ -205,7 +205,7 @@ MODIFYME
 
 ## More Examples
 
-The example application can be found [here](https://github.com/MehmetKaplan/tamed-stripe/blob/master/example).
+The example application can be found [here](https://github.com/MehmetKaplan/tamed-stripe/blob/master/example/backend).
 Also the jest test cases can be used as examples, which can be found [here](https://github.com/MehmetKaplan/tamed-stripe/blob/master/backend/__tests__/tamed-stripe-backend.test.js).
 
 ## License
