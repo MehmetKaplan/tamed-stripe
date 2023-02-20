@@ -11,7 +11,7 @@ beforeAll(async () => {
 		// coming from database-setup
 		pgKeys: {
 			user: 'tamedstripeapp',
-			password: 'tamedstripeapp.', 
+			password: 'tamedstripeapp.',
 			database: 'tamedstripedb',
 			host: 'localhost',
 			port: 5432,
@@ -63,10 +63,17 @@ test('generateCustomer', async () => {
 });
 
 test('generateAccount (connected account for payouts)', async () => {
+	let publicDomain = "http://localhost:3000";
+	let refreshUrlRoute = "/account-authorize";
+	let returnUrlRoute = "/account-generated";
+
 	let now = Date.now();
 	let email = `${now}@yopmail.com`;
 	const props = {
 		email: email,
+		publicDomain: publicDomain,
+		refreshUrlRoute: refreshUrlRoute,
+		returnUrlRoute: returnUrlRoute,
 	};
 	let response1 = await tsb.generateAccount(props);
 	let accountData = response1.payload;
@@ -157,20 +164,26 @@ test('paymentSheetHandler payment with payout', async () => {
 	tickLog.info(`Customer generated with following significant information:\n   id:                  ${customerData.id}\n   object:              ${JSON.stringify(customerData.object)}\n   email:               ${customerData.email}\n   metadata:            ${JSON.stringify(customerData.metadata)}\n   name:                ${customerData.name}\n   phone:               ${customerData.phone}\n   address:             ${JSON.stringify(customerData.address)}\n   livemode:            ${customerData.livemode}`, true);
 	let now2 = Date.now() + '-connected-account';
 	let email2 = `${now2}@yopmail.com`;
+	let publicDomain2 = "http://localhost:3000";
+	let refreshUrlRoute2 = "/account-authorize";
+	let returnUrlRoute2 = "/account-generated";
 	const props2 = {
 		email: email2,
+		publicDomain: publicDomain2,
+		refreshUrlRoute: refreshUrlRoute2,
+		returnUrlRoute: returnUrlRoute2,
 	};
 	let response2 = await tsb.generateAccount(props2);
 	let accountData = response2.payload;
-	tickLog.info(`Account generated with following significant information:\n   id:                  ${accountData.id}\n   type:                ${accountData.type}\n   capabilities:        ${JSON.stringify(accountData.capabilities)}\n   email:               ${accountData.email}\n   Payment Schedule:    ${JSON.stringify(accountData.settings.payouts.schedule)}`, true);
+	tickLog.info(`Account generated with following significant information:\n   id:                  ${accountData.id}\n   type:                ${accountData.type}\n   capabilities:        ${JSON.stringify(accountData.capabilities)}\n   email:               ${accountData.email}\n   Payment Schedule:    ${JSON.stringify(accountData.settings.payouts.schedule)}\n   accountLinkURL:      ${accountData.accountLinkURL}`, true);
 	let customerId = customerData.id;
 	let payInAmount = 1000; // total amount to be chaged to CUSTOMER
 	let currency = 'usd'
 	let payoutData = {
 		amount: 877, // partner's share
 		destination: accountData.id, // CONNECTED ACCOUNT id
-	 };
-	let paymentSheet_ = await tsb.paymentSheetHandler({ customerId, payInAmount, currency, payoutData  });
+	};
+	let paymentSheet_ = await tsb.paymentSheetHandler({ customerId, payInAmount, currency, payoutData });
 	let paymentSheet = paymentSheet_.payload;;
 	tickLog.info(`Generated Payment Sheet: ${JSON.stringify(paymentSheet)}}`, true);
 	expect(paymentSheet).toHaveProperty('paymentIntent');

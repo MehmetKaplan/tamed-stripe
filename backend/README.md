@@ -37,7 +37,6 @@ yarn add tamed-stripe-backend
 | pgKeys | Object | PostgreSQL connection parameters. |
 | httpsKeys | Object | HTTPS connection parameters. |
 | port | Number | Port number for the server. |
-| applicationName | String | Application name. Not used, reserved for future. |
 
 **Returns:** If successful, resolves to `true`. Otherwise, rejects with an error message.
 
@@ -105,7 +104,7 @@ Generates a **payer** customer at Stripe.
 
 ### generateAccount
 
-Generates a **payee** account (aka connected account) at Stripe.
+Generates a **payee** account (aka connected account) at Stripe and its associated account link for the end user to complete the account generation process on Stripe.
 
 | Parameter | Type | Description |
 | --- | --- | --- |
@@ -116,8 +115,11 @@ Generates a **payee** account (aka connected account) at Stripe.
 | Key | Type | Value |
 | --- | --- | --- |
 | email | string | Email of the account. |
+| publicDomain | String | Public domain of the server, to use the return URLs. |
+| refreshUrlRoute | String | Route for the refresh URL. |
+| returnUrlRoute | String | Route for the return URL. |
 
-**Returns:** If successful, resolves to below JSON object. Otherwise, rejects with an error message.
+**Returns:** If successful, resolves to below JSON object. Otherwise, rejects with an error message. The payload also includes the `accountLinkURL` key, which is the result of account link generation.
 ```js
 {
 	result: 'OK',

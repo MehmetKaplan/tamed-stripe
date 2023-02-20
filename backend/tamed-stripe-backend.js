@@ -17,7 +17,6 @@ const init = (p_params) => new Promise(async (resolve, reject) => {
 		poolName = await connect(p_params.pgKeys);
 		poolInfoForTests.poolName = poolName;
 		/* istanbul ignore next */
-		uiTexts.applicationName = p_params?.applicationName ? p_params?.applicationName : uiTexts.applicationName;
 		return resolve(true);
 	} catch (error) /* istanbul ignore next */ {
 		tickLog.error(`Function init failed. Error: ${JSON.stringify(error)}`, true);
@@ -52,7 +51,7 @@ const generateCustomer = (props) => new Promise(async (resolve, reject) => {
 });
 
 const generateAccount = (props) => new Promise(async (resolve, reject) => {
-	let { email } = props;
+	let { email, publicDomain, refreshUrlRoute, returnUrlRoute } = props;
 	try {
 		const accountGenerationParams = {
 			type: 'express',
@@ -71,6 +70,16 @@ const generateAccount = (props) => new Promise(async (resolve, reject) => {
 		};
 		const account = await stripe.accounts.create(accountGenerationParams);
 		if (debugMode) tickLog.success(`generated account: ${JSON.stringify(account)}`, true);
+		let refreshUrl = `${publicDomain}${refreshUrlRoute || '/account-authorize'}`;
+		let returnUrl = `${publicDomain}${returnUrlRoute || '/account-generated'}`
+		const accountLink = await stripe.accountLinks.create({
+			account: account.id,
+			refresh_url: refreshUrl,
+			return_url: returnUrl,
+			type: 'account_onboarding'
+		});
+		account.accountLinkURL = accountLink.url;
+		if (debugMode) tickLog.success(`generated accountLink.url: ${accountLink.url}`, true);
 		let countResult = await runSQL(poolName, sqls.connectedAccountsExists, [account.id]);
 		if (debugMode) tickLog.info(`Database select result: ${JSON.stringify(countResult)}`, true);
 		if (parseInt(countResult.rows[0].count) === 0) {
@@ -80,7 +89,7 @@ const generateAccount = (props) => new Promise(async (resolve, reject) => {
 		} else /* istanbul ignore next */ {
 			// can not come here
 			// placed just to satisfy istanbul
-		};		
+		};
 		return resolve({
 			result: 'OK',
 			payload: account,
@@ -90,7 +99,6 @@ const generateAccount = (props) => new Promise(async (resolve, reject) => {
 		return reject(error);
 	}
 });
-
 
 // USED both for normal payments and payouts
 const paymentSheetHandler = (props) => new Promise(async (resolve, reject) => {
@@ -127,7 +135,7 @@ const paymentSheetHandler = (props) => new Promise(async (resolve, reject) => {
 				publishableKey: stripePK
 			},
 		});
-	} catch (error) /* istanbul ignore next */{
+	} catch (error) /* istanbul ignore next */ {
 		return reject(error);
 	}
 });
@@ -150,13 +158,20 @@ const refundHandler = (props) => new Promise(async (resolve, reject) => {
 	}
 });
 
+const accountGenerated = (props) => new Promise(async (resolve, reject) => {
+	return resolve({
+		result: 'OK',
+	});
+});
+
 module.exports = {
 	init,
 	generateAccount,
 	generateCustomer,
 	paymentSheetHandler,
 	refundHandler,
+	accountGenerated,
 	exportedForTesting: {
 		poolInfoForTests: poolInfoForTests,
-	}	
+	}
 }
