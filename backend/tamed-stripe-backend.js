@@ -50,6 +50,28 @@ const generateCustomer = (props) => new Promise(async (resolve, reject) => {
 	}
 });
 
+const completeAccount = (props) => new Promise(async (resolve, reject) => {
+	try {
+		let { accountId, publicDomain, refreshUrlRoute, returnUrlRoute } = props;
+		let refreshUrl = `${publicDomain}${refreshUrlRoute || '/account-authorize'}`;
+		let returnUrl = `${publicDomain}${returnUrlRoute || '/account-generated'}`
+		const accountLink = await stripe.accountLinks.create({
+			account: accountId,
+			refresh_url: refreshUrl,
+			return_url: returnUrl,
+			type: 'account_onboarding'
+		});
+		let accountLinkURL = accountLink.url;
+		return resolve({
+			result: 'OK',
+			payload: accountLinkURL,
+		});
+	} catch (error) /* istanbul ignore next */ {
+		if (debugMode) tickLog.error(`tamed-stripe-backend related error. Failure while calling generateAccount(${JSON.stringify(props)}). Error: ${JSON.stringify(error)}`, true);
+		return reject(error);
+	}
+});
+
 const generateAccount = (props) => new Promise(async (resolve, reject) => {
 	let { email, publicDomain, refreshUrlRoute, returnUrlRoute } = props;
 	try {
@@ -167,6 +189,7 @@ const accountGenerated = (props) => new Promise(async (resolve, reject) => {
 module.exports = {
 	init,
 	generateAccount,
+	completeAccount,
 	generateCustomer,
 	paymentSheetHandler,
 	refundHandler,

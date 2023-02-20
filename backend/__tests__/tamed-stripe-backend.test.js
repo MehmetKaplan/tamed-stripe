@@ -77,7 +77,7 @@ test('generateAccount (connected account for payouts)', async () => {
 	};
 	let response1 = await tsb.generateAccount(props);
 	let accountData = response1.payload;
-	tickLog.info(`Account generated with following significant information:\n   id:                  ${accountData.id}\n   type:                ${accountData.type}\n   capabilities:        ${JSON.stringify(accountData.capabilities)}\n   email:               ${accountData.email}\n   Payment Schedule:    ${JSON.stringify(accountData.settings.payouts.schedule)}`, true);
+	tickLog.info(`Account generated with following significant information:\n   id:                  ${accountData.id}\n   type:                ${accountData.type}\n   capabilities:        ${JSON.stringify(accountData.capabilities)}\n   email:               ${accountData.email}\n   Payment Schedule:    ${JSON.stringify(accountData.settings.payouts.schedule)}\n   accountLinkURL:      ${accountData.accountLinkURL}`, true);
 	expect(accountData.id).not.toBeNull();
 	expect(accountData.type).toEqual('express');
 	// jest compare object
@@ -88,6 +88,45 @@ test('generateAccount (connected account for payouts)', async () => {
 	expect(accountAtDB.rows.length).toBe(1);
 	expect(accountAtDB.rows[0].stripe_account_id).toEqual(accountData.id);
 	expect(accountAtDB.rows[0].account_object).toEqual(accountData);
+});
+
+
+test('completeAccount', async () => {
+	let publicDomain = "http://localhost:3000";
+	let refreshUrlRoute = "/account-authorize";
+	let returnUrlRoute = "/account-generated";
+
+	let now = Date.now();
+	let email = `${now}@yopmail.com`;
+	const props = {
+		email: email,
+		publicDomain: publicDomain,
+		refreshUrlRoute: refreshUrlRoute,
+		returnUrlRoute: returnUrlRoute,
+	};
+	let response1 = await tsb.generateAccount(props);
+	let accountData = response1.payload;
+	tickLog.info(`Account generated with following significant information:\n   id:                  ${accountData.id}\n   type:                ${accountData.type}\n   capabilities:        ${JSON.stringify(accountData.capabilities)}\n   email:               ${accountData.email}\n   Payment Schedule:    ${JSON.stringify(accountData.settings.payouts.schedule)}\n   accountLinkURL:      ${accountData.accountLinkURL}`, true);
+	expect(accountData.id).not.toBeNull();
+	expect(accountData.type).toEqual('express');
+	// jest compare object
+	expect(accountData.capabilities).toEqual({ "card_payments": "inactive", "transfers": "inactive" });
+	expect(accountData.email).toEqual(email);
+	expect(accountData.settings.payouts.schedule.interval).toEqual('daily');
+	let accountAtDB = await runSQL(poolName, sqls.selectAccount, [accountData.id], true);
+	expect(accountAtDB.rows.length).toBe(1);
+	expect(accountAtDB.rows[0].stripe_account_id).toEqual(accountData.id);
+	expect(accountAtDB.rows[0].account_object).toEqual(accountData);
+	let props2 = {
+		accountId: accountData.id,
+		publicDomain: publicDomain,
+		refreshUrlRoute: refreshUrlRoute,
+		returnUrlRoute: returnUrlRoute,
+	}
+	let completeAccountResponse = await tsb.completeAccount(props2);
+	let uriRegExp = new RegExp(/https?:\/\/(www\.)?[-a-zA-Z0-9@:%._\+~#=]{1,256}\.[a-zA-Z0-9()]{1,6}\b([-a-zA-Z0-9()@:%_\+.~#?&//=]*)/);
+	expect(completeAccountResponse.payload.match(uriRegExp)).toBeTruthy();
+	tickLog.info(`completeAccount URI: ${completeAccountResponse.payload}`);
 });
 
 test('paymentSheetHandler normal payment', async () => {
