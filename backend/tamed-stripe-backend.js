@@ -24,9 +24,9 @@ const init = (p_params) => new Promise(async (resolve, reject) => {
 	}
 });
 
-const generateCustomer = (props) => new Promise(async (resolve, reject) => {
+const generateCustomer = (body) => new Promise(async (resolve, reject) => {
 	try {
-		let { description, email, metadata, name, phone, address } = props;
+		let { description, email, metadata, name, phone, address } = body;
 		let lowCaseEmail = email.toLowerCase().trim();
 		const customer = await stripe.customers.create({ description, email: lowCaseEmail, metadata, name, phone, address });
 		if (debugMode) tickLog.success(`generated customer: ${JSON.stringify(customer)}`, true);
@@ -45,14 +45,14 @@ const generateCustomer = (props) => new Promise(async (resolve, reject) => {
 			payload: customer,
 		});
 	} catch (error) /* istanbul ignore next */ {
-		if (debugMode) tickLog.error(`tamed-stripe-backend related error. Failure while calling generateCustomer(${JSON.stringify(props)}). Error: ${JSON.stringify(error)}`, true);
+		if (debugMode) tickLog.error(`tamed-stripe-backend related error. Failure while calling generateCustomer(${JSON.stringify(body)}). Error: ${JSON.stringify(error)}`, true);
 		return reject(error);
 	}
 });
 
-const completeAccount = (props) => new Promise(async (resolve, reject) => {
+const completeAccount = (body) => new Promise(async (resolve, reject) => {
 	try {
-		let { accountId, publicDomain, refreshUrlRoute, returnUrlRoute } = props;
+		let { accountId, publicDomain, refreshUrlRoute, returnUrlRoute } = body;
 		let refreshUrl = `${publicDomain}${refreshUrlRoute || '/account-authorize'}`;
 		let returnUrl = `${publicDomain}${returnUrlRoute || '/account-generated'}`
 		const accountLink = await stripe.accountLinks.create({
@@ -67,13 +67,13 @@ const completeAccount = (props) => new Promise(async (resolve, reject) => {
 			payload: accountLinkURL,
 		});
 	} catch (error) /* istanbul ignore next */ {
-		if (debugMode) tickLog.error(`tamed-stripe-backend related error. Failure while calling generateAccount(${JSON.stringify(props)}). Error: ${JSON.stringify(error)}`, true);
+		if (debugMode) tickLog.error(`tamed-stripe-backend related error. Failure while calling generateAccount(${JSON.stringify(body)}). Error: ${JSON.stringify(error)}`, true);
 		return reject(error);
 	}
 });
 
-const generateAccount = (props) => new Promise(async (resolve, reject) => {
-	let { email, publicDomain, refreshUrlRoute, returnUrlRoute } = props;
+const generateAccount = (body) => new Promise(async (resolve, reject) => {
+	let { email, publicDomain, refreshUrlRoute, returnUrlRoute } = body;
 	try {
 		const accountGenerationParams = {
 			type: 'express',
@@ -117,15 +117,15 @@ const generateAccount = (props) => new Promise(async (resolve, reject) => {
 			payload: account,
 		});
 	} catch (error) /* istanbul ignore next */ {
-		if (debugMode) tickLog.error(`tamed-stripe-backend related error. Failure while calling generateAccount(${JSON.stringify(props)}). Error: ${JSON.stringify(error)}`, true);
+		if (debugMode) tickLog.error(`tamed-stripe-backend related error. Failure while calling generateAccount(${JSON.stringify(body)}). Error: ${JSON.stringify(error)}`, true);
 		return reject(error);
 	}
 });
 
 // USED both for normal payments and payouts
-const paymentSheetHandler = (props) => new Promise(async (resolve, reject) => {
+const paymentSheetHandler = (body) => new Promise(async (resolve, reject) => {
 	try {
-		let { customerId, payInAmount, currency, payoutData } = props;
+		let { customerId, payInAmount, currency, payoutData } = body;
 		let transferData = undefined;
 		if (payoutData) transferData = {
 			amount: payoutData.payoutAmount,
@@ -163,10 +163,10 @@ const paymentSheetHandler = (props) => new Promise(async (resolve, reject) => {
 });
 
 // MODIFYME to be handled after frontend is ready
-const refundHandler = (props) => new Promise(async (resolve, reject) => {
+const refundHandler = (body) => new Promise(async (resolve, reject) => {
 	try {
 		// refund, can be done only for the last transaction
-		let { chargeId } = props;
+		let { chargeId } = body;
 		const refund = await stripe.refunds.create({
 			charge: chargeId,
 			reverse_transfer: true,
@@ -180,10 +180,42 @@ const refundHandler = (props) => new Promise(async (resolve, reject) => {
 	}
 });
 
-const accountGenerated = (props) => new Promise(async (resolve, reject) => {
+const accountGenerated = (body) => new Promise(async (resolve, reject) => {
 	return resolve({
 		result: 'OK',
 	});
+});
+
+const webhook = (body) => new Promise(async (resolve, reject) => {
+	try {
+		let event = body;
+		tickLog.info(`Webhook received: ${JSON.stringify(event)}`, true);
+		switch (event.type) {
+			case 'payment_intent.succeeded':
+				break;
+			case 'payment_intent.payment_failed':
+				break;
+			case 'payment_intent.refunded':
+				break;
+			case 'account.application.authorized':
+				break;
+			case 'account.application.deauthorized':
+				break;
+			case 'account.updated':
+				break;
+			case 'customer.application.authorized':
+				break;
+			default:
+				break;
+		}
+
+		return resolve({
+			result: 'OK',
+			payload: undefined,
+		});
+	} catch (error) {
+		return reject(error);
+	}
 });
 
 module.exports = {
@@ -194,6 +226,7 @@ module.exports = {
 	paymentSheetHandler,
 	refundHandler,
 	accountGenerated,
+	webhook,
 	exportedForTesting: {
 		poolInfoForTests: poolInfoForTests,
 	}
