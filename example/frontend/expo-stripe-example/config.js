@@ -1,9 +1,6 @@
 module.exports = {
-	"apiBackendMachine": "development.eseme.one",
-	"apiBackendPort": process.env.TAMED_STRIPE_PORT,
-	"apiBackend": () => `https://${apiBackendMachine}:${apiBackendPort}`,
+	"apiBackend": "https://development.eseme.one:61983",
 	"routes": {
-		"generateCustomerRoute": "/generate-customer",
+		"generateCustomer": "/generate-customer",
 	}
 };
-
