@@ -118,6 +118,7 @@ Generates a **payee** account (aka connected account) at Stripe and its associat
 | publicDomain | String | Public domain of the server, to use the return URLs. |
 | refreshUrlRoute | String | Route for the refresh URL. |
 | returnUrlRoute | String | Route for the return URL. |
+| capabilities | JSON | defaults to `{transfers: { requested: true }}` |
 
 **Returns:** If successful, resolves to below JSON object. Otherwise, rejects with an error message. The payload also includes the `accountLinkURL` key, which is the result of account link generation.
 ```js
@@ -134,6 +135,7 @@ Generates a **payee** account (aka connected account) at Stripe and its associat
 		publicDomain: "http://localhost:3000",
 		refreshUrlRoute: "/account-authorize",
 		returnUrlRoute: "/account-generated",
+		capabilities: {transfers: { requested: true }}
 	};
 	let response = await tsb.generateAccount(props);
 ```

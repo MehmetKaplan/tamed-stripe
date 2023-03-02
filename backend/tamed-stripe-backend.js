@@ -73,15 +73,16 @@ const completeAccount = (body) => new Promise(async (resolve, reject) => {
 });
 
 const generateAccount = (body) => new Promise(async (resolve, reject) => {
-	let { email, publicDomain, refreshUrlRoute, returnUrlRoute } = body;
+	let { email, publicDomain, refreshUrlRoute, returnUrlRoute, country, capabilities } = body;
 	try {
+		let country_ = country ? country : 'US';
+		let tos_acceptance = country_ === 'US' ? undefined : { service_agreement: 'recipient' };
 		const accountGenerationParams = {
 			type: 'express',
 			email: email,
-			capabilities: {
-				card_payments: { requested: true },
-				transfers: { requested: true }
-			},
+			capabilities: capabilities ? capabilities : { transfers: { requested: true } },
+			tos_acceptance: tos_acceptance,
+			country: country ? country : 'US',
 			settings: {
 				payouts: {
 					schedule: {
@@ -125,7 +126,7 @@ const generateAccount = (body) => new Promise(async (resolve, reject) => {
 // USED both for normal payments and payouts
 const paymentSheetHandler = (body) => new Promise(async (resolve, reject) => {
 	try {
-		let { customerId, payInAmount, currency, payoutData } = body;
+		let { customerId, payInAmount, currency, payoutData, on_behalf_of } = body;
 		let transferData = undefined;
 		if (payoutData) transferData = {
 			amount: payoutData.payoutAmount,
@@ -139,7 +140,10 @@ const paymentSheetHandler = (body) => new Promise(async (resolve, reject) => {
 				enabled: true,
 			},
 		};
-		if (transferData) paymentIntentParams.transfer_data = transferData;
+		if (transferData) {
+			paymentIntentParams.transfer_data = transferData;
+			if (on_behalf_of) paymentIntentParams.on_behalf_of = on_behalf_of;
+		}
 		const ephemeralKey = await stripe.ephemeralKeys.create(
 			{ customer: customerId },
 			{ apiVersion: '2022-11-15' }

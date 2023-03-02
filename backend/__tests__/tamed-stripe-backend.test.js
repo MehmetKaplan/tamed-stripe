@@ -4,10 +4,11 @@ const sqls = require("../sqls.json");
 const { runSQL, } = require('tamed-pg');
 
 let poolName;
+let debugMode = false; // true 
 
 beforeAll(async () => {
 	await tsb.init({
-		debugMode: true,
+		debugMode: debugMode,
 		// coming from database-setup
 		pgKeys: {
 			user: 'tamedstripeapp',
@@ -56,7 +57,7 @@ test('generateCustomer', async () => {
 	expect(customerData).toHaveProperty('phone');
 	expect(customerData).toHaveProperty('address');
 	expect(customerData.email).toEqual(email);
-	let customerAtDB = await runSQL(poolName, sqls.selectCustomer, [customerData.id], true);
+	let customerAtDB = await runSQL(poolName, sqls.selectCustomer, [customerData.id], debugMode);
 	expect(customerAtDB.rows.length).toBe(1);
 	expect(customerAtDB.rows[0].stripe_customer_id).toEqual(customerData.id);
 	expect(customerAtDB.rows[0].customer_object).toEqual(customerData);
@@ -81,15 +82,43 @@ test('generateAccount (connected account for payouts)', async () => {
 	expect(accountData.id).not.toBeNull();
 	expect(accountData.type).toEqual('express');
 	// jest compare object
-	expect(accountData.capabilities).toEqual({ "card_payments": "inactive", "transfers": "inactive" });
+	expect(accountData.capabilities).toEqual({ "transfers": "inactive" });
 	expect(accountData.email).toEqual(email);
 	expect(accountData.settings.payouts.schedule.interval).toEqual('daily');
-	let accountAtDB = await runSQL(poolName, sqls.selectAccount, [accountData.id], true);
+	let accountAtDB = await runSQL(poolName, sqls.selectAccount, [accountData.id], debugMode);
 	expect(accountAtDB.rows.length).toBe(1);
 	expect(accountAtDB.rows[0].stripe_account_id).toEqual(accountData.id);
 	expect(accountAtDB.rows[0].account_object).toEqual(accountData);
 });
 
+test('generateAccount (connected account for payouts) in TR', async () => {
+	let publicDomain = "http://localhost:3000";
+	let refreshUrlRoute = "/account-authorize";
+	let returnUrlRoute = "/account-generated";
+
+	let now = Date.now();
+	let email = `${now}@yopmail.com`;
+	const props = {
+		email: email,
+		publicDomain: publicDomain,
+		refreshUrlRoute: refreshUrlRoute,
+		returnUrlRoute: returnUrlRoute,
+		country: "TR",
+	};
+	let response1 = await tsb.generateAccount(props);
+	let accountData = response1.payload;
+	tickLog.info(`Account generated with following significant information:\n   id:                  ${accountData.id}\n   type:                ${accountData.type}\n   capabilities:        ${JSON.stringify(accountData.capabilities)}\n   email:               ${accountData.email}\n   Payment Schedule:    ${JSON.stringify(accountData.settings.payouts.schedule)}\n   accountLinkURL:      ${accountData.accountLinkURL}`, true);
+	expect(accountData.id).not.toBeNull();
+	expect(accountData.type).toEqual('express');
+	// jest compare object
+	expect(accountData.capabilities).toEqual({ "transfers": "inactive" });
+	expect(accountData.email).toEqual(email);
+	expect(accountData.settings.payouts.schedule.interval).toEqual('daily');
+	let accountAtDB = await runSQL(poolName, sqls.selectAccount, [accountData.id], debugMode);
+	expect(accountAtDB.rows.length).toBe(1);
+	expect(accountAtDB.rows[0].stripe_account_id).toEqual(accountData.id);
+	expect(accountAtDB.rows[0].account_object).toEqual(accountData);
+});
 
 test('completeAccount', async () => {
 	let publicDomain = "http://localhost:3000";
@@ -110,10 +139,10 @@ test('completeAccount', async () => {
 	expect(accountData.id).not.toBeNull();
 	expect(accountData.type).toEqual('express');
 	// jest compare object
-	expect(accountData.capabilities).toEqual({ "card_payments": "inactive", "transfers": "inactive" });
+	expect(accountData.capabilities).toEqual({ "transfers": "inactive" });
 	expect(accountData.email).toEqual(email);
 	expect(accountData.settings.payouts.schedule.interval).toEqual('daily');
-	let accountAtDB = await runSQL(poolName, sqls.selectAccount, [accountData.id], true);
+	let accountAtDB = await runSQL(poolName, sqls.selectAccount, [accountData.id], debugMode);
 	expect(accountAtDB.rows.length).toBe(1);
 	expect(accountAtDB.rows[0].stripe_account_id).toEqual(accountData.id);
 	expect(accountAtDB.rows[0].account_object).toEqual(accountData);
@@ -168,7 +197,7 @@ test('paymentSheetHandler normal payment', async () => {
 	expect(paymentSheet).toHaveProperty('customer');
 	expect(paymentSheet).toHaveProperty('publishableKey');
 	expect(paymentSheet.customer).toBe(customerId);
-	let paymentSheetAtDB = await runSQL(poolName, sqls.selectPaymentSheets, [customerData.id], true);
+	let paymentSheetAtDB = await runSQL(poolName, sqls.selectPaymentSheets, [customerData.id], debugMode);
 	expect(paymentSheetAtDB.rows.length).toBeGreaterThanOrEqual(1);
 	expect(paymentSheetAtDB.rows[0].stripe_customer_id).toEqual(customerData.id);
 	expect(parseFloat(paymentSheetAtDB.rows[0].pay_in_amount)).toEqual(payInAmount);
@@ -230,7 +259,70 @@ test('paymentSheetHandler payment with payout', async () => {
 	expect(paymentSheet).toHaveProperty('customer');
 	expect(paymentSheet).toHaveProperty('publishableKey');
 	expect(paymentSheet.customer).toBe(customerId);
-	let paymentSheetAtDB = await runSQL(poolName, sqls.selectPaymentSheets, [customerData.id], true);
+	let paymentSheetAtDB = await runSQL(poolName, sqls.selectPaymentSheets, [customerData.id], debugMode);
+	expect(paymentSheetAtDB.rows.length).toBeGreaterThanOrEqual(1);
+	expect(paymentSheetAtDB.rows[0].stripe_customer_id).toEqual(customerData.id);
+	expect(parseFloat(paymentSheetAtDB.rows[0].pay_in_amount)).toEqual(payInAmount);
+	expect(paymentSheetAtDB.rows[0].payout_stripe_account_id).toBe(accountData.id);
+	expect(parseFloat(paymentSheetAtDB.rows[0].pay_out_amount)).toBe(payoutData.amount);
+});
+
+test('paymentSheetHandler payment with payout and on_behalf_of', async () => {
+	let now = Date.now();
+	let email = `${now}@yopmail.com`;
+	let description = `Generated by JEST tests. Customer ${now}`;
+	let metadata = {
+		"testField": "testValue1",
+		"testField2": "testValue2"
+	};
+	let name = `Customer ${now}`;
+	let phone = `+1 555 555 5555`;
+	let address =
+	{
+		city: "San Francisco",
+		country: "US",
+		line1: "1234 Main Street",
+		line2: "Apt. 4",
+		postal_code: "94111",
+		state: "CA"
+	}
+	const props = {
+		description, email, metadata, name, phone, address
+	};
+	let response1 = await tsb.generateCustomer(props);
+	let customerData = response1.payload;
+	tickLog.info(`Customer generated with following significant information:\n   id:                  ${customerData.id}\n   object:              ${JSON.stringify(customerData.object)}\n   email:               ${customerData.email}\n   metadata:            ${JSON.stringify(customerData.metadata)}\n   name:                ${customerData.name}\n   phone:               ${customerData.phone}\n   address:             ${JSON.stringify(customerData.address)}\n   livemode:            ${customerData.livemode}`, true);
+	let now2 = Date.now() + '-connected-account';
+	let email2 = `${now2}@yopmail.com`;
+	let publicDomain2 = "http://localhost:3000";
+	let refreshUrlRoute2 = "/account-authorize";
+	let returnUrlRoute2 = "/account-generated";
+	const props2 = {
+		email: email2,
+		publicDomain: publicDomain2,
+		refreshUrlRoute: refreshUrlRoute2,
+		returnUrlRoute: returnUrlRoute2,
+	};
+	let response2 = await tsb.generateAccount(props2);
+	let accountData = response2.payload;
+	tickLog.info(`Account generated with following significant information:\n   id:                  ${accountData.id}\n   type:                ${accountData.type}\n   capabilities:        ${JSON.stringify(accountData.capabilities)}\n   email:               ${accountData.email}\n   Payment Schedule:    ${JSON.stringify(accountData.settings.payouts.schedule)}\n   accountLinkURL:      ${accountData.accountLinkURL}`, true);
+	let customerId = customerData.id;
+	let payInAmount = 1000; // total amount to be chaged to CUSTOMER
+	let currency = 'usd'
+	let payoutData = {
+		amount: 877, // partner's share
+		destination: accountData.id, // CONNECTED ACCOUNT id
+	};
+	let on_behalf_of = accountData.id;
+	let paymentSheet_ = await tsb.paymentSheetHandler({ customerId, payInAmount, currency, payoutData, on_behalf_of });
+	let paymentSheet = paymentSheet_.payload;;
+	tickLog.info(`Generated Payment Sheet ON BEHALF OF: ${on_behalf_of}\n\n ${JSON.stringify(paymentSheet)}}`, true);
+	expect(paymentSheet).toHaveProperty('paymentIntent');
+	expect(paymentSheet).toHaveProperty('ephemeralKey');
+	expect(paymentSheet).toHaveProperty('customer');
+	expect(paymentSheet).toHaveProperty('publishableKey');
+	expect(paymentSheet.customer).toBe(customerId);
+	let paymentSheetAtDB = await runSQL(poolName, sqls.selectPaymentSheets, [customerData.id], debugMode);
 	expect(paymentSheetAtDB.rows.length).toBeGreaterThanOrEqual(1);
 	expect(paymentSheetAtDB.rows[0].stripe_customer_id).toEqual(customerData.id);
 	expect(parseFloat(paymentSheetAtDB.rows[0].pay_in_amount)).toEqual(payInAmount);
