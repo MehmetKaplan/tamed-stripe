@@ -8,7 +8,8 @@
 	"insertPaymentSheet": "insert into tamedstripe.payment_sheets( stripe_customer_id, insert_time, pay_in_amount, currency, payout_stripe_account_id, pay_out_amount, ephemeral_key ) values ($1, now(), $2, $3, $4, $5, $6) ",
 	"selectPaymentSheets": "select * from tamedstripe.payment_sheets where stripe_customer_id = $1 order by id desc",
 	"selectProduct": "select * from tamedstripe.products where stripe_product_id = $1",
-	"insertProduct": "insert into tamedstripe.products (stripe_product_id, name, description, currency, amount, update_time, product_object) values ($1, $2, $3, $4, $5, now(), $6) ",
-	"selectSubscription": "select * from tamedstripe.subscriptions where stripe_subscription_id = $1"
+	"insertProduct": "insert into tamedstripe.products (stripe_product_id, name, description, currency, unit_amount_decimal, update_time, product_object) values ($1, $2, $3, $4, $5, now(), $6) ",
+	"selectSubscription": "select * from tamedstripe.subscriptions where stripe_subscription_id = $1",
+	"customerProductSubscriptionExists": "select count(*) as \"count\" from tamedstripe.subscriptions where stripe_customer_id = $1 and stripe_product_id = $2",
+	"insertSubscription": "insert into tamedstripe.subscriptions (stripe_subscription_id, stripe_customer_id, update_time, subscription_object) values ($1, $2, now(), $3) "
 }
-

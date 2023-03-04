@@ -52,14 +52,14 @@ const generateCustomer = (body) => new Promise(async (resolve, reject) => {
 
 const generateProduct = (body) => new Promise(async (resolve, reject) => {
 	try {
-		let { name, description, currency, amount } = body;
+		let { name, description, currency, unitAmountDecimal } = body;
 		let default_price_data = {
 			currency: currency,
-			unit_amount_decimal: amount,
+			unit_amount_decimal: unitAmountDecimal,
 		}
 		const product = await stripe.products.create({ name, description, default_price_data });
 		if (debugMode) tickLog.success(`generated product: ${JSON.stringify(product)}`, true);
-		let insertResult = await runSQL(poolName, sqls.insertProduct, [product.id, name, description, currency, amount, JSON.stringify(product)]);
+		let insertResult = await runSQL(poolName, sqls.insertProduct, [product.id, name, description, currency, unitAmountDecimal, JSON.stringify(product)]);
 		if (debugMode) tickLog.info(`Database select result: ${JSON.stringify(insertResult)}`, true);
 		return resolve({
 			result: 'OK',
@@ -71,33 +71,44 @@ const generateProduct = (body) => new Promise(async (resolve, reject) => {
 	}
 });
 
-const generateSubscription = (body) => new Promise(async (resolve, reject) => {
+const generateCheckoutForSubscription = (body) => new Promise(async (resolve, reject) => {
 	try {
-		let { customerId, items, metadata } = body;
-		customer
-		description
-		const subscription = await stripe.subscriptions.create({
-			customer: customerId,
-			items: items,
-			metadata: metadata,
+		let { stripeProductName, currency, unitAmountDecimal, publicDomain, successRoute, cancelRoute } = body;
+		// {CHECKOUT_SESSION_ID} is to be used by Stripe, DON'T modify it!
+		let successUrl = `${publicDomain}${successRoute}?session_id={CHECKOUT_SESSION_ID}`;
+		let cancelUrl = `${publicDomain}${cancelRoute}`;
+
+		const subscriptionCheckoutSession = await await stripe.checkout.sessions.create({
+			mode: 'subscription',
+			payment_method_types: ['card'],
+			line_items: [
+				{
+					price_data: {
+						currency: currency,
+						product_data: {
+							name: stripeProductName, // product name
+						},
+						recurring: {
+							interval: 'month', // Set the billing cycle to monthly
+						},
+						unit_amount_decimal: unitAmountDecimal,
+					},
+					quantity: 1,
+				},
+			],
+			success_url: successUrl,
+			cancel_url: cancelUrl,
 		});
-		if (debugMode) tickLog.success(`generated subscription: ${JSON.stringify(subscription)}`, true);
-		let countResult = await runSQL(poolName, sqls.subscriptionExists, [subscription.id]);
-		if (debugMode) tickLog.info(`Database select result: ${JSON.stringify(countResult)}`, true);
-		if (parseInt(countResult.rows[0].count) === 0) {
-			// insert
-			// (stripe_subscription_id, stripe_customer_id, stripe_price_id, metadata, subscription_object)
-			let insertResult = await runSQL(poolName, sqls.insertSubscription, [subscription.id, subscription.customer, subscription.items.data[0].price.id, JSON.stringify(subscription.metadata), JSON.stringify(subscription)]);
-		} else /* istanbul ignore next */ {
-			// can not come here
-			// placed just to satisfy istanbul
-		};
+
+		if (debugMode) tickLog.success(`generated subscriptionCheckoutSession: ${JSON.stringify(subscriptionCheckoutSession)}`, true);
+		// let insertResult = await runSQL(poolName, sqls.insertSubscription, [subscription.id, subscription.customer, subscription.items.data[0].price.id, JSON.stringify(subscription.metadata), JSON.stringify(subscription)]);
+		// if (debugMode) tickLog.success(`generated subscription, DB insert result ${JSON.stringify(insertResult)}`, true);
 		return resolve({
 			result: 'OK',
-			payload: subscription,
+			payload: subscriptionCheckoutSession,
 		});
 	} catch (error) /* istanbul ignore next */ {
-		if (debugMode) tickLog.error(`tamed-stripe-backend related error. Failure while calling generateSubscription(${JSON.stringify(body)}). Error: ${JSON.stringify(error)}`, true);
+		if (debugMode) tickLog.error(`tamed-stripe-backend related error. Failure while calling generateCheckoutForSubscription(${JSON.stringify(body)}). Error: ${JSON.stringify(error)}`, true);
 		return reject(error);
 	}
 });
@@ -281,7 +292,7 @@ module.exports = {
 	completeAccount,
 	generateCustomer,
 	generateProduct,
-	generateSubscription,
+	generateCheckoutForSubscription,
 	paymentSheetHandler,
 	refundHandler,
 	accountGenerated,

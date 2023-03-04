@@ -62,9 +62,9 @@ Generates a **payer** customer at Stripe.
 
 | Parameter | Type | Description |
 | --- | --- | --- |
-| props | Object | Parameters for the generating a payer customer at Stripe |
+| body | Object | Parameters for the generating a payer customer at Stripe |
 
-#### `props`
+#### `body`
 
 | Key | Type | Value |
 | --- | --- | --- |
@@ -96,10 +96,88 @@ Generates a **payer** customer at Stripe.
 
 **Example:**
 ```javascript
-	const props = {
+	const body = {
 		description, email, metadata, name, phone, address
 	};
-	let response = await tsb.generateCustomer(props);
+	let response = await tsb.generateCustomer(body);
+```
+
+
+### generateProduct
+
+Generates a product that can be used in checkout sessions.
+
+| Parameter | Type | Description |
+| --- | --- | --- |
+| body | Object | Parameters for the generating a payer customer at Stripe |
+
+#### `body`
+
+| Key | Type | Value |
+| --- | --- | --- |
+| name | string | Name of the product. |
+| description | string | Description of the product. |
+| currency | string | Currency of the product. |
+| unitAmountDecimal | number | Unit amount of the product **in CENTS**. |
+
+
+**Returns:** If successful, resolves to below JSON object. Otherwise, rejects with an error message.
+```js
+{
+	result: 'OK',
+	payload: product,
+}
+```
+
+**Example:**
+```javascript
+	const body = {
+		name: 'Test Product',
+		description: 'Test Product Description',
+		currency: 'usd',
+		unitAmountDecimal: 1000, // $10.00
+	};
+	let response = await tsb.generateProduct(body);
+```
+
+### generateCheckoutForSubscription
+
+Generates a Stripe checkout session for monthly subscriptions.
+
+| Parameter | Type | Description |
+| --- | --- | --- |
+| body | Object | Parameters for the generating a payer customer at Stripe |
+
+#### `body`
+
+| Key | Type | Value |
+| --- | --- | --- |
+| stripeProductName | string | Name of the product. |
+| currency | string | Currency of the product. |
+| unitAmountDecimal | number | Unit amount of the product **in CENTS**. |
+| publicDomain | string | Public domain of the website. |
+| successRoute | string | Route to redirect to on successful checkout. |
+| cancelRoute | string | Route to redirect to on cancelled checkout. |
+
+**Returns:** If successful, resolves to below JSON object. Otherwise, rejects with an error message.
+```js
+{
+	result: 'OK',
+	payload: subscriptionCheckoutSession,
+}
+```
+
+**Example:**
+```javascript
+	const body = {
+		stripeProductName: 'Test Product',
+		currency: 'usd',
+		unitAmountDecimal: 1000, // $10.00
+		publicDomain: 'https://www.example.com',
+		successRoute: '/subscription-checkout-success',
+		cancelRoute: '/subscription-checkout-cancel',
+	};
+	let response = await tsb.generateCheckoutForSubscription(body);
 ```
 
 ### generateAccount
@@ -108,9 +186,9 @@ Generates a **payee** account (aka connected account) at Stripe and its associat
 
 | Parameter | Type | Description |
 | --- | --- | --- |
-| props | Object | Parameters for the generating a payee account at Stripe |
+| body | Object | Parameters for the generating a payee account at Stripe |
 
-#### `props`
+#### `body`
 
 | Key | Type | Value |
 | --- | --- | --- |
@@ -130,14 +208,14 @@ Generates a **payee** account (aka connected account) at Stripe and its associat
 
 **Example:**
 ```javascript
-	const props = {
+	const body = {
 		email: "...",
 		publicDomain: "http://localhost:3000",
 		refreshUrlRoute: "/account-authorize",
 		returnUrlRoute: "/account-generated",
 		capabilities: {transfers: { requested: true }}
 	};
-	let response = await tsb.generateAccount(props);
+	let response = await tsb.generateAccount(body);
 ```
 
 ### completeAccount
@@ -146,9 +224,9 @@ Completes a previously started **payee** account (aka connected account) generat
 
 | Parameter | Type | Description |
 | --- | --- | --- |
-| props | Object | Parameters for the generating a payee account at Stripe |
+| body | Object | Parameters for the generating a payee account at Stripe |
 
-#### `props`
+#### `body`
 
 | Key | Type | Value |
 | --- | --- | --- |
@@ -167,13 +245,13 @@ Completes a previously started **payee** account (aka connected account) generat
 
 **Example:**
 ```javascript
-	const props = {
+	const body = {
 		accountId: "...",
 		publicDomain: "http://localhost:3000",
 		refreshUrlRoute: "/account-authorize",
 		returnUrlRoute: "/account-generated",
 	};
-	let response = await tsb.completeAccount(props);
+	let response = await tsb.completeAccount(body);
 ```
 ### paymentSheetHandler
 
@@ -181,9 +259,9 @@ The payment sheet handler is used to generate a payment sheet for the payer cust
 
 | Parameter | Type | Description |
 | --- | --- | --- |
-| props | Object | Parameters for the generating a payment sheet at Stripe |
+| body | Object | Parameters for the generating a payment sheet at Stripe |
 
-#### `props`
+#### `body`
 
 | Key | Type | Value |
 | --- | --- | --- |
@@ -224,9 +302,9 @@ Used to refund a payment.
 
 | Parameter | Type | Description |
 | --- | --- | --- |
-| props | Object | Parameters for the refunding a payment at Stripe |
+| body | Object | Parameters for the refunding a payment at Stripe |
 
-#### `props`
+#### `body`
 
 | Key | Type | Value |
 | --- | --- | --- |
