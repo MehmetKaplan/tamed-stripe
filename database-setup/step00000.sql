@@ -20,11 +20,24 @@ from
 
 drop table tamedstripe.connected_accounts;
 
+revoke all on tamedstripe.subscriptions
+from
+	tamedstripeapp;
+
+drop table tamedstripe.subscriptions;
+
 revoke all on tamedstripe.customers
 from
 	tamedstripeapp;
 
 drop table tamedstripe.customers;
+
+revoke all on tamedstripe.products
+from
+	tamedstripeapp;
+
+drop table tamedstripe.products;
+
 
 -- SCHEMA
 

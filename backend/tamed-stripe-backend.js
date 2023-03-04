@@ -50,6 +50,59 @@ const generateCustomer = (body) => new Promise(async (resolve, reject) => {
 	}
 });
 
+const generateProduct = (body) => new Promise(async (resolve, reject) => {
+	try {
+		let { name, description, currency, amount } = body;
+		let default_price_data = {
+			currency: currency,
+			unit_amount_decimal: amount,
+		}
+		const product = await stripe.products.create({ name, description, default_price_data });
+		if (debugMode) tickLog.success(`generated product: ${JSON.stringify(product)}`, true);
+		let insertResult = await runSQL(poolName, sqls.insertProduct, [product.id, name, description, currency, amount, JSON.stringify(product)]);
+		if (debugMode) tickLog.info(`Database select result: ${JSON.stringify(insertResult)}`, true);
+		return resolve({
+			result: 'OK',
+			payload: product,
+		});
+	} catch (error) /* istanbul ignore next */ {
+		if (debugMode) tickLog.error(`tamed-stripe-backend related error. Failure while calling generateProduct(${JSON.stringify(body)}). Error: ${JSON.stringify(error)}`, true);
+		return reject(error);
+	}
+});
+
+const generateSubscription = (body) => new Promise(async (resolve, reject) => {
+	try {
+		let { customerId, items, metadata } = body;
+		customer
+		description
+		const subscription = await stripe.subscriptions.create({
+			customer: customerId,
+			items: items,
+			metadata: metadata,
+		});
+		if (debugMode) tickLog.success(`generated subscription: ${JSON.stringify(subscription)}`, true);
+		let countResult = await runSQL(poolName, sqls.subscriptionExists, [subscription.id]);
+		if (debugMode) tickLog.info(`Database select result: ${JSON.stringify(countResult)}`, true);
+		if (parseInt(countResult.rows[0].count) === 0) {
+			// insert
+			// (stripe_subscription_id, stripe_customer_id, stripe_price_id, metadata, subscription_object)
+			let insertResult = await runSQL(poolName, sqls.insertSubscription, [subscription.id, subscription.customer, subscription.items.data[0].price.id, JSON.stringify(subscription.metadata), JSON.stringify(subscription)]);
+		} else /* istanbul ignore next */ {
+			// can not come here
+			// placed just to satisfy istanbul
+		};
+		return resolve({
+			result: 'OK',
+			payload: subscription,
+		});
+	} catch (error) /* istanbul ignore next */ {
+		if (debugMode) tickLog.error(`tamed-stripe-backend related error. Failure while calling generateSubscription(${JSON.stringify(body)}). Error: ${JSON.stringify(error)}`, true);
+		return reject(error);
+	}
+});
+
+
 const completeAccount = (body) => new Promise(async (resolve, reject) => {
 	try {
 		let { accountId, publicDomain, refreshUrlRoute, returnUrlRoute } = body;
@@ -227,6 +280,8 @@ module.exports = {
 	generateAccount,
 	completeAccount,
 	generateCustomer,
+	generateProduct,
+	generateSubscription,
 	paymentSheetHandler,
 	refundHandler,
 	accountGenerated,

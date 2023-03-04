@@ -6,5 +6,9 @@
 	"insertConnectedAccount": "insert into tamedstripe.connected_accounts (stripe_account_id, update_time, capabilities, email, payment_schedule, account_object) values ($1, now(), $2, $3, $4, $5) ",
 	"selectAccount": "select * from tamedstripe.connected_accounts where stripe_account_id = $1",
 	"insertPaymentSheet": "insert into tamedstripe.payment_sheets( stripe_customer_id, insert_time, pay_in_amount, currency, payout_stripe_account_id, pay_out_amount, ephemeral_key ) values ($1, now(), $2, $3, $4, $5, $6) ",
-	"selectPaymentSheets": "select * from tamedstripe.payment_sheets where stripe_customer_id = $1 order by id desc"
+	"selectPaymentSheets": "select * from tamedstripe.payment_sheets where stripe_customer_id = $1 order by id desc",
+	"selectProduct": "select * from tamedstripe.products where stripe_product_id = $1",
+	"insertProduct": "insert into tamedstripe.products (stripe_product_id, name, description, currency, amount, update_time, product_object) values ($1, $2, $3, $4, $5, now(), $6) ",
+	"selectSubscription": "select * from tamedstripe.subscriptions where stripe_subscription_id = $1"
 }
+
