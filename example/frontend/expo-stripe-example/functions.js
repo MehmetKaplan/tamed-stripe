@@ -6,7 +6,7 @@ let apiBackend, routes, debugMode;
 const init = async (props) => {
 	debugMode = props.debugMode;
 	if (debugMode) console.log(`\x1b[1;33m;API Backend: ${props.apiBackend}\x1b[0m`);
-	if (debugMode) console.log(`\x1b[1;33m;To be used routes: ${JSON.stringify(props.routes)}\x1b[0m`);
+	if (debugMode) console.log(`\x1b[1;33mTo be used routes: ${JSON.stringify(props.routes)}\x1b[0m`);
 	apiBackend = props.apiBackend;
 	routes = props.routes;
 };
@@ -20,7 +20,9 @@ const generateCustomer = (props) => new Promise(async (resolve, reject) => {
 		body.name = props.name;
 		body.phone = props.phone;
 		body.address = props.address;
-
+		body.publicDomain = props.publicDomain;
+		body.successRoute = props.successRoute;
+		body.cancelRoute = props.cancelRoute;
 
 		let uri = `${apiBackend}${routes.generateCustomer}`;
 
@@ -61,6 +63,20 @@ const generateAccount = (props) => new Promise(async (resolve, reject) => {
 	}
 });
 
+const CustomerWebView = (props) => {
+	if (!(props?.customerCheckoutSessionUrl) || (props.customerCheckoutSessionUrl.length === 0)) return <></>;
+	return <WebView
+		source={{ uri: props.customerCheckoutSessionUrl }}
+		style={{ marginTop: 20 }}
+		onNavigationStateChange={navState => {
+			console.log(navState);
+			if (navState.url.includes("web-view-close")) {
+				props.setCustomerCheckoutSessionUrl("");
+			}
+		}}
+	/>;
+}
+
 
 // props: accountLinkUrl, setAccountLinkUrl
 const AccountWebView = (props) => {
@@ -84,5 +100,6 @@ module.exports = {
 	generateCustomer,
 	generateAccount,
 	AccountWebView: AccountWebView,
+	CustomerWebView: CustomerWebView,
 
 };

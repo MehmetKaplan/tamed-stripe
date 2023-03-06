@@ -1,7 +1,7 @@
 {
   "dependencies": {
     "path": "^0.12.7",
-    "tamed-express-server": "^2.0.2",
-    "tamed-stripe-backend": "^1.0.11"
+    "tamed-express-server": "^3.0.0",
+    "tamed-stripe-backend": "^1.0.25"
   }
 }
