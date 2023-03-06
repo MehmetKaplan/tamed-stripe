@@ -85,7 +85,7 @@ const generateCustomerSuccessRoute = (body) => new Promise(async (resolve, rejec
 		if (debugMode) tickLog.success(`session: ${JSON.stringify(session)}`, true);
 		const setupIntent = await stripe.setupIntents.retrieve(session.setup_intent);
 		if (debugMode) tickLog.success(`setupIntent: ${JSON.stringify(setupIntent)}`, true);
-		if (!(setupIntent?.payment_method)) return resolve(closePage(`<h1>Error!</h1><p>Please try again later.</p><br>${JSON.stringify(body)}`, 3000));
+		if (!(setupIntent?.payment_method)) return resolve(closePage(`<h1>Error!!</h1><p>Please try again later.</p><br>${JSON.stringify(body)}`, 3000));
 		const modifyResult = await runSQL(poolName, sqls.modifyCustomerPayment, [session.customer, 'A', setupIntent.payment_method], debugMode);
 		return resolve(closePage(`<h1>Success!</h1><p>You can close this window now.</p><br>${JSON.stringify(body)}`, 3000));
 	}
