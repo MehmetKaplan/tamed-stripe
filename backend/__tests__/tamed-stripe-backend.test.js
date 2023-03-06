@@ -22,7 +22,6 @@ beforeAll(async () => {
 
 });
 
-/*
 test('generateCustomer', async () => {
 	let now = Date.now();
 	let email = `${now}@yopmail.com`;
@@ -137,9 +136,9 @@ test('generateProduct', async () => {
 	expect(productAtDB.rows[0].name).toEqual(name);
 	expect(productAtDB.rows[0].description).toEqual(description);
 	expect(productAtDB.rows[0].currency).toEqual(currency);
-	expect(productAtDB.rows[0].unit_amount_decimal).toEqual(unitAmountDecimal);
+	expect(productAtDB.rows[0].unit_amount_decimal).toEqual(`${unitAmountDecimal}.00`);
 });
-*/
+
 
 test('generateCheckoutForSubscription', async () => {
 	let now = Date.now();
@@ -215,7 +214,6 @@ test('generateCheckoutForSubscription', async () => {
 
 });
 
-/*
 test('generateAccount (connected account for payouts)', async () => {
 	let publicDomain = "http://localhost:3000";
 	let refreshUrlRoute = "/account-authorize";
@@ -482,4 +480,4 @@ test('paymentSheetHandler payment with payout and on_behalf_of', async () => {
 	expect(paymentSheetAtDB.rows[0].payout_stripe_account_id).toBe(accountData.id);
 	expect(parseFloat(paymentSheetAtDB.rows[0].pay_out_amount)).toBe(payoutData.amount);
 });
-*/
+

@@ -8,6 +8,12 @@
 --                                  |___/
 
 -- TABLES 
+revoke all on tamedstripe.subscriptions
+from
+	tamedstripeapp;
+
+drop table tamedstripe.subscriptions;
+
 revoke all on tamedstripe.payment_sheets
 from
 	tamedstripeapp;
@@ -19,12 +25,6 @@ from
 	tamedstripeapp;
 
 drop table tamedstripe.connected_accounts;
-
-revoke all on tamedstripe.subscriptions
-from
-	tamedstripeapp;
-
-drop table tamedstripe.subscriptions;
 
 revoke all on tamedstripe.customers
 from

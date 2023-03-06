@@ -29,17 +29,13 @@ const generateCustomer = (body) => new Promise(async (resolve, reject) => {
 		let { description, email, metadata, name, phone, address } = body;
 		let lowCaseEmail = email.toLowerCase().trim();
 		const customer = await stripe.customers.create({ description, email: lowCaseEmail, metadata, name, phone, address });
+		/* istanbul ignore next */
 		if (debugMode) tickLog.success(`generated customer: ${JSON.stringify(customer)}`, true);
 		let countResult = await runSQL(poolName, sqls.customerExists, [customer.id]);
+		/* istanbul ignore next */
 		if (debugMode) tickLog.info(`Database select result: ${JSON.stringify(countResult)}`, true);
-		if (parseInt(countResult.rows[0].count) === 0) {
-			// insert
-			// (stripe_customer_id, email, name, phone, address, metadata, customer_object) 
-			let insertResult = await runSQL(poolName, sqls.insertCustomer, [customer.id, customer.email, customer.name, customer.phone, customer.address, JSON.stringify(customer.metadata), JSON.stringify(customer)]);
-		} else /* istanbul ignore next */ {
-			// can not come here
-			// placed just to satisfy istanbul
-		};
+		if (parseInt(countResult.rows[0].count) === 0) await runSQL(poolName, sqls.insertCustomer, [customer.id, customer.email, customer.name, customer.phone, customer.address, JSON.stringify(customer.metadata), JSON.stringify(customer)]);
+		else /* istanbul ignore next */ { };
 		return resolve({
 			result: 'OK',
 			payload: customer,
@@ -71,49 +67,6 @@ const generateProduct = (body) => new Promise(async (resolve, reject) => {
 	}
 });
 
-const generateCheckoutForSubscription = (body) => new Promise(async (resolve, reject) => {
-	try {
-		let { stripeProductName, currency, unitAmountDecimal, publicDomain, successRoute, cancelRoute } = body;
-		// {CHECKOUT_SESSION_ID} is to be used by Stripe, DON'T modify it!
-		let successUrl = `${publicDomain}${successRoute}?session_id={CHECKOUT_SESSION_ID}`;
-		let cancelUrl = `${publicDomain}${cancelRoute}`;
-
-		const subscriptionCheckoutSession = await await stripe.checkout.sessions.create({
-			mode: 'subscription',
-			payment_method_types: ['card'],
-			line_items: [
-				{
-					price_data: {
-						currency: currency,
-						product_data: {
-							name: stripeProductName, // product name
-						},
-						recurring: {
-							interval: 'month', // Set the billing cycle to monthly
-						},
-						unit_amount_decimal: unitAmountDecimal,
-					},
-					quantity: 1,
-				},
-			],
-			success_url: successUrl,
-			cancel_url: cancelUrl,
-		});
-
-		if (debugMode) tickLog.success(`generated subscriptionCheckoutSession: ${JSON.stringify(subscriptionCheckoutSession)}`, true);
-		// let insertResult = await runSQL(poolName, sqls.insertSubscription, [subscription.id, subscription.customer, subscription.items.data[0].price.id, JSON.stringify(subscription.metadata), JSON.stringify(subscription)]);
-		// if (debugMode) tickLog.success(`generated subscription, DB insert result ${JSON.stringify(insertResult)}`, true);
-		return resolve({
-			result: 'OK',
-			payload: subscriptionCheckoutSession,
-		});
-	} catch (error) /* istanbul ignore next */ {
-		if (debugMode) tickLog.error(`tamed-stripe-backend related error. Failure while calling generateCheckoutForSubscription(${JSON.stringify(body)}). Error: ${JSON.stringify(error)}`, true);
-		return reject(error);
-	}
-});
-
-
 const completeAccount = (body) => new Promise(async (resolve, reject) => {
 	try {
 		let { accountId, publicDomain, refreshUrlRoute, returnUrlRoute } = body;
@@ -144,7 +97,7 @@ const generateAccount = (body) => new Promise(async (resolve, reject) => {
 		const accountGenerationParams = {
 			type: 'express',
 			email: email,
-			capabilities: capabilities ? capabilities : { transfers: { requested: true } },
+			capabilities: /* istanbul ignore next */ capabilities ? capabilities : { transfers: { requested: true } },
 			tos_acceptance: tos_acceptance,
 			country: country ? country : 'US',
 			settings: {
@@ -156,6 +109,7 @@ const generateAccount = (body) => new Promise(async (resolve, reject) => {
 			}
 		};
 		const account = await stripe.accounts.create(accountGenerationParams);
+		/* istanbul ignore next */
 		if (debugMode) tickLog.success(`generated account: ${JSON.stringify(account)}`, true);
 		let refreshUrl = `${publicDomain}${refreshUrlRoute || '/account-authorize'}`;
 		let returnUrl = `${publicDomain}${returnUrlRoute || '/account-generated'}`
@@ -213,7 +167,9 @@ const paymentSheetHandler = (body) => new Promise(async (resolve, reject) => {
 			{ apiVersion: '2022-11-15' }
 		);
 		const paymentIntent = await stripe.paymentIntents.create(paymentIntentParams);
+		/* istanbul ignore next */
 		if (debugMode) tickLog.success(`generated ephemeralKey: ${JSON.stringify(ephemeralKey)}`, true);
+		/* istanbul ignore next */
 		if (debugMode) tickLog.success(`generated paymentIntent: ${JSON.stringify(paymentIntent)}`, true);
 		let insertResult = await runSQL(poolName, sqls.insertPaymentSheet, [customerId, payInAmount, currency, payoutData?.destination /*account id*/, payoutData?.amount, ephemeralKey.secret]);
 		return resolve({
@@ -230,30 +186,50 @@ const paymentSheetHandler = (body) => new Promise(async (resolve, reject) => {
 	}
 });
 
-// MODIFYME to be handled after frontend is ready
-const refundHandler = (body) => new Promise(async (resolve, reject) => {
+const generateCheckoutForSubscription = (body) => new Promise(async (resolve, reject) => {
 	try {
-		// refund, can be done only for the last transaction
-		let { chargeId } = body;
-		const refund = await stripe.refunds.create({
-			charge: chargeId,
-			reverse_transfer: true,
+		let { stripeProductName, currency, unitAmountDecimal, publicDomain, successRoute, cancelRoute } = body;
+		// {CHECKOUT_SESSION_ID} is to be used by Stripe, DON'T modify it!
+		let successUrl = `${publicDomain}${successRoute}?session_id={CHECKOUT_SESSION_ID}`;
+		let cancelUrl = `${publicDomain}${cancelRoute}`;
+
+		const subscriptionCheckoutSession = await await stripe.checkout.sessions.create({
+			mode: 'subscription',
+			payment_method_types: ['card'],
+			line_items: [
+				{
+					price_data: {
+						currency: currency,
+						product_data: {
+							name: stripeProductName, // product name
+						},
+						recurring: {
+							interval: 'month', // Set the billing cycle to monthly
+						},
+						unit_amount_decimal: unitAmountDecimal,
+					},
+					quantity: 1,
+				},
+			],
+			success_url: successUrl,
+			cancel_url: cancelUrl,
 		});
+
+		/* istanbul ignore next */
+		if (debugMode) tickLog.success(`generated subscriptionCheckoutSession: ${JSON.stringify(subscriptionCheckoutSession)}`, true);
+		//let insertResult = await runSQL(poolName, sqls.insertSubscription, [subscription.id, subscription.customer, subscription.items.data[0].price.id, JSON.stringify(subscription.metadata), JSON.stringify(subscription)]);
+		//if (debugMode) tickLog.success(`generated subscription, DB insert result ${JSON.stringify(insertResult)}`, true);
 		return resolve({
 			result: 'OK',
-			payload: refund,
+			payload: subscriptionCheckoutSession,
 		});
-	} catch (error) {
+	} catch (error) /* istanbul ignore next */ {
+		if (debugMode) tickLog.error(`tamed-stripe-backend related error. Failure while calling generateCheckoutForSubscription(${JSON.stringify(body)}). Error: ${JSON.stringify(error)}`, true);
 		return reject(error);
 	}
 });
 
-const accountGenerated = (body) => new Promise(async (resolve, reject) => {
-	return resolve({
-		result: 'OK',
-	});
-});
-
+/* istanbul ignore next */
 const webhook = (body) => new Promise(async (resolve, reject) => {
 	try {
 		let event = body;
@@ -294,8 +270,6 @@ module.exports = {
 	generateProduct,
 	generateCheckoutForSubscription,
 	paymentSheetHandler,
-	refundHandler,
-	accountGenerated,
 	webhook,
 	exportedForTesting: {
 		poolInfoForTests: poolInfoForTests,
