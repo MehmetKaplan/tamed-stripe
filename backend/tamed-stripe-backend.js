@@ -48,18 +48,26 @@ const generateCustomer = (body) => new Promise(async (resolve, reject) => {
 
 const generateProduct = (body) => new Promise(async (resolve, reject) => {
 	try {
-		let { name, description, currency, unitAmountDecimal } = body;
-		let default_price_data = {
-			currency: currency,
+		const { name, description, currency, unitAmountDecimal, interval } = body;
+		// interval can be one of day, week, month, or year
+		const product = await stripe.products.create({ name, description });
+		const priceData = {
+			product: product.id,
 			unit_amount_decimal: unitAmountDecimal,
+			currency: currency,
 		}
-		const product = await stripe.products.create({ name, description, default_price_data });
+		if (['day', 'week', 'month', 'year'].includes(interval)) priceData.recurring = { interval };
+		const price = await stripe.prices.create(priceData);
 		if (debugMode) tickLog.success(`generated product: ${JSON.stringify(product)}`, true);
-		let insertResult = await runSQL(poolName, sqls.insertProduct, [product.id, name, description, currency, unitAmountDecimal, JSON.stringify(product)]);
+		if (debugMode) tickLog.success(`generated price: ${JSON.stringify(price)}`, true);
+		const insertResult = await runSQL(poolName, sqls.insertProduct, [product.id, name, description, currency, unitAmountDecimal, (interval ? interval : ''), JSON.stringify(product), JSON.stringify(price)]);
 		if (debugMode) tickLog.info(`Database select result: ${JSON.stringify(insertResult)}`, true);
 		return resolve({
 			result: 'OK',
-			payload: product,
+			payload: {
+				product,
+				price
+			},
 		});
 	} catch (error) /* istanbul ignore next */ {
 		if (debugMode) tickLog.error(`tamed-stripe-backend related error. Failure while calling generateProduct(${JSON.stringify(body)}). Error: ${JSON.stringify(error)}`, true);
@@ -185,6 +193,14 @@ const paymentSheetHandler = (body) => new Promise(async (resolve, reject) => {
 		return reject(error);
 	}
 });
+
+/*
+const subscription = await stripe.subscriptions.create({
+	customer: '{{CUSTOMER_ID}}',
+	items: [{price: '{{RECURRING_PRICE_ID}}'}],
+	add_invoice_items: [{price: '{{ONE_TIME_PRICE_ID}}'}],
+ });
+ */
 
 const generateCheckoutForSubscription = (body) => new Promise(async (resolve, reject) => {
 	try {

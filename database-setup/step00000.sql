@@ -8,6 +8,12 @@
 --                                  |___/
 
 -- TABLES 
+revoke all on tamedstripe.invoices
+from
+	tamedstripeapp;
+
+drop table tamedstripe.invoices;
+
 revoke all on tamedstripe.subscriptions
 from
 	tamedstripeapp;
