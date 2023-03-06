@@ -85,18 +85,22 @@ const generateCustomerSuccessRoute = (body) => new Promise(async (resolve, rejec
 		if (debugMode) tickLog.success(`session: ${JSON.stringify(session)}`, true);
 		const setupIntent = await stripe.setupIntents.retrieve(session.setup_intent);
 		if (debugMode) tickLog.success(`setupIntent: ${JSON.stringify(setupIntent)}`, true);
+		if (!(setupIntent?.payment_method)) return resolve(closePage(`<h1>Error!</h1><p>Please try again later.</p><br>${JSON.stringify(body)}`, 3000));
 		const modifyResult = await runSQL(poolName, sqls.modifyCustomerPayment, [session.customer, 'A', setupIntent.payment_method], debugMode);
 		return resolve(closePage(`<h1>Success!</h1><p>You can close this window now.</p><br>${JSON.stringify(body)}`, 3000));
 	}
 	catch (error) /* istanbul ignore next */ {
 		if (debugMode) tickLog.error(`tamed-stripe-backend related error. Failure while calling generateCustomerSuccessRoute(${JSON.stringify(body)}). Error: ${JSON.stringify(error)}`, true);
-		return resolve(closePage(`<h1>Error!</h1><p>Please try again later.</p><br>${JSON.stringify(body)}`, 3000));		
+		return resolve(closePage(`<h1>Error!</h1><p>Please try again later.</p><br>`, 3000));
 	}
 
 });
 
 const generateCustomerCancelRoute = (body) => new Promise(async (resolve, reject) => {
-	return resolve(closePage(`<h1>Cancelled!</h1><p>You can close this window now.</p><br>${JSON.stringify(body)}`, 3000));
+	const session = await stripe.checkout.sessions.retrieve(body.session_id);
+	if (debugMode) tickLog.success(`session: ${JSON.stringify(session)}`, true);
+	const modifyResult = await runSQL(poolName, sqls.modifyCustomerPayment, [session.customer, 'C', ''], debugMode);
+	return resolve(closePage(`<h1>Cancelled!</h1><p>You can close this window now.</p><br>`, 3000));
 });
 
 const generateProduct = (body) => new Promise(async (resolve, reject) => {
