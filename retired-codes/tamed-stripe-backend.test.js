@@ -21,7 +21,8 @@ beforeAll(async () => {
 	poolName = tsb.exportedForTesting.poolInfoForTests.poolName;
 
 });
-/*
+
+
 test('generateProduct recurring', async () => {
 	const now = Date.now();
 	const name = `Recurring Product ${now}`;
@@ -583,7 +584,6 @@ test('generateCheckoutForSubscription', async () => {
 
 });
 
-*/
 
 test('generateSubscription', async () => {
 	let now = Date.now();
