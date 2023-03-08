@@ -86,6 +86,17 @@ const generateCustomerSuccessRoute = (body) => new Promise(async (resolve, rejec
 		const setupIntent = await stripe.setupIntents.retrieve(session.setup_intent);
 		if (debugMode) tickLog.success(`setupIntent: ${JSON.stringify(setupIntent)}`, true);
 		if (!(setupIntent?.payment_method)) return resolve(closePage(`<h1>Error!!</h1><p>Please try again later.</p><br>${JSON.stringify(body)}`, 3000));
+		const paymentMethod = await stripe.paymentMethods.attach(
+			setupIntent.payment_method,
+			{ customer: session.customer }
+		);
+		if (debugMode) tickLog.success(`paymentMethod:\n${JSON.stringify(paymentMethod)}`, true);
+		const customer = await stripe.customers.update(session.customer, {
+			invoice_settings: {
+				default_payment_method: setupIntent.payment_method
+			}
+		});
+		if (debugMode) tickLog.success(`****************************** customer:\n${JSON.stringify(customer, null, 2)}`, true);
 		const modifyResult = await runSQL(poolName, sqls.modifyCustomerPayment, [session.customer, 'A', setupIntent.payment_method], debugMode);
 		return resolve(closePage(`<h1>Success!</h1><p>You can close this window now.</p><br>${JSON.stringify(body)}`, 3000));
 	}
@@ -101,6 +112,24 @@ const generateCustomerCancelRoute = (body) => new Promise(async (resolve, reject
 	if (debugMode) tickLog.success(`session: ${JSON.stringify(session)}`, true);
 	const modifyResult = await runSQL(poolName, sqls.modifyCustomerPayment, [session.customer, 'C', ''], debugMode);
 	return resolve(closePage(`<h1>Cancelled!</h1><p>You can close this window now.</p><br>`, 3000));
+});
+
+const generateSubscription = (body) => new Promise(async (resolve, reject) => {
+	try {
+		let { customerId, recurringPriceId } = body;
+		const subscription = await stripe.subscriptions.create({
+			customer: customerId,
+			items: [{ price: recurringPriceId }]
+		});
+		/* istanbul ignore next */
+		if (debugMode) tickLog.success(`generated subscription: ${JSON.stringify(subscription)}`, true);
+		return resolve({
+			result: 'OK',
+			payload: subscription,
+		});
+	} catch (error) /* istanbul ignore next */ {
+		return reject(error);
+	}
 });
 
 const generateProduct = (body) => new Promise(async (resolve, reject) => {
@@ -171,6 +200,7 @@ module.exports = {
 	generateCustomer,
 	generateCustomerSuccessRoute,
 	generateCustomerCancelRoute,
+	generateSubscription,
 	generateProduct,
 	webhook,
 	exportedForTesting: {

@@ -58,7 +58,7 @@ await tsb.init({
 
 ### generateCustomer
 
-Generates a **payer** customer at Stripe.
+Generates a **payer** customer at Stripe and attaches a payment method to it so that the customer can do payments.
 
 | Parameter | Type | Description |
 | --- | --- | --- |
