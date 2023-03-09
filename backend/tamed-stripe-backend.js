@@ -241,7 +241,7 @@ const oneTimePayment = (body) => new Promise(async (resolve, reject) => {
 					destination: payoutData.payoutAccountId,
 				}
 			};
-			if (payoutData?.useOnBehalfOf) paymentIntentParams.on_behalf_of = payoutData.payoutAccountId;
+			// if (payoutData?.useOnBehalfOf) paymentIntentParams.on_behalf_of = payoutData.payoutAccountId;
 		}
 
 		const stripeItems = convertItems(currency, items);
