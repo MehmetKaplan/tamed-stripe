@@ -54,7 +54,7 @@ const generateCustomer = (body) => new Promise(async (resolve, reject) => {
 			address,
 		});
 		const checkoutSession = await stripe.checkout.sessions.create({
-			payment_method_types: ['card'],
+			payment_method_types: ['card'], // MODIFYME try by removing this line
 			mode: 'setup',
 			customer: customer.id,
 			success_url: successUrl,
@@ -161,6 +161,66 @@ const generateProduct = (body) => new Promise(async (resolve, reject) => {
 	}
 });
 
+const convertItems = (currency, items) => {
+	const retVal = [];
+	for (let i = 0; i < items.length; i++) {
+		const item = items[i];
+		retVal.push({
+			price_data: { currency, currency, product_data: { name: item.name, }, unit_amount_decimal: item.unitAmountDecimal, },
+			quantity: 1,
+		});
+	}
+	return retVal;
+}
+const oneTimePayment = (body) => new Promise(async (resolve, reject) => {
+	try {
+		// payoutData: {payoutAmount, payoutAccountId, useOnBehalfOf: true|false}
+		// items: [{name, unitAmountDecimal}]
+		const { customerId, currency, items, payoutData, publicDomain, successRoute, cancelRoute } = body;
+
+		// In case there is payout
+		// convert payoutData to payment intent structure
+		let paymentIntentParams = undefined;
+		if (payoutData) {
+			paymentIntentParams = {
+				transfer_data: {
+					amount: payoutData.payoutAmount,
+					destination: payoutData.payoutAccountId,
+				}
+			};
+			if (payoutData?.useOnBehalfOf) paymentIntentParams.on_behalf_of = payoutData.payoutAccountId;
+		}
+
+		const stripeItems = convertItems(currency, items);
+
+		const successUrl = `${publicDomain}${successRoute}?session_id={CHECKOUT_SESSION_ID}`;
+		const cancelUrl = `${publicDomain}${cancelRoute}?session_id={CHECKOUT_SESSION_ID}`;
+
+		const checkoutSessionParams = {
+			mode: 'payment',
+			customer: customerId,
+			currency: currency,
+			line_items: stripeItems,
+			invoice_creation: { enabled: true },
+			payment_intent_data: paymentIntentParams,
+			success_url: successUrl,
+			cancel_url: cancelUrl,
+		};
+		const checkoutSession = await stripe.checkout.sessions.create(checkoutSessionParams);
+
+		return resolve({
+			result: 'OK',
+			payload: checkoutSession,
+		});
+	} catch (error) {
+		if (debugMode) tickLog.error(`tamed-stripe-backend related error. Failure while calling oneTimePayment(${JSON.stringify(body)}). Error: ${JSON.stringify(error)}`, true);
+		return reject(error);
+
+	}
+
+});
+
+
 /* istanbul ignore next */
 const webhook = (body) => new Promise(async (resolve, reject) => {
 	try {
@@ -202,6 +262,7 @@ module.exports = {
 	generateCustomerCancelRoute,
 	generateSubscription,
 	generateProduct,
+	oneTimePayment,
 	webhook,
 	exportedForTesting: {
 		poolInfoForTests: poolInfoForTests,

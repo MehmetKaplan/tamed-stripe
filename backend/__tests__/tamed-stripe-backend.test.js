@@ -55,7 +55,7 @@ test('generateCustomer', async () => {
 	expect(customerAtDB.rows[0].stripe_customer_id).toEqual(customerData.id);
 	expect(customerAtDB.rows[0].customer_object).toEqual(customerData);
 });
-*/
+
 
 test('generateSubscription', async () => {
 
@@ -80,7 +80,7 @@ test('generateSubscription', async () => {
 	const productData = response2.payload.product;
 	const priceData = response2.payload.price;
 	tickLog.info(`Product generated with following significant information:
-	   id:                  ${productData.id}
+		id:                  ${productData.id}
 		name:                ${productData.name}
 		description:         ${productData.description}
 		type:                ${productData.type}
@@ -95,7 +95,7 @@ test('generateSubscription', async () => {
 		interval:            ${priceData.recurring.interval},
 		type:                ${priceData.type},
 		unit_amount_decimal: ${priceData.unit_amount_decimal},
- 	`, true);
+	  `, true);
 
 	const response3 = await tsb.generateSubscription({
 		customerId: customerId,
@@ -103,4 +103,29 @@ test('generateSubscription', async () => {
 	});
 	tickLog.info(`response3: ${JSON.stringify(response3, null, 2)}`); // deleteme
 	
+});
+
+*/
+
+test('oneTimePayment without payOut', async () => {
+	const now = new Date();
+
+	// payoutData: {payoutAmount, payoutAccountId, useOnBehalfOf: true|false}
+	// items: [{name, unitAmountDecimal}]
+	// const { customerId, currency, items, payoutData, successUrl, cancelUrl } = body;
+	// This is a previously generated customer id and its credit card information 
+	// 	is updated using the link from checkout session coming within the generateCustomer method.
+	const customerId = 'cus_NULe1UNetgP3iq';
+	const currency = 'try';
+	const items = [
+		{ name: "iPhone", unitAmountDecimal: "100000" },
+		{ name: "iPad", unitAmountDecimal: "200000" },
+		{ name: "iMac", unitAmountDecimal: "300000" },
+	];
+	const payoutData = undefined;
+	const publicDomain = "https://development.eseme.one:61983";
+	const successRoute = "/one-time-payment-success-route";
+	const cancelRoute = "/one-time-payment-cancel-route";
+	const response4 = await tsb.oneTimePayment({ customerId, currency, items, payoutData, publicDomain, successRoute, cancelRoute });
+	tickLog.info(`response4: ${JSON.stringify(response4, null, 2)}`); // deleteme
 });
