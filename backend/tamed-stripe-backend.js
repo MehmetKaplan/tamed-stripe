@@ -172,6 +172,59 @@ const convertItems = (currency, items) => {
 	}
 	return retVal;
 }
+
+const generateAccount = (body) => new Promise(async (resolve, reject) => {
+	let { email, publicDomain, refreshUrlRoute, returnUrlRoute, country, capabilities } = body;
+	try {
+		let country_ = country ? country : 'US';
+		let tos_acceptance = country_ === 'US' ? undefined : { service_agreement: 'recipient' };
+		const accountGenerationParams = {
+			type: 'express',
+			email: email,
+			capabilities: /* istanbul ignore next */ capabilities ? capabilities : { transfers: { requested: true } },
+			tos_acceptance: tos_acceptance,
+			country: country ? country : 'US',
+			settings: {
+				payouts: {
+					schedule: {
+						delay_days: 'minimum'
+					}
+				}
+			}
+		};
+		const account = await stripe.accounts.create(accountGenerationParams);
+		/* istanbul ignore next */
+		if (debugMode) tickLog.success(`generated account: ${JSON.stringify(account)}`, true);
+		let refreshUrl = `${publicDomain}${refreshUrlRoute || '/account-authorize'}`;
+		let returnUrl = `${publicDomain}${returnUrlRoute || '/account-generated'}`
+		const accountLink = await stripe.accountLinks.create({
+			account: account.id,
+			refresh_url: refreshUrl,
+			return_url: returnUrl,
+			type: 'account_onboarding'
+		});
+		account.accountLinkURL = accountLink.url;
+		if (debugMode) tickLog.success(`generated accountLink.url: ${accountLink.url}`, true);
+		let countResult = await runSQL(poolName, sqls.connectedAccountsExists, [account.id]);
+		if (debugMode) tickLog.info(`Database select result: ${JSON.stringify(countResult)}`, true);
+		if (parseInt(countResult.rows[0].count) === 0) {
+			// insert
+			// (stripe_customer_id, email, name, phone, address, metadata, customer_object) 
+			let insertResult = await runSQL(poolName, sqls.insertConnectedAccount, [account.id, JSON.stringify(account.capabilities), account.email, JSON.stringify(account.settings.payouts.schedule), JSON.stringify(account)]);
+		} else /* istanbul ignore next */ {
+			// can not come here
+			// placed just to satisfy istanbul
+		};
+		return resolve({
+			result: 'OK',
+			payload: account,
+		});
+	} catch (error) /* istanbul ignore next */ {
+		if (debugMode) tickLog.error(`tamed-stripe-backend related error. Failure while calling generateAccount(${JSON.stringify(body)}). Error: ${JSON.stringify(error)}`, true);
+		return reject(error);
+	}
+});
+
 const oneTimePayment = (body) => new Promise(async (resolve, reject) => {
 	try {
 		// payoutData: {payoutAmount, payoutAccountId, useOnBehalfOf: true|false}
@@ -220,7 +273,6 @@ const oneTimePayment = (body) => new Promise(async (resolve, reject) => {
 
 });
 
-
 /* istanbul ignore next */
 const webhook = (body) => new Promise(async (resolve, reject) => {
 	try {
@@ -262,6 +314,7 @@ module.exports = {
 	generateCustomerCancelRoute,
 	generateSubscription,
 	generateProduct,
+	generateAccount,
 	oneTimePayment,
 	webhook,
 	exportedForTesting: {

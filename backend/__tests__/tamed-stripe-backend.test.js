@@ -23,6 +23,7 @@ beforeAll(async () => {
 });
 
 /*
+
 test('generateCustomer', async () => {
 	const now = new Date();
 	const body = {
@@ -107,6 +108,64 @@ test('generateSubscription', async () => {
 
 */
 
+test('generateAccount (connected account for payouts)', async () => {
+	let publicDomain = "http://localhost:3000";
+	let refreshUrlRoute = "/account-authorize";
+	let returnUrlRoute = "/account-generated";
+
+	let now = Date.now();
+	let email = `${now}@yopmail.com`;
+	const props = {
+		email: email,
+		publicDomain: publicDomain,
+		refreshUrlRoute: refreshUrlRoute,
+		returnUrlRoute: returnUrlRoute,
+	};
+	let response1 = await tsb.generateAccount(props);
+	let accountData = response1.payload;
+	tickLog.info(`Account generated with following significant information:\n   id:                  ${accountData.id}\n   type:                ${accountData.type}\n   capabilities:        ${JSON.stringify(accountData.capabilities)}\n   email:               ${accountData.email}\n   Payment Schedule:    ${JSON.stringify(accountData.settings.payouts.schedule)}\n   accountLinkURL:      ${accountData.accountLinkURL}`, true);
+	expect(accountData.id).not.toBeNull();
+	expect(accountData.type).toEqual('express');
+	// jest compare object
+	expect(accountData.capabilities).toEqual({ "transfers": "inactive" });
+	expect(accountData.email).toEqual(email);
+	expect(accountData.settings.payouts.schedule.interval).toEqual('daily');
+	let accountAtDB = await runSQL(poolName, sqls.selectAccount, [accountData.id], debugMode);
+	expect(accountAtDB.rows.length).toBe(1);
+	expect(accountAtDB.rows[0].stripe_account_id).toEqual(accountData.id);
+	expect(accountAtDB.rows[0].account_object).toEqual(accountData);
+});
+
+test('generateAccount (connected account for payouts) in TR', async () => {
+	let publicDomain = "http://localhost:3000";
+	let refreshUrlRoute = "/account-authorize";
+	let returnUrlRoute = "/account-generated";
+
+	let now = Date.now();
+	let email = `${now}@yopmail.com`;
+	const props = {
+		email: email,
+		publicDomain: publicDomain,
+		refreshUrlRoute: refreshUrlRoute,
+		returnUrlRoute: returnUrlRoute,
+		country: "TR",
+	};
+	let response1 = await tsb.generateAccount(props);
+	let accountData = response1.payload;
+	tickLog.info(`Account generated with following significant information:\n   id:                  ${accountData.id}\n   type:                ${accountData.type}\n   capabilities:        ${JSON.stringify(accountData.capabilities)}\n   email:               ${accountData.email}\n   Payment Schedule:    ${JSON.stringify(accountData.settings.payouts.schedule)}\n   accountLinkURL:      ${accountData.accountLinkURL}`, true);
+	expect(accountData.id).not.toBeNull();
+	expect(accountData.type).toEqual('express');
+	// jest compare object
+	expect(accountData.capabilities).toEqual({ "transfers": "inactive" });
+	expect(accountData.email).toEqual(email);
+	expect(accountData.settings.payouts.schedule.interval).toEqual('daily');
+	let accountAtDB = await runSQL(poolName, sqls.selectAccount, [accountData.id], debugMode);
+	expect(accountAtDB.rows.length).toBe(1);
+	expect(accountAtDB.rows[0].stripe_account_id).toEqual(accountData.id);
+	expect(accountAtDB.rows[0].account_object).toEqual(accountData);
+});
+
+
 test('oneTimePayment without payOut', async () => {
 	const now = new Date();
 
@@ -129,3 +188,35 @@ test('oneTimePayment without payOut', async () => {
 	const response4 = await tsb.oneTimePayment({ customerId, currency, items, payoutData, publicDomain, successRoute, cancelRoute });
 	tickLog.info(`response4: ${JSON.stringify(response4, null, 2)}`); // deleteme
 });
+
+
+
+test('oneTimePayment with payOut', async () => {
+	const now = new Date();
+
+	// payoutData: {payoutAmount, payoutAccountId, useOnBehalfOf: true|false}
+	// items: [{name, unitAmountDecimal}]
+	// const { customerId, currency, items, payoutData, successUrl, cancelUrl } = body;
+	// This is a previously generated customer id and its credit card information 
+	// 	is updated using the link from checkout session coming within the generateCustomer method.
+	const customerId = 'cus_NULe1UNetgP3iq';
+	// This is a previously generated account id
+	const accountId = "acct_1Mjivf2HrSbgvhw4";
+	const currency = 'try';
+	const items = [
+		{ name: "iPhone", unitAmountDecimal: "100000" },
+		{ name: "iPad", unitAmountDecimal: "200000" },
+		{ name: "iMac", unitAmountDecimal: "300000" },
+	];
+	const payoutData = {
+		payoutAmount: 4500, 
+		payoutAccountId: accountId, 
+		useOnBehalfOf: true
+	};
+	const publicDomain = "https://development.eseme.one:61983";
+	const successRoute = "/one-time-payment-success-route";
+	const cancelRoute = "/one-time-payment-cancel-route";
+	const response4 = await tsb.oneTimePayment({ customerId, currency, items, payoutData, publicDomain, successRoute, cancelRoute });
+	tickLog.info(`response4: ${JSON.stringify(response4, null, 2)}`); // deleteme
+});
+
