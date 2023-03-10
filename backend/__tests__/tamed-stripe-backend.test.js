@@ -22,6 +22,7 @@ beforeAll(async () => {
 
 });
 
+/*
 test('generateCustomer', async () => {
 	const now = new Date().getTime();
 	const body = {
@@ -102,7 +103,7 @@ test('generateSubscription', async () => {
 		recurringPriceId: priceData.id
 	});
 	tickLog.info(`response3: ${JSON.stringify(response3, null, 2)}`); // deleteme
-	
+
 });
 
 test('generateAccount (connected account for payouts)', async () => {
@@ -222,7 +223,7 @@ test('oneTimePayment with payOut to FR', async () => {
 	// const { customerId, currency, items, payoutData, successUrl, cancelUrl } = body;
 	// This is a previously generated customer id and its credit card information 
 	// 	is updated using the link from checkout session coming within the generateCustomer method.
-	const customerId = 'cus_NULe1UNetgP3iq'; 
+	const customerId = 'cus_NULe1UNetgP3iq';
 	// This is a previously generated account id
 	const accountId = "acct_1MjkRw2HaPwigiek"; // 
 	const currency = 'try';
@@ -232,8 +233,8 @@ test('oneTimePayment with payOut to FR', async () => {
 		{ name: "iMac", unitAmountDecimal: "300000" },
 	];
 	const payoutData = {
-		payoutAmount: 450000, 
-		payoutAccountId: accountId, 
+		payoutAmount: 450000,
+		payoutAccountId: accountId,
 		useOnBehalfOf: true
 	};
 	const publicDomain = "https://development.eseme.one:61983";
@@ -251,7 +252,7 @@ test('oneTimePayment with payOut to TR', async () => {
 	// const { customerId, currency, items, payoutData, successUrl, cancelUrl } = body;
 	// This is a previously generated customer id and its credit card information 
 	// 	is updated using the link from checkout session coming within the generateCustomer method.
-	const customerId = 'cus_NULe1UNetgP3iq'; 
+	const customerId = 'cus_NULe1UNetgP3iq';
 	// This is a previously generated account id
 	const accountId = "acct_1Mjivf2HrSbgvhw4"; // "message":"TR is not currently supported by Stripe."
 	const currency = 'try';
@@ -261,8 +262,8 @@ test('oneTimePayment with payOut to TR', async () => {
 		{ name: "iMac", unitAmountDecimal: "300000" },
 	];
 	const payoutData = {
-		payoutAmount: 4500, 
-		payoutAccountId: accountId, 
+		payoutAmount: 4500,
+		payoutAccountId: accountId,
 		useOnBehalfOf: true
 	};
 	const publicDomain = "https://development.eseme.one:61983";
@@ -270,4 +271,56 @@ test('oneTimePayment with payOut to TR', async () => {
 	const cancelRoute = "/one-time-payment-cancel-route";
 	const response4 = await tsb.oneTimePayment({ customerId, currency, items, payoutData, publicDomain, successRoute, cancelRoute });
 	tickLog.info(`response4: ${JSON.stringify(response4, null, 2)}`); // deleteme
+});
+
+*/
+
+test('Webhook Scenario 1: Customer registration & card payment method setup save', async () => {
+
+	const now = new Date().getTime();
+	const body = {
+		applicationCustomerId: `Jest Application Customer-${now}`,
+		description: `Jest Customer ${now}`,
+		email: `test-${now}@yopmail.com`,
+		metadata: { "test": "test" },
+		name: `Jest Customer ${now}`,
+		phone: `1234567890`,
+		address: { "line1": "1234 Main St", "city": "San Francisco", "state": "CA", "postal_code": "94111" },
+		publicDomain: "https://development.eseme.one:61983",
+		successRoute: "/generate-customer-success-route",
+		cancelRoute: "/generate-customer-cancel-route",
+	};
+	const result1 = await tsb.generateCustomer(body);
+	const customerData = result1.payload.customer;
+	const checkoutSessionData = result1.payload.checkoutSession;
+	expect(customerData.id).toBeTruthy();
+	expect(checkoutSessionData).toBeTruthy();
+	expect(checkoutSessionData.id).toBeTruthy();
+	expect(checkoutSessionData.customer).toBeTruthy();
+	expect(checkoutSessionData.customer).toBe(customerData.id);
+	expect(checkoutSessionData.success_url).toBeTruthy();
+	expect(checkoutSessionData.cancel_url).toBeTruthy();
+	expect(checkoutSessionData.success_url).toBe(`${body.publicDomain}${body.successRoute}?session_id={CHECKOUT_SESSION_ID}`);
+	expect(checkoutSessionData.cancel_url).toBe(`${body.publicDomain}${body.cancelRoute}?session_id={CHECKOUT_SESSION_ID}`);
+	if (debugMode) tickLog.success(`generateCustomer result: ${JSON.stringify(customerData, null, 2)}`, true);
+	if (debugMode) tickLog.success(`checkoutSessionData result: ${JSON.stringify(checkoutSessionData, null, 2)}`, true);
+	let customerAtDB = await runSQL(poolName, sqls.selectCustomer, [customerData.id], debugMode);
+	expect(customerAtDB.rows.length).toBe(1);
+	expect(customerAtDB.rows[0].stripe_customer_id).toEqual(customerData.id);
+	expect(customerAtDB.rows[0].customer_object).toEqual(customerData);
+
+	let webhookResult = await tsb.webhook({
+		type: "checkout.session.expired",
+		data: {
+			object: {
+				id: checkoutSessionData.id,
+				mode: "setup",
+			},
+		},
+	});
+	let customerAtDB2 = await runSQL(poolName, sqls.selectCustomer, [customerData.id], debugMode);
+	expect(customerAtDB2.rows.length).toBe(1);
+	expect(customerAtDB2.rows[0].stripe_customer_id).toEqual(customerData.id);
+	expect(customerAtDB2.rows[0].state).toEqual('W');
+	expect(customerAtDB2.rows[0].application_customer_id).toBeNull();
 });

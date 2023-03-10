@@ -2,7 +2,7 @@
 	"customerExists": "select count(*) as \"count\" from tamedstripe.customers where stripe_customer_id = $1",
 	"insertCustomer": "insert into tamedstripe.customers (application_customer_id, stripe_customer_id, state, update_time, email, name, phone, address, metadata, checkout_session_id, payment_method_id, customer_object) values ($1, $2, $3, now(), $4, $5, $6, $7, $8, $9, $10, $11) ",
 	"modifyCustomerPayment": "update tamedstripe.customers set state = $2, update_time = now(), payment_method_id = $3 where stripe_customer_id = $1",
-	"unlinkCustomer": "update tamedstripe.customers set application_customer_id = null where stripe_customer_id = $1",
+	"unlinkCustomer": "update tamedstripe.customers set application_customer_id = null, state = 'U' where stripe_customer_id = $1",
 	"selectCustomer": "select * from tamedstripe.customers where stripe_customer_id = $1",
 	"connectedAccountsExists": "select count(*) as \"count\" from tamedstripe.connected_accounts where stripe_account_id = $1",
 	"insertConnectedAccount": "insert into tamedstripe.connected_accounts (stripe_account_id, update_time, capabilities, email, payment_schedule, account_object) values ($1, now(), $2, $3, $4, $5) ",

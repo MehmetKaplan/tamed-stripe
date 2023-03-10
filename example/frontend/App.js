@@ -7,7 +7,7 @@ import { init, generateCustomer, CustomerWebView, generateProduct, generateSubsc
 export default function App() {
 	const [customerId, setCustomerId] = useState('');
 
-	const [email, setEmail] = useState('');
+	const [email, setEmail] = useState('test@test.com');
 
 	const [subscriptionName, setSubscriptionName] = useState('');
 	const [subscriptionCharge, setSubscriptionCharge] = useState('0');
