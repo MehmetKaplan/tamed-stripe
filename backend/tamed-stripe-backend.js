@@ -80,31 +80,7 @@ const generateCustomer = (body) => new Promise(async (resolve, reject) => {
 });
 
 const generateCustomerSuccessRoute = (body) => new Promise(async (resolve, reject) => {
-	try {
-		const session = await stripe.checkout.sessions.retrieve(body.session_id);
-		if (debugMode) tickLog.success(`session: ${JSON.stringify(session)}`, true);
-		const setupIntent = await stripe.setupIntents.retrieve(session.setup_intent);
-		if (debugMode) tickLog.success(`setupIntent: ${JSON.stringify(setupIntent)}`, true);
-		if (!(setupIntent?.payment_method)) return resolve(closePage(`<h1>Error!!</h1><p>Please try again later.</p><br>${JSON.stringify(body)}`, 3000));
-		const paymentMethod = await stripe.paymentMethods.attach(
-			setupIntent.payment_method,
-			{ customer: session.customer }
-		);
-		if (debugMode) tickLog.success(`paymentMethod:\n${JSON.stringify(paymentMethod)}`, true);
-		const customer = await stripe.customers.update(session.customer, {
-			invoice_settings: {
-				default_payment_method: setupIntent.payment_method
-			}
-		});
-		if (debugMode) tickLog.success(`****************************** customer:\n${JSON.stringify(customer, null, 2)}`, true);
-		const modifyResult = await runSQL(poolName, sqls.modifyCustomerPayment, [session.customer, 'A', setupIntent.payment_method], debugMode);
-		return resolve(closePage(`<h1>Success!</h1><p>You can close this window now.</p><br>${JSON.stringify(body)}`, 3000));
-	}
-	catch (error) /* istanbul ignore next */ {
-		if (debugMode) tickLog.error(`tamed-stripe-backend related error. Failure while calling generateCustomerSuccessRoute(${JSON.stringify(body)}). Error: ${JSON.stringify(error)}`, true);
-		return resolve(closePage(`<h1>Error!</h1><p>Please try again later.</p><br>`, 3000));
-	}
-
+	return resolve(closePage(`<h1>Success!</h1><p>You can close this window now.</p><br>${debugMode ? JSON.stringify(body) : ''}`, 3000));
 });
 
 const generateCustomerCancelRoute = (body) => new Promise(async (resolve, reject) => {
@@ -273,12 +249,50 @@ const oneTimePayment = (body) => new Promise(async (resolve, reject) => {
 
 });
 
+const webhookCheckoutSessionCompleted = (props) => new Promise(async (resolve, reject) => {
+	let session;
+	try {
+		const {checkoutSessionId} = props;
+		session = await stripe.checkout.sessions.retrieve(checkoutSessionId);
+		if (debugMode) tickLog.success(`session: ${JSON.stringify(session)}`, true);
+		const setupIntent = await stripe.setupIntents.retrieve(session.setup_intent);
+		if (debugMode) tickLog.success(`setupIntent: ${JSON.stringify(setupIntent)}`, true);
+		if (!(setupIntent?.payment_method)) throw new Error('No payment method found');
+		const paymentMethod = await stripe.paymentMethods.attach(
+			setupIntent.payment_method,
+			{ customer: session.customer }
+		);
+		if (debugMode) tickLog.success(`paymentMethod:\n${JSON.stringify(paymentMethod)}`, true);
+		const customer = await stripe.customers.update(session.customer, {
+			invoice_settings: {
+				default_payment_method: setupIntent.payment_method
+			}
+		});
+		tickLog.success(`Customer Generated:\n${JSON.stringify(customer, null, 2)}`, true);
+		const modifyResult = await runSQL(poolName, sqls.modifyCustomerPayment, [session.customer, 'A', setupIntent.payment_method], debugMode);
+	} catch (error) {
+		// only log error and keep the customer in W state which is just a useless state.
+		if (debugMode) tickLog.error(`\x1b[0;31mwebhookCheckoutSessionCompleted failed\x1b[0m for checkoutSessionId ${checkoutSessionId} with error ${JSON.stringify(error)}`, true);
+		try {
+			if (session) await runSQL(poolName, sqls.modifyCustomerPayment, [session.customer], debugMode);
+		} catch (error2) {
+			// Do nothing
+		}
+	}
+});
+
 /* istanbul ignore next */
 const webhook = (body) => new Promise(async (resolve, reject) => {
 	try {
 		let event = body;
 		tickLog.info(`Webhook received: ${JSON.stringify(event)}`, true);
 		switch (event.type) {
+			case 'checkout.session.completed':
+				// Webhook Scenario 1: Customer registration & card payment method save
+				if (event.data.object.mode === 'setup') {
+					await webhookCheckoutSessionCompleted({checkoutSessionId: event.data.object.id});
+				}
+				break;
 			case 'payment_intent.succeeded':
 				break;
 			case 'payment_intent.payment_failed':
