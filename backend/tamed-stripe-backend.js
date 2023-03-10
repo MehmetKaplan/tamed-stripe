@@ -39,7 +39,7 @@ const init = (p_params) => new Promise(async (resolve, reject) => {
 
 const generateCustomer = (body) => new Promise(async (resolve, reject) => {
 	try {
-		let { description, email, metadata, name, phone, address, publicDomain, successRoute, cancelRoute } = body;
+		let { applicationCustomerId, description, email, metadata, name, phone, address, publicDomain, successRoute, cancelRoute } = body;
 		// {CHECKOUT_SESSION_ID} is to be used by Stripe, DON'T modify it!
 		let successUrl = `${publicDomain}${successRoute}?session_id={CHECKOUT_SESSION_ID}`;
 		let cancelUrl = `${publicDomain}${cancelRoute}?session_id={CHECKOUT_SESSION_ID}`;
@@ -65,7 +65,7 @@ const generateCustomer = (body) => new Promise(async (resolve, reject) => {
 			tickLog.success(`generated customer: ${JSON.stringify(customer)}`, true);
 			tickLog.success(`generated checkoutSession: ${JSON.stringify(checkoutSession)}`, true);
 		}
-		await runSQL(poolName, sqls.insertCustomer, [customer.id, 'W', customer.email, customer.name, customer.phone, customer.address, JSON.stringify(customer.metadata), checkoutSession.id, '', JSON.stringify(customer)]);
+		await runSQL(poolName, sqls.insertCustomer, [applicationCustomerId, customer.id, 'W', customer.email, customer.name, customer.phone, customer.address, JSON.stringify(customer.metadata), checkoutSession.id, '', JSON.stringify(customer)]);
 		return resolve({
 			result: 'OK',
 			payload: {

@@ -9,17 +9,17 @@
 
 -- TABLES 
 
-revoke all on tamedstripe.subscriptions
-from
-	tamedstripeapp;
-
-drop table tamedstripe.subscriptions;
-
 revoke all on tamedstripe.connected_accounts
 from
 	tamedstripeapp;
 
 drop table tamedstripe.connected_accounts;
+
+revoke all on tamedstripe.subscriptions
+from
+	tamedstripeapp;
+
+drop table tamedstripe.subscriptions;
 
 revoke all on tamedstripe.customers
 from

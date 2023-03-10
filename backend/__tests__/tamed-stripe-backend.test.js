@@ -23,10 +23,11 @@ beforeAll(async () => {
 });
 
 test('generateCustomer', async () => {
-	const now = new Date();
+	const now = new Date().getTime();
 	const body = {
+		applicationCustomerId: `Jest Application Customer-${now}`,
 		description: `Jest Customer ${now}`,
-		email: `test-${now.getTime()}@yopmail.com`,
+		email: `test-${now}@yopmail.com`,
 		metadata: { "test": "test" },
 		name: `Jest Customer ${now}`,
 		phone: `1234567890`,

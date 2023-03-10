@@ -68,6 +68,7 @@ Generates a **payer** customer at Stripe and attaches a payment method to it so 
 
 | Key | Type | Value |
 | --- | --- | --- |
+| applicationCustomerId | string | This is your application's customer id that you can use toconnect your application with stripe side customer id. |
 | description | string | Description of the customer. |
 | email | string | Email of the customer. |
 | metadata | Object | Metadata for the customer, you can embed andy data within this object, it is kept in Stripe servers also. |

@@ -31,6 +31,7 @@ const backendCaller =  (method, route, headers, props, successCallback, failCall
 const generateCustomer = (props) => new Promise(async (resolve, reject) => {
 	try {
 		let body = {};
+		body.applicationCustomerId = props.applicationCustomerId;
 		body.description = props.description;
 		body.email = props.email;
 		body.metadata = props.metadata;
