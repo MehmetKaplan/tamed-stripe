@@ -8,23 +8,12 @@
 --                                  |___/
 
 -- TABLES 
-revoke all on tamedstripe.invoices
-from
-	tamedstripeapp;
-
-drop table tamedstripe.invoices;
 
 revoke all on tamedstripe.subscriptions
 from
 	tamedstripeapp;
 
 drop table tamedstripe.subscriptions;
-
-revoke all on tamedstripe.payment_sheets
-from
-	tamedstripeapp;
-
-drop table tamedstripe.payment_sheets;
 
 revoke all on tamedstripe.connected_accounts
 from
