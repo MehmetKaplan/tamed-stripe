@@ -68,6 +68,7 @@ create table tamedstripe.subscriptions (
 	unit_amount_decimal numeric(12) not null, -- in cents
 	interval varchar(20) not null,
 	update_time timestamp not null,
+	state varchar(1) not null, -- 'A'ctive, 'C'ancelled
 	subscription_object jsonb not null
 );
 grant all on tamedstripe.subscriptions to tamedstripeapp;
@@ -80,6 +81,10 @@ alter table
 	tamedstripe.subscriptions
 add
 	constraint fk_subscriptions_products foreign key (stripe_product_id) references tamedstripe.products(stripe_product_id);
+alter table
+	tamedstripe.subscriptions
+add
+	constraint subscriptions_check1 check (state in ('A', 'C'));
 
 
 create table tamedstripe.subscription_payments (

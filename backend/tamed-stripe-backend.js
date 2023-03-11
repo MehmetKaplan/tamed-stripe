@@ -93,6 +93,7 @@ const generateCustomerCancelRoute = (body) => new Promise(async (resolve, reject
 	return resolve(closePage(`<h1>Cancelled!</h1><p>You can close this window now.</p><br>`, 3000));
 });
 
+// Scenario 2: subscription first and next recurring payments (success & failed)
 const generateSubscription = (body) => new Promise(async (resolve, reject) => {
 	try {
 		let { customerId, recurringPriceId, description } = body;
@@ -115,6 +116,23 @@ const generateSubscription = (body) => new Promise(async (resolve, reject) => {
 			subscription.items.data[0].price.recurring.interval, // we assume there is only one item for subscriptions
 			JSON.stringify(subscription)
 		], debugMode);
+		return resolve({
+			result: 'OK',
+			payload: subscription,
+		});
+	} catch (error) /* istanbul ignore next */ {
+		return reject(error);
+	}
+});
+
+// Scenario 2: cancel subscription
+const cancelSubscription = (body) => new Promise(async (resolve, reject) => {
+	try {
+		let { subscriptionId } = body;
+		const subscription = await stripe.subscriptions.cancel(subscriptionId);
+		/* istanbul ignore next */
+		if (debugMode) tickLog.success(`cancelled subscription: ${JSON.stringify(subscription)}`, true);
+		await runSQL(poolName, sqls.updateSubscription, [subscriptionId], debugMode);
 		return resolve({
 			result: 'OK',
 			payload: subscription,
@@ -265,6 +283,7 @@ const oneTimePayment = (body) => new Promise(async (resolve, reject) => {
 
 });
 
+// Scenario 1: Customer registration & card payment method setup save (failed)
 const webhookCheckoutSessionFailed = (props) => new Promise(async (resolve, reject) => {
 	let session;
 	try {
@@ -277,6 +296,7 @@ const webhookCheckoutSessionFailed = (props) => new Promise(async (resolve, reje
 	return resolve();
 });
 
+// Scenario 2: subscription first and next recurring payments (success & failed)
 const webhookPaymentIntentSucceeded = (event) => new Promise(async (resolve, reject) => {
 	try {
 		const invoice = await stripe.invoices.retrieve(event.data.object.invoice);
@@ -316,6 +336,7 @@ const webhookPaymentIntentSucceeded = (event) => new Promise(async (resolve, rej
 
 // BELOW ITEMS SHOULD BE TESTED WITH EXPO APPLICATION BECAUSE THEY REQUIRE ASYNCHRONOUS HUMAN INTERACTIONS
 
+// Scenario 1: Customer registration & card payment method setup save (success)
 const webhookCheckoutSessionCompleted = (props) => new Promise(async (resolve, reject) => {
 	const { checkoutSessionId } = props;
 	let session;
@@ -356,33 +377,33 @@ const webhook = (body) => new Promise(async (resolve, reject) => {
 		tickLog.info(`Webhook received: ${JSON.stringify(event)}`, true);
 		switch (event.type) {
 			case 'checkout.session.completed':
-				// Webhook Scenario 1: Customer registration & card payment method setup save
+				// Scenario 1: Customer registration & card payment method setup save (success)
 				if (event.data.object.mode === 'setup') {
 					await webhookCheckoutSessionCompleted({ checkoutSessionId: event.data.object.id });
 				}
 				break;
 
 			case 'checkout.session.async_payment_succeeded':
-				// Webhook Scenario 1: Customer registration & card payment method setup save
+				// Scenario 1: Customer registration & card payment method setup save (success)
 				if (event.data.object.mode === 'setup') {
 					await webhookCheckoutSessionCompleted({ checkoutSessionId: event.data.object.id });
 				}
 				break;
 
 			case 'checkout.session.async_payment_failed':
-				// Webhook Scenario 1: Customer registration & card payment method setup save
+				// Scenario 1: Customer registration & card payment method setup save (failed)
 				if (event.data.object.mode === 'setup') {
 					await webhookCheckoutSessionFailed({ checkoutSessionId: event.data.object.id });
 				}
 				break;
 			case 'checkout.session.expired':
-				// Webhook Scenario 1: Customer registration & card payment method setup save
+				// Scenario 1: Customer registration & card payment method setup save (failed)
 				if (event.data.object.mode === 'setup') {
 					await webhookCheckoutSessionFailed({ checkoutSessionId: event.data.object.id });
 				}
 				break;
 			case 'payment_intent.succeeded':
-				await webhookPaymentIntentSucceeded(event);
+				await webhookPaymentIntentSucceeded(event); // Scenario 2: subscription first and next recurring payments (success & failed)
 				break;
 			case 'payment_intent.payment_failed':
 				break;
@@ -408,7 +429,8 @@ const webhook = (body) => new Promise(async (resolve, reject) => {
 			payload: undefined,
 		});
 	} catch (error) {
-		return reject(error);
+		// Don't reject so that webhook continue working but log the error
+		tickLog.error(`\x1b[0;31mWebhook failed\x1b[0m with error ${JSON.stringify(error)} for ${JSON.stringify(body)}`, true);
 	}
 });
 
@@ -419,6 +441,7 @@ module.exports = {
 	generateCustomerSuccessRoute,
 	generateCustomerCancelRoute,
 	generateSubscription,
+	cancelSubscription,
 	generateProduct,
 	generateAccount,
 	oneTimePayment,

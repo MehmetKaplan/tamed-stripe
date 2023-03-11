@@ -11,9 +11,9 @@ module.exports = {
 	selectPaymentSheets: "select * from tamedstripe.payment_sheets where stripe_customer_id = $1 order by id desc",
 	selectProduct: "select * from tamedstripe.products where stripe_product_id = $1",
 	insertProduct: "insert into tamedstripe.products (stripe_product_id, name, description, currency, unit_amount_decimal, interval, update_time, product_object, price_object) values ($1, $2, $3, $4, $5, $6, now(), $7, $8) ",
-	selectSubscription: "select * from tamedstripe.subscriptions where stripe_subscription_id = $1",
-	customerProductSubscriptionExists: "select count(*) as \"count\" from tamedstripe.subscriptions where stripe_customer_id = $1 and stripe_product_id = $2",
-	insertSubscription: "insert into tamedstripe.subscriptions (stripe_subscription_id, stripe_customer_id, stripe_product_id, description, currency, unit_amount_decimal, interval, update_time, subscription_object) values ($1, $2, $3, $4, $5, $6, $7, now(), $8) ",
+	selectSubscription: "select * from tamedstripe.subscriptions where stripe_subscription_id = $1 and state = 'A'",
+	insertSubscription: "insert into tamedstripe.subscriptions (stripe_subscription_id, stripe_customer_id, stripe_product_id, description, currency, unit_amount_decimal, interval, update_time, state, subscription_object) values ($1, $2, $3, $4, $5, $6, $7, now(), 'A', $8) ",
+	updateSubscription: "update tamedstripe.subscriptions set state = 'C' where stripe_subscription_id = $1",
 	insertSubscriptionPayment: "insert into tamedstripe.subscription_payments (stripe_subscription_id, invoice_id, hosted_invoice_url, insert_time, unit_amount_decimal, currency, state, subscription_covered_from, subscription_covered_to, subscription_payment_object) values ($1, $2, $3, now(), $4, $5, $6, $7, $8, $9) ",
 	selectSubscriptionPayments: `
 		select a.application_customer_id, a.stripe_customer_id, 
@@ -24,6 +24,7 @@ module.exports = {
 			from tamedstripe.customers a, tamedstripe.subscriptions b, tamedstripe.subscription_payments c
 			where a.application_customer_id = $1
 				and a.stripe_customer_id = b.stripe_customer_id
+				and b.state = 'A'
 				and b.stripe_subscription_id = c.stripe_subscription_id
 				and c.state = 'P'
 			order by insert_time desc;
@@ -37,6 +38,7 @@ module.exports = {
 			from tamedstripe.customers a, tamedstripe.subscriptions b, tamedstripe.subscription_payments c
 			where a.stripe_customer_id = $1
 				and a.stripe_customer_id = b.stripe_customer_id
+				and b.state = 'A'
 				and b.stripe_subscription_id = c.stripe_subscription_id
 				and c.state = 'P'
 			order by insert_time desc;
