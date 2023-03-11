@@ -1,4 +1,4 @@
-const sqls = require('./sqls.json');
+const sqls = require('./sqls.js');
 const uiTexts = require('./ui-texts-english.json');
 const stripeSK = require('./config.js').secretKey;
 const stripePK = require('./config.js').publishableKey;
@@ -87,7 +87,7 @@ const generateCustomerCancelRoute = (body) => new Promise(async (resolve, reject
 	try {
 		const session = await stripe.checkout.sessions.retrieve(body.session_id);
 		if (debugMode) tickLog.success(`session: ${JSON.stringify(session)}`, true);
-		if (session) await runSQL(poolName, sqls.unlinkCustomer, [session.customer], debugMode);			
+		if (session) await runSQL(poolName, sqls.unlinkCustomer, [session.customer], debugMode);
 	} catch (error) {
 	}
 	return resolve(closePage(`<h1>Cancelled!</h1><p>You can close this window now.</p><br>`, 3000));
@@ -95,13 +95,26 @@ const generateCustomerCancelRoute = (body) => new Promise(async (resolve, reject
 
 const generateSubscription = (body) => new Promise(async (resolve, reject) => {
 	try {
-		let { customerId, recurringPriceId } = body;
+		let { customerId, recurringPriceId, description } = body;
 		const subscription = await stripe.subscriptions.create({
 			customer: customerId,
-			items: [{ price: recurringPriceId }]
+			items: [{ price: recurringPriceId }],
+			description: description,
 		});
 		/* istanbul ignore next */
 		if (debugMode) tickLog.success(`generated subscription: ${JSON.stringify(subscription)}`, true);
+		// stripe_subscription_id, stripe_customer_id, stripe_product_id, description, currency, 
+		// unit_amount_decimal, interval, update_time, subscription_object
+		await runSQL(poolName, sqls.insertSubscription, [
+			subscription.id,
+			customerId,
+			subscription.items.data[0].price.product,  // we assume there is only one item for subscriptions
+			subscription.description,
+			subscription.currency,
+			subscription.items.data[0].price.unit_amount_decimal, // we assume there is only one item for subscriptions
+			subscription.items.data[0].price.recurring.interval, // we assume there is only one item for subscriptions
+			JSON.stringify(subscription)
+		], debugMode);
 		return resolve({
 			result: 'OK',
 			payload: subscription,
@@ -126,7 +139,7 @@ const generateProduct = (body) => new Promise(async (resolve, reject) => {
 		if (debugMode) tickLog.success(`generated product: ${JSON.stringify(product)}`, true);
 		if (debugMode) tickLog.success(`generated price: ${JSON.stringify(price)}`, true);
 		const insertResult = await runSQL(poolName, sqls.insertProduct, [product.id, name, description, currency, unitAmountDecimal, (interval ? interval : ''), JSON.stringify(product), JSON.stringify(price)]);
-		if (debugMode) tickLog.info(`Database select result: ${JSON.stringify(insertResult)}`, true);
+		if (debugMode) tickLog.info(`Product insert result: ${JSON.stringify(insertResult)}`, true);
 		return resolve({
 			result: 'OK',
 			payload: {
@@ -264,6 +277,43 @@ const webhookCheckoutSessionFailed = (props) => new Promise(async (resolve, reje
 	return resolve();
 });
 
+const webhookPaymentIntentSucceeded = (event) => new Promise(async (resolve, reject) => {
+	try {
+		const invoice = await stripe.invoices.retrieve(event.data.object.invoice);
+		if (debugMode) tickLog.success(`invoice: ${JSON.stringify(invoice)}`, true);
+		const subscription = await stripe.subscriptions.retrieve(invoice.subscription);
+		if (debugMode) tickLog.success(`subscription: ${JSON.stringify(subscription)}`, true);
+		const subscriptionPayments = await runSQL(poolName, sqls.selectSubscriptionPaymentsByStripeCustomerId, [invoice.customer], debugMode);
+		if (debugMode) tickLog.success(`subscriptionPayments: ${JSON.stringify(subscriptionPayments)}`, true);
+		let periodStart, periodEnd;
+		if (invoice.status === 'paid') {
+			if (subscriptionPayments.rows.length > 0) periodStart = subscriptionPayments.rows[0].subscription_covered_to;
+			else periodStart = new Date();
+			periodEnd = new Date(); // to be overridden below
+			switch (subscription.items.data[0].price.recurring.interval) {
+				case 'day':
+					periodEnd.setDate(periodStart.getDate() + 1);
+					break;
+				case 'week':
+					periodEnd.setDate(periodStart.getDate() + 7);
+					break;
+				case 'month':
+					periodEnd.setMonth(periodStart.getMonth() + 1);
+					break;
+			}
+		}
+		// stripe_subscription_id, invoice_id, hosted_invoice_url, insert_time, unit_amount_decimal, currency, state, subscription_covered_from, subscription_covered_to, subscription_payment_object
+		await runSQL(poolName, sqls.insertSubscriptionPayment, [invoice.subscription, invoice.id, invoice.hosted_invoice_url, `${invoice.amount_paid}`, invoice.currency, (invoice.status === 'paid') ? 'P' : 'F', periodStart, periodEnd, event], debugMode);
+		return resolve({
+			result: 'OK',
+			payload: undefined,
+		});
+	} catch (error) {
+		return reject(error);
+	}
+});
+
+
 // BELOW ITEMS SHOULD BE TESTED WITH EXPO APPLICATION BECAUSE THEY REQUIRE ASYNCHRONOUS HUMAN INTERACTIONS
 
 const webhookCheckoutSessionCompleted = (props) => new Promise(async (resolve, reject) => {
@@ -331,14 +381,16 @@ const webhook = (body) => new Promise(async (resolve, reject) => {
 					await webhookCheckoutSessionFailed({ checkoutSessionId: event.data.object.id });
 				}
 				break;
-
-
 			case 'payment_intent.succeeded':
+				await webhookPaymentIntentSucceeded(event);
 				break;
 			case 'payment_intent.payment_failed':
 				break;
 			case 'payment_intent.refunded':
 				break;
+
+
+
 			case 'account.application.authorized':
 				break;
 			case 'account.application.deauthorized':

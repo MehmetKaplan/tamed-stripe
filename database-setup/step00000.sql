@@ -7,7 +7,19 @@
 --  \____|_|\___|\__,_|_|  |_|_| |_|\__, | /_/   \_\_|  \___|\__,_|
 --                                  |___/
 
+-- FUNCTIONS, PROCEDURES
+
+-- if exists drop the function get_payment_history
+drop function if exists get_payment_history;
+
+
 -- TABLES 
+
+revoke all on tamedstripe.subscription_payments
+from
+	tamedstripeapp;
+
+drop table tamedstripe.subscription_payments;
 
 revoke all on tamedstripe.connected_accounts
 from

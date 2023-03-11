@@ -1,0 +1,48 @@
+module.exports = {
+	customerExists: "select count(*) as \"count\" from tamedstripe.customers where stripe_customer_id = $1",
+	insertCustomer: "insert into tamedstripe.customers (application_customer_id, stripe_customer_id, state, update_time, email, name, phone, address, metadata, checkout_session_id, payment_method_id, customer_object) values ($1, $2, $3, now(), $4, $5, $6, $7, $8, $9, $10, $11) ",
+	modifyCustomerPayment: "update tamedstripe.customers set state = $2, update_time = now(), payment_method_id = $3 where stripe_customer_id = $1",
+	unlinkCustomer: "update tamedstripe.customers set application_customer_id = null, state = 'U' where stripe_customer_id = $1",
+	selectCustomer: "select * from tamedstripe.customers where stripe_customer_id = $1",
+	connectedAccountsExists: "select count(*) as \"count\" from tamedstripe.connected_accounts where stripe_account_id = $1",
+	insertConnectedAccount: "insert into tamedstripe.connected_accounts (stripe_account_id, update_time, capabilities, email, payment_schedule, account_object) values ($1, now(), $2, $3, $4, $5) ",
+	selectAccount: "select * from tamedstripe.connected_accounts where stripe_account_id = $1",
+	insertPaymentSheet: "insert into tamedstripe.payment_sheets( stripe_customer_id, insert_time, pay_in_amount, currency, payout_stripe_account_id, pay_out_amount, ephemeral_key ) values ($1, now(), $2, $3, $4, $5, $6) ",
+	selectPaymentSheets: "select * from tamedstripe.payment_sheets where stripe_customer_id = $1 order by id desc",
+	selectProduct: "select * from tamedstripe.products where stripe_product_id = $1",
+	insertProduct: "insert into tamedstripe.products (stripe_product_id, name, description, currency, unit_amount_decimal, interval, update_time, product_object, price_object) values ($1, $2, $3, $4, $5, $6, now(), $7, $8) ",
+	selectSubscription: "select * from tamedstripe.subscriptions where stripe_subscription_id = $1",
+	customerProductSubscriptionExists: "select count(*) as \"count\" from tamedstripe.subscriptions where stripe_customer_id = $1 and stripe_product_id = $2",
+	insertSubscription: "insert into tamedstripe.subscriptions (stripe_subscription_id, stripe_customer_id, stripe_product_id, description, currency, unit_amount_decimal, interval, update_time, subscription_object) values ($1, $2, $3, $4, $5, $6, $7, now(), $8) ",
+	insertSubscriptionPayment: "insert into tamedstripe.subscription_payments (stripe_subscription_id, invoice_id, hosted_invoice_url, insert_time, unit_amount_decimal, currency, state, subscription_covered_from, subscription_covered_to, subscription_payment_object) values ($1, $2, $3, now(), $4, $5, $6, $7, $8, $9) ",
+	selectSubscriptionPayments: `
+		select a.application_customer_id, a.stripe_customer_id, 
+				b.stripe_product_id, b.currency, b.unit_amount_decimal, 
+				c.insert_time, c.unit_amount_decimal, c.state,
+				c.subscription_covered_from, c.subscription_covered_to,
+				c.invoice_id, c.hosted_invoice_url
+			from tamedstripe.customers a, tamedstripe.subscriptions b, tamedstripe.subscription_payments c
+			where a.application_customer_id = $1
+				and a.stripe_customer_id = b.stripe_customer_id
+				and b.stripe_subscription_id = c.stripe_subscription_id
+				and c.state = 'P'
+			order by insert_time desc;
+	`,
+	selectSubscriptionPaymentsByStripeCustomerId: `
+		select a.application_customer_id, a.stripe_customer_id, 
+				b.stripe_product_id, b.currency, b.unit_amount_decimal, 
+				c.insert_time, c.unit_amount_decimal, c.state,
+				c.subscription_covered_from, c.subscription_covered_to,
+				c.invoice_id, c.hosted_invoice_url
+			from tamedstripe.customers a, tamedstripe.subscriptions b, tamedstripe.subscription_payments c
+			where a.stripe_customer_id = $1
+				and a.stripe_customer_id = b.stripe_customer_id
+				and b.stripe_subscription_id = c.stripe_subscription_id
+				and c.state = 'P'
+			order by insert_time desc;
+	`
+
+}
+
+
+
