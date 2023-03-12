@@ -59,50 +59,21 @@ test('generateCustomer', async () => {
 	expect(customerAtDB.rows[0].customer_object).toEqual(customerData);
 });
 
-test('generateAccount (connected account for payouts)', async () => {
-	let publicDomain = "http://localhost:3000";
-	let refreshUrlRoute = "/account-authorize";
-	let returnUrlRoute = "/account-generated";
-
-	let now = Date.now();
-	let email = `${now}@yopmail.com`;
-	const props = {
-		email: email,
-		publicDomain: publicDomain,
-		refreshUrlRoute: refreshUrlRoute,
-		returnUrlRoute: returnUrlRoute,
-	};
-	let response1 = await tsb.generateAccount(props);
-	let accountData = response1.payload;
-	tickLog.info(`Account generated with following significant information:\n   id:                  ${accountData.id}\n   type:                ${accountData.type}\n   capabilities:        ${JSON.stringify(accountData.capabilities)}\n   email:               ${accountData.email}\n   Payment Schedule:    ${JSON.stringify(accountData.settings.payouts.schedule)}\n   accountLinkURL:      ${accountData.accountLinkURL}`, true);
-	expect(accountData.id).not.toBeNull();
-	expect(accountData.type).toEqual('express');
-	// jest compare object
-	expect(accountData.capabilities).toEqual({ "transfers": "inactive" });
-	expect(accountData.email).toEqual(email);
-	expect(accountData.settings.payouts.schedule.interval).toEqual('daily');
-	let accountAtDB = await runSQL(poolName, sqls.selectAccount, [accountData.id], debugMode);
-	expect(accountAtDB.rows.length).toBe(1);
-	expect(accountAtDB.rows[0].stripe_account_id).toEqual(accountData.id);
-	expect(accountAtDB.rows[0].account_object).toEqual(accountData);
-});
-
+*/ 
 test('generateAccount (connected account for payouts) in TR', async () => {
-	let publicDomain = "http://localhost:3000";
-	let refreshUrlRoute = "/account-authorize";
-	let returnUrlRoute = "/account-generated";
-
-	let now = Date.now();
-	let email = `${now}@yopmail.com`;
+	const country = "TR";
+	const now = Date.now();
+	const applicationCustomerId = `Application Customer-${now}`;
+	const email = `${now}@yopmail.com`;
+	const publicDomain = "https://development.eseme.one:61983";
 	const props = {
+		applicationCustomerId: applicationCustomerId,
 		email: email,
 		publicDomain: publicDomain,
-		refreshUrlRoute: refreshUrlRoute,
-		returnUrlRoute: returnUrlRoute,
-		country: "TR",
+		country: country,
 	};
-	let response1 = await tsb.generateAccount(props);
-	let accountData = response1.payload;
+	const response1 = await tsb.generateAccount(props);
+	const accountData = response1.payload;
 	tickLog.info(`Account generated with following significant information:\n   id:                  ${accountData.id}\n   type:                ${accountData.type}\n   capabilities:        ${JSON.stringify(accountData.capabilities)}\n   email:               ${accountData.email}\n   Payment Schedule:    ${JSON.stringify(accountData.settings.payouts.schedule)}\n   accountLinkURL:      ${accountData.accountLinkURL}`, true);
 	expect(accountData.id).not.toBeNull();
 	expect(accountData.type).toEqual('express');
@@ -110,28 +81,28 @@ test('generateAccount (connected account for payouts) in TR', async () => {
 	expect(accountData.capabilities).toEqual({ "transfers": "inactive" });
 	expect(accountData.email).toEqual(email);
 	expect(accountData.settings.payouts.schedule.interval).toEqual('daily');
-	let accountAtDB = await runSQL(poolName, sqls.selectAccount, [accountData.id], debugMode);
+	let accountAtDB = await runSQL(poolName, sqls.selectAccount, [applicationCustomerId], debugMode);
 	expect(accountAtDB.rows.length).toBe(1);
 	expect(accountAtDB.rows[0].stripe_account_id).toEqual(accountData.id);
 	expect(accountAtDB.rows[0].account_object).toEqual(accountData);
 });
+
+
 
 test('generateAccount (connected account for payouts) in FR', async () => {
-	let publicDomain = "http://localhost:3000";
-	let refreshUrlRoute = "/account-authorize";
-	let returnUrlRoute = "/account-generated";
-
-	let now = Date.now();
-	let email = `${now}@yopmail.com`;
+	const country = "FR";
+	const now = Date.now();
+	const applicationCustomerId = `Application Customer-${now}`;
+	const email = `${now}@yopmail.com`;
+	const publicDomain = "https://development.eseme.one:61983";
 	const props = {
+		applicationCustomerId: applicationCustomerId,
 		email: email,
 		publicDomain: publicDomain,
-		refreshUrlRoute: refreshUrlRoute,
-		returnUrlRoute: returnUrlRoute,
-		country: "FR",
+		country: country,
 	};
-	let response1 = await tsb.generateAccount(props);
-	let accountData = response1.payload;
+	const response1 = await tsb.generateAccount(props);
+	const accountData = response1.payload;
 	tickLog.info(`Account generated with following significant information:\n   id:                  ${accountData.id}\n   type:                ${accountData.type}\n   capabilities:        ${JSON.stringify(accountData.capabilities)}\n   email:               ${accountData.email}\n   Payment Schedule:    ${JSON.stringify(accountData.settings.payouts.schedule)}\n   accountLinkURL:      ${accountData.accountLinkURL}`, true);
 	expect(accountData.id).not.toBeNull();
 	expect(accountData.type).toEqual('express');
@@ -139,12 +110,37 @@ test('generateAccount (connected account for payouts) in FR', async () => {
 	expect(accountData.capabilities).toEqual({ "transfers": "inactive" });
 	expect(accountData.email).toEqual(email);
 	expect(accountData.settings.payouts.schedule.interval).toEqual('daily');
-	let accountAtDB = await runSQL(poolName, sqls.selectAccount, [accountData.id], debugMode);
+	let accountAtDB = await runSQL(poolName, sqls.selectAccount, [applicationCustomerId], debugMode);
 	expect(accountAtDB.rows.length).toBe(1);
 	expect(accountAtDB.rows[0].stripe_account_id).toEqual(accountData.id);
 	expect(accountAtDB.rows[0].account_object).toEqual(accountData);
 });
 
+test('generateAccount same account in state W twice', async () => {
+	const country = undefined;
+	const now = Date.now();
+	const applicationCustomerId = `Application Customer-${now}`;
+	const email = `${now}@yopmail.com`;
+	const publicDomain = "https://development.eseme.one:61983";
+	const props = {
+		applicationCustomerId: applicationCustomerId,
+		email: email,
+		publicDomain: publicDomain,
+		country: country,
+	};
+	const response1 = await tsb.generateAccount(props);
+	const accountData1 = response1.payload;
+	const response2 = await tsb.generateAccount(props);
+	const accountData2 = response2.payload;
+
+	expect(accountData1.id).toEqual(accountData2.id);
+	expect(accountData1.accountLinkURL).not.toEqual(accountData2.accountLinkURL); // new account link should be generated
+	expect(accountData1?.urlRegenerated).toBeFalsy();
+	expect(accountData2.urlRegenerated).toBe(true);
+});
+
+
+/* 
 test('oneTimePayment without payOut', async () => {
 	const now = new Date();
 
@@ -276,6 +272,7 @@ test('Webhook Scenario 1: Customer registration & card payment method setup save
 */
 
 // MANUAL TESTS
+/*
 
 test('cancelSubscription', async () => {
 	// 1. run only for generateCustomer and copy customer id
@@ -407,3 +404,25 @@ test('payment_intent.succeeded (Subscription)', async () => {
 });
 
 */
+
+test('generateAccount same account in state A again', async () => {
+	// 1. run one of the generateAccount tests 
+	// 2. Manually activate the account by following the link
+	// 3. use the same applicationCustomerId here (you can get from DB)
+	//   		select id, application_customer_id from tamedstripe.connected_accounts where state = 'A';
+	const country = undefined;
+	const now = Date.now();
+	const applicationCustomerId = `Application Customer-1678659989247`;
+	const email = `${now}@yopmail.com`;
+	const publicDomain = "https://development.eseme.one:61983";
+	const props = {
+		applicationCustomerId: applicationCustomerId,
+		email: email,
+		publicDomain: publicDomain,
+		country: country,
+	};
+	const response = await tsb.generateAccount(props);
+	const accountData = response.payload;
+	expect(accountData.accountLinkURL.length).toBe(0);
+	expect(accountData.id.length).toBeGreaterThan(0);
+});

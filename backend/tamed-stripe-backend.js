@@ -184,8 +184,42 @@ const convertItems = (currency, items) => {
 }
 
 const generateAccount = (body) => new Promise(async (resolve, reject) => {
-	let { email, publicDomain, refreshUrlRoute, returnUrlRoute, country, capabilities } = body;
+	let { applicationCustomerId, email, publicDomain, refreshUrlRoute, returnUrlRoute, country, capabilities } = body;
+	let refreshUrl = `${publicDomain}${refreshUrlRoute || '/generate-account-cancel-route'}`;
+	let returnUrl = `${publicDomain}${returnUrlRoute || '/generate-account-success-route'}`
+
 	try {
+		let result = await runSQL(poolName, sqls.selectAccount, [applicationCustomerId]);
+		// Already exists an Active account for this applicationCustomerId so return only it
+		if ((result.rows.length > 0) && (result.rows[0].state === 'A')) {
+			return resolve({
+				result: 'OK',
+				payload: {
+					id: result.rows[0].stripe_account_id,
+					accountLinkURL: ''
+				}
+			});
+		}
+
+		// There is an account id but Waiting to be finalized so generate a new link for the same account id
+		if ((result.rows.length > 0) && (result.rows[0].state === 'W')) {
+			const accountLinkForW = await stripe.accountLinks.create({
+				account: result.rows[0].stripe_account_id,
+				refresh_url: refreshUrl,
+				return_url: returnUrl,
+				type: 'account_onboarding'
+			});
+			return resolve({
+				result: 'OK',
+				payload: {
+					id: result.rows[0].stripe_account_id,
+					accountLinkURL: accountLinkForW.url,
+					urlRegenerated: true
+				}
+			});
+		}
+
+		// There is no account, so generate the account and the link
 		let country_ = country ? country : 'US';
 		let tos_acceptance = country_ === 'US' ? undefined : { service_agreement: 'recipient' };
 		const accountGenerationParams = {
@@ -202,11 +236,10 @@ const generateAccount = (body) => new Promise(async (resolve, reject) => {
 				}
 			}
 		};
+
 		const account = await stripe.accounts.create(accountGenerationParams);
 		/* istanbul ignore next */
 		if (debugMode) tickLog.success(`generated account: ${JSON.stringify(account)}`, true);
-		let refreshUrl = `${publicDomain}${refreshUrlRoute || '/account-authorize'}`;
-		let returnUrl = `${publicDomain}${returnUrlRoute || '/account-generated'}`
 		const accountLink = await stripe.accountLinks.create({
 			account: account.id,
 			refresh_url: refreshUrl,
@@ -215,16 +248,8 @@ const generateAccount = (body) => new Promise(async (resolve, reject) => {
 		});
 		account.accountLinkURL = accountLink.url;
 		if (debugMode) tickLog.success(`generated accountLink.url: ${accountLink.url}`, true);
-		let countResult = await runSQL(poolName, sqls.connectedAccountsExists, [account.id]);
-		if (debugMode) tickLog.info(`Database select result: ${JSON.stringify(countResult)}`, true);
-		if (parseInt(countResult.rows[0].count) === 0) {
-			// insert
-			// (stripe_customer_id, email, name, phone, address, metadata, customer_object) 
-			let insertResult = await runSQL(poolName, sqls.insertConnectedAccount, [account.id, JSON.stringify(account.capabilities), account.email, JSON.stringify(account.settings.payouts.schedule), JSON.stringify(account)]);
-		} else /* istanbul ignore next */ {
-			// can not come here
-			// placed just to satisfy istanbul
-		};
+
+		let result3 = await runSQL(poolName, sqls.insertConnectedAccount, [applicationCustomerId, account.id, 'W', JSON.stringify(account.capabilities), account.email, JSON.stringify(account.settings.payouts.schedule), JSON.stringify(account)]);
 		return resolve({
 			result: 'OK',
 			payload: account,
@@ -235,9 +260,17 @@ const generateAccount = (body) => new Promise(async (resolve, reject) => {
 	}
 });
 
+const generateAccountSuccessRoute = (body) => new Promise(async (resolve, reject) => {
+	return resolve(closePage(`<h1>Success!</h1><p>Account generation completed.</p><br>${debugMode ? JSON.stringify(body) : ''}`, 3000));
+});
+
+const generateAccountCancelRoute = (body) => new Promise(async (resolve, reject) => {
+	return resolve(closePage(`<h1>FAIL!</h1><p>Account generation failed, please try again later.</p><br>${debugMode ? JSON.stringify(body) : ''}`, 3000));
+});
+
 const oneTimePayment = (body) => new Promise(async (resolve, reject) => {
 	try {
-		// payoutData: {payoutAmount, payoutAccountId, useOnBehalfOf: true|false}
+		// payoutData: {payoutAmount, payoutAccountId}
 		// items: [{name, unitAmountDecimal}]
 		const { customerId, currency, items, payoutData, publicDomain, successRoute, cancelRoute } = body;
 
@@ -251,7 +284,6 @@ const oneTimePayment = (body) => new Promise(async (resolve, reject) => {
 					destination: payoutData.payoutAccountId,
 				}
 			};
-			// if (payoutData?.useOnBehalfOf) paymentIntentParams.on_behalf_of = payoutData.payoutAccountId;
 		}
 
 		const stripeItems = convertItems(currency, items);
@@ -370,6 +402,19 @@ const webhookCheckoutSessionCompleted = (props) => new Promise(async (resolve, r
 	return resolve();
 });
 
+// Scenario 4: One-time payment with payout, account generation
+const webhookAccountUpdated = (event) => new Promise(async (resolve, reject) => {
+	try {
+		if (event.data.object.charges_enabled && event.data.object.payouts_enabled) {
+			const result = await runSQL(poolName, sqls.updateConnectedAccount, [event.data.object.id, 'A'], debugMode);
+		}
+		return resolve();
+	} catch (error) {
+		return reject(error);
+	}
+});
+
+
 /* istanbul ignore next */
 const webhook = (body) => new Promise(async (resolve, reject) => {
 	try {
@@ -412,13 +457,8 @@ const webhook = (body) => new Promise(async (resolve, reject) => {
 
 
 
-			case 'account.application.authorized':
-				break;
-			case 'account.application.deauthorized':
-				break;
 			case 'account.updated':
-				break;
-			case 'customer.application.authorized':
+				webhookAccountUpdated(event); // Scenario 4: One-time payment with payout, account generation
 				break;
 			default:
 				break;
@@ -444,6 +484,8 @@ module.exports = {
 	cancelSubscription,
 	generateProduct,
 	generateAccount,
+	generateAccountSuccessRoute,
+	generateAccountCancelRoute,
 	oneTimePayment,
 	webhook,
 	exportedForTesting: {

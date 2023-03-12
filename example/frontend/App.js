@@ -2,17 +2,24 @@ import { useState, useEffect } from 'react';
 import { StatusBar } from 'expo-status-bar';
 import { StyleSheet, Text, View, Button, TextInput, Alert } from 'react-native';
 
-import { init, generateCustomer, CustomerWebView, generateProduct, generateSubscription, generateAccount, AccountWebView, } from './functions.js';
+import { init, generateCustomer, generateProduct, generateSubscription, generateAccount, oneTimePayment, StripeActionWebView} from './functions.js';
 
 export default function App() {
 	const [customerId, setCustomerId] = useState('');
 
 	const [email, setEmail] = useState('test@test.com');
 
-	const [subscriptionName, setSubscriptionName] = useState('');
+	const [subscriptionName, setSubscriptionName] = useState('Test subscription');
 	const [subscriptionCharge, setSubscriptionCharge] = useState('0');
+	const [subscriptionId, setSubscriptionId] = useState('');
 
 	const [accountLinkUrl, setAccountLinkUrl] = useState('');
+	const [accountId, setAccountId] = useState('');
+
+	const [oneTimePaymentUrl, setOneTimePaymentUrl] = useState('');
+	const [oneTimeChargeItem, setOneTimeChargeItem] = useState('Test item');
+	const [oneTimeCharge, setOneTimeCharge] = useState('0');
+	const [payoutAmount, setPayoutAmount] = useState('0');
 	const [customerCheckoutSessionUrl, setCustomerCheckoutSessionUrl] = useState('');
 
 
@@ -23,7 +30,8 @@ export default function App() {
 				"generateCustomer": "/generate-customer",
 				"generateProduct": "/generate-product",
 				"generateSubscription": "/generate-subscription",
-				"generateAccount": "/generate-account"
+				"generateAccount": "/generate-account",
+				"oneTimePayment": "/one-time-payment"
 			},
 			debugMode: true
 		});
@@ -62,28 +70,58 @@ export default function App() {
 			name: subscriptionName,
 			description: subscriptionName,
 			currency: 'usd',
-			unitAmountDecimal: subscriptionCharge * 100, // Stripe expects amount in cents
+			unitAmountDecimal: `${subscriptionCharge * 100}`, // Stripe expects amount in cents
 			interval: 'month',
 		});
 		const resultSubscription = await generateSubscription({
 			customerId: customerId,
 			recurringPriceId: resultProduct.payload.price.id,
+			description: `${subscriptionName} Subscription`,
 		});
+		console.log(`Subscription : ${JSON.stringify(resultSubscription.payload, null, 2)}`);
+		setSubscriptionId(resultSubscription.payload.id);
 		Alert.alert(`Login to your Stripe account to check the results for the customer with email ${email}`)
 	}
 
 	const generateAccount_ = async () => {
 		// Stripe generate account and let user complete the process
+		// applicationCustomerId, email, publicDomain, refreshUrlRoute, returnUrlRoute, country, capabilities
+		const now = new Date().getTime();
 		const account = await generateAccount({
-			"email": "1676290904050@yopmail.com",
-			"publicDomain": "https://development.eseme.one:61983",
-			"refreshUrlRoute": "/account-authorize",
-			"returnUrlRoute": "/account-generated",
-			"country": "TR",
+			applicationCustomerId: `Test Expo App Customer-${now}`,
+			email: `${now}@test.com`,
+			publicDomain: "https://development.eseme.one:61983",
+			country: "TR",
 		});
-
+		setAccountId(account.payload.id);
 		setAccountLinkUrl(account.payload.accountLinkURL);
 	};
+
+	const oneTimePayment_ = async () => {
+		const payoutData = {
+			payoutAmount: payoutAmount, 
+			payoutAccountId: accountId
+		}
+		const items = [{
+			name: oneTimeChargeItem,
+			unitAmountDecimal: `${oneTimeCharge * 100}`, // Stripe expects amount in cents
+		}];
+		const body = { 
+			customerId: customerId, 
+			currency: 'usd', 
+			items: items,
+			payoutData: payoutData, 
+			publicDomain: "https://development.eseme.one:61983", 
+			successRoute: "/one-time-payment-success-route", 
+			cancelRoute: "/one-time-payment-cancel-route" 
+		};
+
+		const result = await oneTimePayment(body);
+
+		setOneTimePaymentUrl(result.payload.url);
+	};
+
+
 
 	const generateCustomerBlock = customerId.length === 0
 		? <View style={{ borderColor: '#693', borderWidth: 1, borderRadius: 10, width: '68%', alignItems: 'center' }}>
@@ -102,9 +140,8 @@ export default function App() {
 		</View>
 		: <></>;
 
-	const generateSubscriptionBlock = customerId.length === 0
-		? <></>
-		: <View style={{ borderColor: '#693', borderWidth: 1, borderRadius: 10, width: '68%', alignItems: 'center' }}>
+	const generateSubscriptionBlock = customerId.length > 0 && subscriptionId.length === 0
+		? <View style={{ borderColor: '#693', borderWidth: 1, borderRadius: 10, width: '68%', alignItems: 'center' }}>
 			<Text> </Text>
 			<TextInput
 				placeholder="Subscription Name"
@@ -125,37 +162,74 @@ export default function App() {
 				onPress={generateSubscription_}
 			/>
 			<Text> </Text>
-		</View>;
+		</View>
+		: <></>;
 
-	// MODIFYME
-	const generateAccountBlock = customerId.length === 0
-		? <></>
-		: <View style={{ borderColor: '#693', borderWidth: 1, borderRadius: 10, width: '68%', alignItems: 'center' }}>
+	const generateAccountBlock = subscriptionId.length > 0 && accountId.length === 0
+		? <View style={{ borderColor: '#693', borderWidth: 1, borderRadius: 10, width: '68%', alignItems: 'center' }}>
 			<Text> </Text>
 			<Button
 				title="Generate Account"
 				onPress={generateAccount_}
 			/>
 			<Text> </Text>
-		</View>;
+		</View>
+		: <></>;
+
+	const oneTimePaymentBlock = accountId.length > 0
+		? <View style={{ borderColor: '#693', borderWidth: 1, borderRadius: 10, width: '68%', alignItems: 'center' }}>
+			<TextInput
+				placeholder="One Time Charge Item"
+				onChangeText={text => setOneTimeChargeItem(text)}
+				value={oneTimeChargeItem}
+				style={{ padding: 10, borderWidth: 1, borderRadius: 5, width: '98%' }}
+			/>
+			<Text> </Text>
+			<TextInput
+				placeholder="One Time Charge Amount"
+				onChangeText={text => setOneTimeCharge(text)}
+				value={oneTimeCharge}
+				style={{ padding: 10, borderWidth: 1, borderRadius: 5, width: '98%' }}
+			/>
+			<Text> </Text>
+			<TextInput
+				placeholder="Payout Amount"
+				onChangeText={text => setPayoutAmount(text)}
+				value={payoutAmount}
+				style={{ padding: 10, borderWidth: 1, borderRadius: 5, width: '98%' }}
+			/>
+			<Text> </Text>
+			<Button
+				title="One Time Payment with Payout"
+				onPress={oneTimePayment_}
+			/>
+			<Text> </Text>
+		</View>
+		: <></>;
 
 	let screen = <View style={styles.container}>
 		<StatusBar style="auto" />
 		{generateCustomerBlock}
 		{generateSubscriptionBlock}
 		{generateAccountBlock}
+		{oneTimePaymentBlock}
 		<Text> </Text>
 		<Text> </Text>
 	</View>;
 
-	if (accountLinkUrl.length > 0) screen = <AccountWebView
-		accountLinkUrl={accountLinkUrl}
-		setAccountLinkUrl={setAccountLinkUrl}
+	if (accountLinkUrl.length > 0) screen = <StripeActionWebView
+		url={accountLinkUrl}
+		setUrl={setAccountLinkUrl}
 	/>;
 
-	if (customerCheckoutSessionUrl.length > 0) screen = <CustomerWebView
-		customerCheckoutSessionUrl={customerCheckoutSessionUrl}
-		setCustomerCheckoutSessionUrl={setCustomerCheckoutSessionUrl}
+	if (customerCheckoutSessionUrl.length > 0) screen = <StripeActionWebView
+		url={customerCheckoutSessionUrl}
+		setUrl={setCustomerCheckoutSessionUrl}
+	/>;
+
+	if (oneTimePaymentUrl.length > 0) screen = <StripeActionWebView
+		url={oneTimePaymentUrl}
+		setUrl={setOneTimePaymentUrl}
 	/>;
 
 	return screen;
