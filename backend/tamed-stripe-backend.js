@@ -268,11 +268,19 @@ const generateAccountCancelRoute = (body) => new Promise(async (resolve, reject)
 	return resolve(closePage(`<h1>FAIL!</h1><p>Account generation failed, please try again later.</p><br>${debugMode ? JSON.stringify(body) : ''}`, 3000));
 });
 
+const getItemsTotalPrice = (items) => {
+	let totalPrice = 0;
+	for (let i = 0; i < items.length; i++) {
+		totalPrice += Number(items[i].unitAmountDecimal);
+	}
+	return totalPrice;
+}
+
 const oneTimePayment = (body) => new Promise(async (resolve, reject) => {
 	try {
 		// payoutData: {payoutAmount, payoutAccountId}
 		// items: [{name, unitAmountDecimal}]
-		const { customerId, currency, items, payoutData, publicDomain, successRoute, cancelRoute } = body;
+		const { applicationCustomerId, customerId, currency, items, payoutData, publicDomain, successRoute, cancelRoute } = body;
 
 		// In case there is payout
 		// convert payoutData to payment intent structure
@@ -302,7 +310,10 @@ const oneTimePayment = (body) => new Promise(async (resolve, reject) => {
 			cancel_url: cancelUrl,
 		};
 		const checkoutSession = await stripe.checkout.sessions.create(checkoutSessionParams);
-
+		if (debugMode) tickLog.success(`generated checkoutSession: ${JSON.stringify(checkoutSession)}`, true);
+		let totalAmount = getItemsTotalPrice(items);
+		// application_customer_id, stripe_customer_id, update_time, total_amount_decimal, currency, state, invoice_id, hosted_invoice_url, payout_amount, payout_account_id, payout_state, items, one_time_payment_object
+		let result = await runSQL(poolName, sqls.insertOneTimePayment, [applicationCustomerId, customerId, checkoutSession.id, totalAmount, currency, 'W', payoutData ? payoutData.payoutAmount : null, payoutData ? payoutData.payoutAccountId : null, payoutData ? 'W' : null, JSON.stringify(items), JSON.stringify(checkoutSession)]);
 		return resolve({
 			result: 'OK',
 			payload: checkoutSession,
@@ -316,7 +327,7 @@ const oneTimePayment = (body) => new Promise(async (resolve, reject) => {
 });
 
 // Scenario 1: Customer registration & card payment method setup save (failed)
-const webhookCheckoutSessionFailed = (props) => new Promise(async (resolve, reject) => {
+const webhookCheckoutSessionFailedSetup = (props) => new Promise(async (resolve, reject) => {
 	let session;
 	try {
 		const { checkoutSessionId } = props;
@@ -369,7 +380,7 @@ const webhookPaymentIntentSucceeded = (event) => new Promise(async (resolve, rej
 // BELOW ITEMS SHOULD BE TESTED WITH EXPO APPLICATION BECAUSE THEY REQUIRE ASYNCHRONOUS HUMAN INTERACTIONS
 
 // Scenario 1: Customer registration & card payment method setup save (success)
-const webhookCheckoutSessionCompleted = (props) => new Promise(async (resolve, reject) => {
+const webhookCheckoutSessionCompletedSetup = (props) => new Promise(async (resolve, reject) => {
 	const { checkoutSessionId } = props;
 	let session;
 	try {
@@ -392,13 +403,22 @@ const webhookCheckoutSessionCompleted = (props) => new Promise(async (resolve, r
 		const modifyResult = await runSQL(poolName, sqls.modifyCustomerPayment, [session.customer, 'A', setupIntent.payment_method], debugMode);
 	} catch (error) /*istanbul ignore next*/ {
 		// only log error and keep the customer in W state which is just a useless state.
-		if (debugMode) tickLog.error(`\x1b[0;31mwebhookCheckoutSessionCompleted failed\x1b[0m for checkoutSessionId ${checkoutSessionId} with error ${JSON.stringify(error)}`, true);
+		if (debugMode) tickLog.error(`\x1b[0;31mwebhookCheckoutSessionCompletedSetup failed\x1b[0m for checkoutSessionId ${checkoutSessionId} with error ${JSON.stringify(error)}`, true);
 		try {
 			if (session) await runSQL(poolName, sqls.unlinkCustomer, [session.customer], debugMode);
 		} catch (error2) {
 			// Do nothing
 		}
 	}
+	return resolve();
+});
+
+const webhookCheckoutSessionCompletedPayment = (event) => new Promise(async (resolve, reject) => {
+	const invoice = await stripe.invoices.retrieve(event.data.object.invoice);
+	if (debugMode) tickLog.success(`invoice: ${JSON.stringify(invoice)}`, true);
+	const checkoutSessionId = event.data.object.id;
+	// state = $2, invoice_id = $3, hosted_invoice_url = $4 where checkout_session_id = $1
+	const result = await runSQL(poolName, sqls.updateOneTimePayment, [checkoutSessionId, 'P', invoice.id, invoice.hosted_invoice_url], debugMode); 
 	return resolve();
 });
 
@@ -424,39 +444,42 @@ const webhook = (body) => new Promise(async (resolve, reject) => {
 			case 'checkout.session.completed':
 				// Scenario 1: Customer registration & card payment method setup save (success)
 				if (event.data.object.mode === 'setup') {
-					await webhookCheckoutSessionCompleted({ checkoutSessionId: event.data.object.id });
-				}
+					await webhookCheckoutSessionCompletedSetup({ checkoutSessionId: event.data.object.id });
+				};
+				if ((event.data.object.mode === 'payment') && (event.data.object.status === 'complete')) {
+					await webhookCheckoutSessionCompletedPayment(event);
+				};
 				break;
-
 			case 'checkout.session.async_payment_succeeded':
 				// Scenario 1: Customer registration & card payment method setup save (success)
 				if (event.data.object.mode === 'setup') {
-					await webhookCheckoutSessionCompleted({ checkoutSessionId: event.data.object.id });
+					await webhookCheckoutSessionCompletedSetup({ checkoutSessionId: event.data.object.id });
 				}
+				if ((event.data.object.mode === 'payment') && (event.data.object.status === 'complete')) {
+					await webhookCheckoutSessionCompletedPayment(event);
+				};
 				break;
-
 			case 'checkout.session.async_payment_failed':
 				// Scenario 1: Customer registration & card payment method setup save (failed)
 				if (event.data.object.mode === 'setup') {
-					await webhookCheckoutSessionFailed({ checkoutSessionId: event.data.object.id });
-				}
+					await webhookCheckoutSessionFailedSetup({ checkoutSessionId: event.data.object.id });
+				};
 				break;
 			case 'checkout.session.expired':
 				// Scenario 1: Customer registration & card payment method setup save (failed)
 				if (event.data.object.mode === 'setup') {
-					await webhookCheckoutSessionFailed({ checkoutSessionId: event.data.object.id });
+					await webhookCheckoutSessionFailedSetup({ checkoutSessionId: event.data.object.id });
 				}
 				break;
 			case 'payment_intent.succeeded':
-				await webhookPaymentIntentSucceeded(event); // Scenario 2: subscription first and next recurring payments (success & failed)
+				if (event.data.object.description === "Subscription creation") {
+					await webhookPaymentIntentSucceeded(event); // Scenario 2: subscription first and next recurring payments (success & failed)
+				};
 				break;
 			case 'payment_intent.payment_failed':
 				break;
 			case 'payment_intent.refunded':
 				break;
-
-
-
 			case 'account.updated':
 				webhookAccountUpdated(event); // Scenario 4: One-time payment with payout, account generation
 				break;

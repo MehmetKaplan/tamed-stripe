@@ -9,6 +9,12 @@
 
 -- TABLES 
 
+revoke all on tamedstripe.one_time_payments
+from
+	tamedstripeapp;
+
+drop table tamedstripe.one_time_payments;
+
 revoke all on tamedstripe.subscription_payments
 from
 	tamedstripeapp;

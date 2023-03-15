@@ -23,7 +23,6 @@ beforeAll(async () => {
 	poolName = tsb.exportedForTesting.poolInfoForTests.poolName;
 
 });
-
 /*
 test('generateCustomer', async () => {
 	const now = new Date().getTime();
@@ -59,7 +58,6 @@ test('generateCustomer', async () => {
 	expect(customerAtDB.rows[0].customer_object).toEqual(customerData);
 });
 
-*/ 
 test('generateAccount (connected account for payouts) in TR', async () => {
 	const country = "TR";
 	const now = Date.now();
@@ -86,7 +84,6 @@ test('generateAccount (connected account for payouts) in TR', async () => {
 	expect(accountAtDB.rows[0].stripe_account_id).toEqual(accountData.id);
 	expect(accountAtDB.rows[0].account_object).toEqual(accountData);
 });
-
 
 
 test('generateAccount (connected account for payouts) in FR', async () => {
@@ -116,6 +113,7 @@ test('generateAccount (connected account for payouts) in FR', async () => {
 	expect(accountAtDB.rows[0].account_object).toEqual(accountData);
 });
 
+
 test('generateAccount same account in state W twice', async () => {
 	const country = undefined;
 	const now = Date.now();
@@ -140,7 +138,7 @@ test('generateAccount same account in state W twice', async () => {
 });
 
 
-/* 
+
 test('oneTimePayment without payOut', async () => {
 	const now = new Date();
 
@@ -149,7 +147,7 @@ test('oneTimePayment without payOut', async () => {
 	// const { customerId, currency, items, payoutData, successUrl, cancelUrl } = body;
 	// This is a previously generated customer id and its credit card information 
 	// 	is updated using the link from checkout session coming within the generateCustomer method.
-	const customerId = 'cus_NVaVksq70fVlqI';
+	const customerId = 'cus_NX3K1wGTcFJYrn';
 	const currency = 'try';
 	const items = [
 		{ name: "iPhone", unitAmountDecimal: "100000" },
@@ -162,18 +160,24 @@ test('oneTimePayment without payOut', async () => {
 	const cancelRoute = "/one-time-payment-cancel-route";
 	const response4 = await tsb.oneTimePayment({ customerId, currency, items, payoutData, publicDomain, successRoute, cancelRoute });
 });
+*/
+
 
 test('oneTimePayment with payOut to FR', async () => {
-	const now = new Date();
+	// 1. run for generateCustomer and copy customer id
+	// 2. replace customerId in related test cases with the copied customer id
+	// 3. run for 'generateAccount (connected account for payouts) in FR' and activate account using its link
+	const now = new Date().getTime();
+	const applicationCustomerId = `Application Customer-${now}`;
 
 	// payoutData: {payoutAmount, payoutAccountId, useOnBehalfOf: true|false}
 	// items: [{name, unitAmountDecimal}]
 	// const { customerId, currency, items, payoutData, successUrl, cancelUrl } = body;
 	// This is a previously generated customer id and its credit card information 
 	// 	is updated using the link from checkout session coming within the generateCustomer method.
-	const customerId = 'cus_NVaVksq70fVlqI';
+	const customerId = 'cus_NX3K1wGTcFJYrn';
 	// This is a previously generated account id
-	const accountId = "acct_1MjkRw2HaPwigiek"; // 
+	const accountId = "acct_1MlzTlCTsUH8xjbg"; // 
 	const currency = 'try';
 	const items = [
 		{ name: "iPhone", unitAmountDecimal: "100000" },
@@ -188,9 +192,12 @@ test('oneTimePayment with payOut to FR', async () => {
 	const publicDomain = "https://development.eseme.one:61983";
 	const successRoute = "/one-time-payment-success-route";
 	const cancelRoute = "/one-time-payment-cancel-route";
-	const response4 = await tsb.oneTimePayment({ customerId, currency, items, payoutData, publicDomain, successRoute, cancelRoute });
+	const response4 = await tsb.oneTimePayment({ applicationCustomerId, customerId, currency, items, payoutData, publicDomain, successRoute, cancelRoute });
 });
 
+
+
+/*
 test('oneTimePayment with payOut to TR', async () => {
 	const now = new Date();
 
@@ -199,9 +206,9 @@ test('oneTimePayment with payOut to TR', async () => {
 	// const { customerId, currency, items, payoutData, successUrl, cancelUrl } = body;
 	// This is a previously generated customer id and its credit card information 
 	// 	is updated using the link from checkout session coming within the generateCustomer method.
-	const customerId = 'cus_NVaVksq70fVlqI';
+	const customerId = 'cus_NX3K1wGTcFJYrn';
 	// This is a previously generated account id
-	const accountId = "acct_1Mjivf2HrSbgvhw4"; // "message":"TR is not currently supported by Stripe."
+	const accountId = "acct_1MlzMCC8KUbIgYWQ"; // "message":"TR is not currently supported by Stripe."
 	const currency = 'try';
 	const items = [
 		{ name: "iPhone", unitAmountDecimal: "100000" },
@@ -218,7 +225,6 @@ test('oneTimePayment with payOut to TR', async () => {
 	const cancelRoute = "/one-time-payment-cancel-route";
 	const response4 = await tsb.oneTimePayment({ customerId, currency, items, payoutData, publicDomain, successRoute, cancelRoute });
 });
-
 
 test('Webhook Scenario 1: Customer registration & card payment method setup save', async () => {
 
@@ -269,10 +275,10 @@ test('Webhook Scenario 1: Customer registration & card payment method setup save
 	expect(customerAtDB2.rows[0].state).toEqual('W');
 	expect(customerAtDB2.rows[0].application_customer_id).toBeNull();
 });
-*/
+
 
 // MANUAL TESTS
-/*
+
 
 test('cancelSubscription', async () => {
 	// 1. run only for generateCustomer and copy customer id
@@ -283,7 +289,7 @@ test('cancelSubscription', async () => {
 
 	// This is a previously generated customer id and its credit card information 
 	// 	is updated using the link from checkout session coming within the generateCustomer method.
-	const customerId = 'cus_NVaVksq70fVlqI';
+	const customerId = 'cus_NX3K1wGTcFJYrn';
 
 	const description = `Jest Test Subscription - ${now}`;
 
@@ -333,7 +339,7 @@ test('cancelSubscription', async () => {
 	expect(subscriptionAtDB2.rows.length).toBe(0);
 
 });
-/*
+
 
 test('generateSubscription', async () => {
 	// 1. run only for generateCustomer and copy customer id
@@ -344,7 +350,7 @@ test('generateSubscription', async () => {
 
 	// This is a previously generated customer id and its credit card information 
 	// 	is updated using the link from checkout session coming within the generateCustomer method.
-	const customerId = 'cus_NVaVksq70fVlqI';
+	const customerId = 'cus_NX3K1wGTcFJYrn';
 
 	const description = `Jest Test Subscription - ${now}`;
 
@@ -403,7 +409,7 @@ test('payment_intent.succeeded (Subscription)', async () => {
 	expect(subscriptionPayments.rows.length).toBe(previousSubscriptionPayments.rows.length + 1);
 });
 
-*/
+
 
 test('generateAccount same account in state A again', async () => {
 	// 1. run one of the generateAccount tests 
@@ -426,3 +432,4 @@ test('generateAccount same account in state A again', async () => {
 	expect(accountData.accountLinkURL.length).toBe(0);
 	expect(accountData.id.length).toBeGreaterThan(0);
 });
+*/
