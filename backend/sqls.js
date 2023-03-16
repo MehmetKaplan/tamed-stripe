@@ -6,6 +6,7 @@ module.exports = {
 	selectCustomer: "select * from tamedstripe.customers where stripe_customer_id = $1",
 	insertConnectedAccount: "insert into tamedstripe.connected_accounts (application_customer_id, stripe_account_id, state, update_time, capabilities, email, payment_schedule, account_object) values ($1, $2, $3, now(), $4, $5, $6, $7) ",
 	selectAccount: "select * from tamedstripe.connected_accounts where application_customer_id = $1",
+	selectAccountForTest: "select * from tamedstripe.connected_accounts where state = 'A' limit 1 ",
 	updateConnectedAccount: "update tamedstripe.connected_accounts set state = $2, update_time = now() where stripe_account_id = $1",
 	insertPaymentSheet: "insert into tamedstripe.payment_sheets( stripe_customer_id, insert_time, pay_in_amount, currency, payout_stripe_account_id, pay_out_amount, ephemeral_key ) values ($1, now(), $2, $3, $4, $5, $6) ",
 	selectPaymentSheets: "select * from tamedstripe.payment_sheets where stripe_customer_id = $1 order by id desc",

@@ -5,6 +5,7 @@ const { runSQL, } = require('tamed-pg');
 
 // The following items are coming from STEP 1
 const customerId = 'cus_NXM3AR5EfpIS7C';
+const accountId_TR = "acct_1MmHL3Fw4152XXeh";
 
 const logMessages = [];
 
@@ -26,7 +27,6 @@ beforeAll(async () => {
 	poolName = tsb.exportedForTesting.poolInfoForTests.poolName;
 
 });
-
 
 test('webhook for generateSubscription from Step2', async () => {
 	const event = require('./generate-subscription-event.json');
@@ -140,6 +140,24 @@ test('generateAccount same account in state W twice', async () => {
 	expect(accountData2.urlRegenerated).toBe(true);
 });
 
+test('generateAccount same account in state A again', async () => {
+	const publicDomain = "https://development.eseme.one:61983";
+
+	const oldAccountDB = await runSQL(poolName, sqls.selectAccountForTest, [], debugMode);
+	const oldAccount = oldAccountDB.rows[0].account_object;
+	const props = {
+		applicationCustomerId: oldAccountDB.rows[0].application_customer_id,
+		email: oldAccount.email,
+		publicDomain: publicDomain,
+		country: oldAccount.country,
+	};
+	const response = await tsb.generateAccount(props);
+	const accountData = response.payload;
+	expect(accountData.id).toEqual(oldAccount.id);
+	expect(accountData.accountLinkURL.length).toBe(0);
+	expect(accountData?.urlRegenerated).toBeFalsy();
+});
+
 test('Webhook Scenario 1: Customer registration & card payment method setup save', async () => {
 	const now = new Date().getTime();
 	const body = {
@@ -189,3 +207,26 @@ test('Webhook Scenario 1: Customer registration & card payment method setup save
 	expect(customerAtDB2.rows[0].application_customer_id).toBeNull();
 });
 
+test('generateCustomerCancelRoute', async () => {
+	const now = new Date().getTime();
+	const body = {
+		applicationCustomerId: `Jest Application Customer-${now}`,
+		description: `Jest Customer ${now}`,
+		email: `test-${now}@yopmail.com`,
+		metadata: { "test": "test" },
+		name: `Jest Customer ${now}`,
+		phone: `1234567890`,
+		address: { "line1": "1234 Main St", "city": "San Francisco", "state": "CA", "postal_code": "94111" },
+		publicDomain: "https://development.eseme.one:61983",
+		successRoute: "/generate-customer-success-route",
+		cancelRoute: "/generate-customer-cancel-route",
+	};
+	const result1 = await tsb.generateCustomer(body);
+	const customerData = result1.payload.customer;
+	const checkoutSessionData = result1.payload.checkoutSession;
+	const beforeStateCustomer = await runSQL(poolName, sqls.selectCustomer, [customerData.id], debugMode);
+	await tsb.generateCustomerCancelRoute({session_id: checkoutSessionData.id});
+	const afterStateCustomer = await runSQL(poolName, sqls.selectCustomer, [customerData.id], debugMode);
+	expect(beforeStateCustomer.rows[0].state).toEqual('W');
+	expect(afterStateCustomer.rows[0].state).toEqual('U');
+});
