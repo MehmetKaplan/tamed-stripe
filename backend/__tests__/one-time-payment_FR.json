@@ -1,0 +1,105 @@
+{
+	"id": "evt_1MmIXlCDKfcpGwAffe3Sg5Ia",
+	"object": "event",
+	"api_version": "2022-11-15",
+	"created": 1678979801,
+	"data": {
+		"object": {
+			"id": "cs_test_b1FRsumqOTA5Aj0htYvh0iwFCn5kWAVE7ZHF4OW2ChH6wsFpIF6tDuK7vY",
+			"object": "checkout.session",
+			"after_expiration": null,
+			"allow_promotion_codes": null,
+			"amount_subtotal": 450000,
+			"amount_total": 450000,
+			"automatic_tax": {
+				"enabled": false,
+				"status": null
+			},
+			"billing_address_collection": null,
+			"cancel_url": "https://development.eseme.one:61983/one-time-payment-cancel-route?session_id={CHECKOUT_SESSION_ID}",
+			"client_reference_id": null,
+			"consent": null,
+			"consent_collection": null,
+			"created": 1678979761,
+			"currency": "eur",
+			"custom_fields": [],
+			"custom_text": {
+				"shipping_address": null,
+				"submit": null
+			},
+			"customer": "cus_NXM3AR5EfpIS7C",
+			"customer_creation": null,
+			"customer_details": {
+				"address": {
+					"city": "San Francisco",
+					"country": null,
+					"line1": "1234 Main St",
+					"line2": null,
+					"postal_code": "94111",
+					"state": "CA"
+				},
+				"email": "test-1678975168562@yopmail.com",
+				"name": "Jest Customer 1678975168562",
+				"phone": null,
+				"tax_exempt": "none",
+				"tax_ids": []
+			},
+			"customer_email": null,
+			"expires_at": 1679066161,
+			"invoice": "in_1MmIXkCDKfcpGwAf9xSRKUNi",
+			"invoice_creation": {
+				"enabled": true,
+				"invoice_data": {
+					"account_tax_ids": null,
+					"custom_fields": null,
+					"description": null,
+					"footer": null,
+					"metadata": {},
+					"rendering_options": null
+				}
+			},
+			"livemode": false,
+			"locale": null,
+			"metadata": {},
+			"mode": "payment",
+			"payment_intent": "pi_3MmIXiCDKfcpGwAf0IqnNVYs",
+			"payment_link": null,
+			"payment_method_collection": "always",
+			"payment_method_options": {},
+			"payment_method_types": [
+				"card",
+				"bancontact",
+				"eps",
+				"giropay",
+				"ideal"
+			],
+			"payment_status": "paid",
+			"phone_number_collection": {
+				"enabled": false
+			},
+			"recovered_from": null,
+			"setup_intent": null,
+			"shipping_address_collection": null,
+			"shipping_cost": null,
+			"shipping_details": null,
+			"shipping_options": [],
+			"status": "complete",
+			"submit_type": null,
+			"subscription": null,
+			"success_url": "https://development.eseme.one:61983/one-time-payment-success-route?session_id={CHECKOUT_SESSION_ID}",
+			"total_details": {
+				"amount_discount": 0,
+				"amount_shipping": 0,
+				"amount_tax": 0
+			},
+			"url": null
+		}
+	},
+	"livemode": false,
+	"pending_webhooks": 1,
+	"request": {
+		"id": null,
+		"idempotency_key": null
+	},
+	"type": "checkout.session.completed"
+}

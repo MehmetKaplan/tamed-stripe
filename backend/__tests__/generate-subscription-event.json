@@ -1,11 +1,11 @@
 {
-	"id": "evt_3MkZSZCDKfcpGwAf1j5kiET7",
+	"id": "evt_3MmI8tCDKfcpGwAf1Anhvwhv",
 	"object": "event",
 	"api_version": "2022-11-15",
-	"created": 1678568172,
+	"created": 1678978260,
 	"data": {
 		"object": {
-			"id": "pi_3MkZSZCDKfcpGwAf1jasBzMY",
+			"id": "pi_3MmI8tCDKfcpGwAf1JHnmwkY",
 			"object": "payment_intent",
 			"amount": 100001,
 			"amount_capturable": 0,
@@ -19,20 +19,20 @@
 			"canceled_at": null,
 			"cancellation_reason": null,
 			"capture_method": "automatic",
-			"client_secret": "pi_3MkZSZCDKfcpGwAf1jasBzMY_secret_QhBqrGVm4CRBDYy7VYNYKe5Vz",
+			"client_secret": "pi_3MmI8tCDKfcpGwAf1JHnmwkY_secret_4DBO5Kfy76GuOkw8TgjlQitXD",
 			"confirmation_method": "automatic",
-			"created": 1678568171,
+			"created": 1678978259,
 			"currency": "usd",
-			"customer": "cus_NVaVksq70fVlqI",
+			"customer": "cus_NXM3AR5EfpIS7C",
 			"description": "Subscription creation",
-			"invoice": "in_1MkZSYCDKfcpGwAfRHLEuGPj",
+			"invoice": "in_1MmI8tCDKfcpGwAfI9jG2N3Z",
 			"last_payment_error": null,
-			"latest_charge": "ch_3MkZSZCDKfcpGwAf1b6HblTW",
+			"latest_charge": "ch_3MmI8tCDKfcpGwAf1R63Gr0b",
 			"livemode": false,
 			"metadata": {},
 			"next_action": null,
 			"on_behalf_of": null,
-			"payment_method": "pm_1MkZN3CDKfcpGwAfs6lZBCkc",
+			"payment_method": "pm_1MmHN4CDKfcpGwAfkALzf6BB",
 			"payment_method_options": {
 				"card": {
 					"installments": null,
@@ -40,12 +40,14 @@
 					"network": null,
 					"request_three_d_secure": "automatic"
 				},
+				"cashapp": {},
 				"us_bank_account": {
 					"verification_method": "automatic"
 				}
 			},
 			"payment_method_types": [
 				"card",
+				"cashapp",
 				"us_bank_account"
 			],
 			"processing": null,
@@ -64,8 +66,8 @@
 	"livemode": false,
 	"pending_webhooks": 1,
 	"request": {
-		"id": "req_pPPMjgoAIH92tX",
-		"idempotency_key": "a6af7926-f7bc-4a21-9cc0-d34411456d65"
+		"id": "req_XA1EPNQJrPpiyT",
+		"idempotency_key": "c2f44943-084b-485b-b6ad-b7be430c7c85"
 	},
 	"type": "payment_intent.succeeded"
 }

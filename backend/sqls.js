@@ -45,4 +45,5 @@ module.exports = {
 	`,
 	insertOneTimePayment: "insert into tamedstripe.one_time_payments(application_customer_id, stripe_customer_id, checkout_session_id, update_time, total_amount_decimal, currency, state, invoice_id, hosted_invoice_url, payout_amount, payout_account_id, payout_state, items, one_time_payment_object) values ($1, $2, $3, now(), $4, $5, $6, null, null, $7, $8, $9, $10, $11)",
 	updateOneTimePayment: "update tamedstripe.one_time_payments set update_time = now(), state = $2, invoice_id = $3, hosted_invoice_url = $4 where checkout_session_id = $1",
+	selectOneTimePayment: "select * from tamedstripe.one_time_payments where checkout_session_id = $1",
 }

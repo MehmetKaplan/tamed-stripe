@@ -280,7 +280,9 @@ const oneTimePayment = (body) => new Promise(async (resolve, reject) => {
 	try {
 		// payoutData: {payoutAmount, payoutAccountId}
 		// items: [{name, unitAmountDecimal}]
-		const { applicationCustomerId, customerId, currency, items, payoutData, publicDomain, successRoute, cancelRoute } = body;
+		const { applicationCustomerId, customerId, currency, items, payoutData, publicDomain, } = body;
+		const successRoute = body?.successRoute || '/one-time-payment-success-route';
+		const cancelRoute = body?.successRoute || '/one-time-payment-cancel-route';
 
 		// In case there is payout
 		// convert payoutData to payment intent structure
@@ -326,6 +328,15 @@ const oneTimePayment = (body) => new Promise(async (resolve, reject) => {
 
 });
 
+const oneTimePaymentSuccessRoute = (body) => new Promise(async (resolve, reject) => {
+	return resolve(closePage(`<h1>Success!</h1><p>Checkout completed.</p><br>${debugMode ? JSON.stringify(body) : ''}`, 3000));
+});
+
+const oneTimePaymentCancelRoute = (body) => new Promise(async (resolve, reject) => {
+	return resolve(closePage(`<h1>FAIL!</h1><p>Checkout failed, please try again later.</p><br>${debugMode ? JSON.stringify(body) : ''}`, 3000));
+});
+
+
 // Scenario 1: Customer registration & card payment method setup save (failed)
 const webhookCheckoutSessionFailedSetup = (props) => new Promise(async (resolve, reject) => {
 	let session;
@@ -335,6 +346,40 @@ const webhookCheckoutSessionFailedSetup = (props) => new Promise(async (resolve,
 		if (session) await runSQL(poolName, sqls.unlinkCustomer, [session.customer], debugMode);
 	} catch (error) {
 		// Do nothing
+	}
+	return resolve();
+});
+
+// Scenario 1: Customer registration & card payment method setup save (success)
+const webhookCheckoutSessionCompletedSetup = (props) => new Promise(async (resolve, reject) => {
+	const { checkoutSessionId } = props;
+	let session;
+	try {
+		session = await stripe.checkout.sessions.retrieve(checkoutSessionId);
+		if (debugMode) tickLog.success(`session: ${JSON.stringify(session)}`, true);
+		const setupIntent = await stripe.setupIntents.retrieve(session.setup_intent);
+		if (debugMode) tickLog.success(`setupIntent: ${JSON.stringify(setupIntent)}`, true);
+		if (!(setupIntent?.payment_method)) throw new Error('No payment method found');
+		const paymentMethod = await stripe.paymentMethods.attach(
+			setupIntent.payment_method,
+			{ customer: session.customer }
+		);
+		if (debugMode) tickLog.success(`paymentMethod:\n${JSON.stringify(paymentMethod)}`, true);
+		const customer = await stripe.customers.update(session.customer, {
+			invoice_settings: {
+				default_payment_method: setupIntent.payment_method
+			}
+		});
+		tickLog.success(`Customer Generated:\n${JSON.stringify(customer, null, 2)}`, true);
+		const modifyResult = await runSQL(poolName, sqls.modifyCustomerPayment, [session.customer, 'A', setupIntent.payment_method], debugMode);
+	} catch (error) /*istanbul ignore next*/ {
+		// only log error and keep the customer in W state which is just a useless state.
+		if (debugMode) tickLog.error(`\x1b[0;31mwebhookCheckoutSessionCompletedSetup failed\x1b[0m for checkoutSessionId ${checkoutSessionId} with error ${JSON.stringify(error)}`, true);
+		try {
+			if (session) await runSQL(poolName, sqls.unlinkCustomer, [session.customer], debugMode);
+		} catch (error2) {
+			// Do nothing
+		}
 	}
 	return resolve();
 });
@@ -376,49 +421,13 @@ const webhookPaymentIntentSucceeded = (event) => new Promise(async (resolve, rej
 	}
 });
 
-
-// BELOW ITEMS SHOULD BE TESTED WITH EXPO APPLICATION BECAUSE THEY REQUIRE ASYNCHRONOUS HUMAN INTERACTIONS
-
-// Scenario 1: Customer registration & card payment method setup save (success)
-const webhookCheckoutSessionCompletedSetup = (props) => new Promise(async (resolve, reject) => {
-	const { checkoutSessionId } = props;
-	let session;
-	try {
-		session = await stripe.checkout.sessions.retrieve(checkoutSessionId);
-		if (debugMode) tickLog.success(`session: ${JSON.stringify(session)}`, true);
-		const setupIntent = await stripe.setupIntents.retrieve(session.setup_intent);
-		if (debugMode) tickLog.success(`setupIntent: ${JSON.stringify(setupIntent)}`, true);
-		if (!(setupIntent?.payment_method)) throw new Error('No payment method found');
-		const paymentMethod = await stripe.paymentMethods.attach(
-			setupIntent.payment_method,
-			{ customer: session.customer }
-		);
-		if (debugMode) tickLog.success(`paymentMethod:\n${JSON.stringify(paymentMethod)}`, true);
-		const customer = await stripe.customers.update(session.customer, {
-			invoice_settings: {
-				default_payment_method: setupIntent.payment_method
-			}
-		});
-		tickLog.success(`Customer Generated:\n${JSON.stringify(customer, null, 2)}`, true);
-		const modifyResult = await runSQL(poolName, sqls.modifyCustomerPayment, [session.customer, 'A', setupIntent.payment_method], debugMode);
-	} catch (error) /*istanbul ignore next*/ {
-		// only log error and keep the customer in W state which is just a useless state.
-		if (debugMode) tickLog.error(`\x1b[0;31mwebhookCheckoutSessionCompletedSetup failed\x1b[0m for checkoutSessionId ${checkoutSessionId} with error ${JSON.stringify(error)}`, true);
-		try {
-			if (session) await runSQL(poolName, sqls.unlinkCustomer, [session.customer], debugMode);
-		} catch (error2) {
-			// Do nothing
-		}
-	}
-	return resolve();
-});
-
+// Scenario 3 & 4: One-time payment with or without payout
 const webhookCheckoutSessionCompletedPayment = (event) => new Promise(async (resolve, reject) => {
 	const invoice = await stripe.invoices.retrieve(event.data.object.invoice);
 	if (debugMode) tickLog.success(`invoice: ${JSON.stringify(invoice)}`, true);
 	const checkoutSessionId = event.data.object.id;
 	// state = $2, invoice_id = $3, hosted_invoice_url = $4 where checkout_session_id = $1
-	const result = await runSQL(poolName, sqls.updateOneTimePayment, [checkoutSessionId, 'P', invoice.id, invoice.hosted_invoice_url], debugMode); 
+	const result = await runSQL(poolName, sqls.updateOneTimePayment, [checkoutSessionId, 'P', invoice.id, invoice.hosted_invoice_url], debugMode);
 	return resolve();
 });
 
@@ -476,10 +485,6 @@ const webhook = (body) => new Promise(async (resolve, reject) => {
 					await webhookPaymentIntentSucceeded(event); // Scenario 2: subscription first and next recurring payments (success & failed)
 				};
 				break;
-			case 'payment_intent.payment_failed':
-				break;
-			case 'payment_intent.refunded':
-				break;
 			case 'account.updated':
 				webhookAccountUpdated(event); // Scenario 4: One-time payment with payout, account generation
 				break;
@@ -510,6 +515,8 @@ module.exports = {
 	generateAccountSuccessRoute,
 	generateAccountCancelRoute,
 	oneTimePayment,
+	oneTimePaymentSuccessRoute,
+	oneTimePaymentCancelRoute,
 	webhook,
 	exportedForTesting: {
 		poolInfoForTests: poolInfoForTests,

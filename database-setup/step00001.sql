@@ -144,7 +144,7 @@ create table tamedstripe.one_time_payments (
 	hosted_invoice_url varchar(255),
 	payout_amount numeric(12), 
 	payout_account_id varchar(255),
-	payout_state varchar(1) not null, -- 'W'aiting for payout action, 'P'aid, 'F'ailed
+	payout_state varchar(1), -- 'W'aiting for payout action, 'P'aid, 'F'ailed
 	items jsonb not null,
 	one_time_payment_object jsonb not null
 );
