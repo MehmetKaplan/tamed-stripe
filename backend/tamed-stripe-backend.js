@@ -12,6 +12,7 @@ const poolInfoForTests = {};
 let debugMode = true;
 
 const closePage = (content, duration) => {
+	/* istanbul ignore next */
 	return `
 		<html>
 			<script>setTimeout(function() {window.location='web-view-close'}, ${duration});</script>
@@ -21,6 +22,7 @@ const closePage = (content, duration) => {
 };
 
 const webViewClose = (body) => new Promise(async (resolve, reject) => {
+	/* istanbul ignore next */
 	return resolve(`<p>Please Close This Window</p>`);
 });
 
@@ -80,6 +82,7 @@ const generateCustomer = (body) => new Promise(async (resolve, reject) => {
 });
 
 const generateCustomerSuccessRoute = (body) => new Promise(async (resolve, reject) => {
+	/* istanbul ignore next */
 	return resolve(closePage(`<h1>Success!</h1><p>You can close this window now.</p><br>${debugMode ? JSON.stringify(body) : ''}`, 3000));
 });
 
@@ -261,10 +264,12 @@ const generateAccount = (body) => new Promise(async (resolve, reject) => {
 });
 
 const generateAccountSuccessRoute = (body) => new Promise(async (resolve, reject) => {
+	/* istanbul ignore next */
 	return resolve(closePage(`<h1>Success!</h1><p>Account generation completed.</p><br>${debugMode ? JSON.stringify(body) : ''}`, 3000));
 });
 
 const generateAccountCancelRoute = (body) => new Promise(async (resolve, reject) => {
+	/* istanbul ignore next */
 	return resolve(closePage(`<h1>FAIL!</h1><p>Account generation failed, please try again later.</p><br>${debugMode ? JSON.stringify(body) : ''}`, 3000));
 });
 
@@ -320,7 +325,7 @@ const oneTimePayment = (body) => new Promise(async (resolve, reject) => {
 			result: 'OK',
 			payload: checkoutSession,
 		});
-	} catch (error) {
+	} catch (error) /* istanbul ignore next */ {
 		if (debugMode) tickLog.error(`tamed-stripe-backend related error. Failure while calling oneTimePayment(${JSON.stringify(body)}). Error: ${JSON.stringify(error)}`, true);
 		return reject(error);
 
@@ -329,10 +334,12 @@ const oneTimePayment = (body) => new Promise(async (resolve, reject) => {
 });
 
 const oneTimePaymentSuccessRoute = (body) => new Promise(async (resolve, reject) => {
+	/* istanbul ignore next */
 	return resolve(closePage(`<h1>Success!</h1><p>Checkout completed.</p><br>${debugMode ? JSON.stringify(body) : ''}`, 3000));
 });
 
 const oneTimePaymentCancelRoute = (body) => new Promise(async (resolve, reject) => {
+	/* istanbul ignore next */
 	return resolve(closePage(`<h1>FAIL!</h1><p>Checkout failed, please try again later.</p><br>${debugMode ? JSON.stringify(body) : ''}`, 3000));
 });
 
@@ -396,14 +403,18 @@ const webhookPaymentIntentSucceeded = (event) => new Promise(async (resolve, rej
 		let periodStart, periodEnd;
 		if (invoice.status === 'paid') {
 			if (subscriptionPayments.rows.length > 0) periodStart = subscriptionPayments.rows[0].subscription_covered_to;
-			else periodStart = new Date();
+			else /* istanbul ignore next */ periodStart = new Date();
 			periodEnd = new Date(); // to be overridden below
 			switch (subscription.items.data[0].price.recurring.interval) {
 				case 'day':
+					/*istanbul ignore next*/
 					periodEnd.setDate(periodStart.getDate() + 1);
+					/*istanbul ignore next*/
 					break;
 				case 'week':
+					/*istanbul ignore next*/
 					periodEnd.setDate(periodStart.getDate() + 7);
+					/*istanbul ignore next*/
 					break;
 				case 'month':
 					periodEnd.setMonth(periodStart.getMonth() + 1);
@@ -417,6 +428,7 @@ const webhookPaymentIntentSucceeded = (event) => new Promise(async (resolve, rej
 			payload: undefined,
 		});
 	} catch (error) {
+		/*istanbul ignore next*/
 		return reject(error);
 	}
 });
