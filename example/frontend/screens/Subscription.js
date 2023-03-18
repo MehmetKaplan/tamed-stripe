@@ -1,7 +1,7 @@
 
 import { useState, useEffect } from 'react';
 import { StyleSheet, Text, View, Button, TextInput, Alert, Linking } from 'react-native';
-import { StripeActionWebView } from '../functions.js';
+import { StripeActionWebView } from 'tamed-stripe-frontend';
 
 export default function Subscription(props) {
 	const [actionButtonClicked, setActionButtonClicked] = useState(false);

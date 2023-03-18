@@ -1,0 +1,23 @@
+{
+	"name": "tamed-stripe-frontend",
+	"version": "1.0.1",
+	"description": "The frontend library for the tamed-stripe",
+	"repository": "https://github.com/MehmetKaplan/tamed-stripe",
+	"main": "tamed-stripe-frontend.js",
+	"author": "Mehmet Kaplan",
+	"license": "MIT",
+	"private": false,
+	"scripts": {
+		"test": "jest --runInBand --coverage --no-cache --forceExit "
+	},
+	"devDependencies": {
+		"@babel/core": "^7.21.3",
+		"@babel/preset-env": "^7.20.2",
+		"babel-jest": "^29.5.0",
+		"jest": "^29.5.0"
+	},
+	"dependencies": {},
+	"peerDependencies": {
+		"react-native-webview": "*"
+	}
+}

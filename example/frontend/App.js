@@ -8,8 +8,10 @@ import Account from './screens/Account';
 import OneTimePayment from './screens/OneTimePayment';
 import EndApp from './screens/EndApp';
 
-const tsf = require('./functions.js');
+import tsf from 'tamed-stripe-frontend';
+
 const apiBackend = "https://development.eseme.one:61983";
+
 export default function App() {
 	const [activeScreen, setActiveScreen] = useState('Customer');
 	const [customerId, setCustomerId] = useState('');
