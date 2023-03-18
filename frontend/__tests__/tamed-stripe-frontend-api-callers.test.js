@@ -80,3 +80,27 @@ test('generateAccount', async () => {
 	expect(account.payload.id.length).toBeGreaterThan(10);
 	expect(account.payload.accountLinkURL.length).toBeGreaterThan(30);
 });
+
+test('oneTimePayment', async () => {
+	const payoutData = {
+		payoutAmount: "12345",
+		payoutAccountId: accountId_TR
+	}
+	const items = [
+		{ name: `Frontend Jest Test Item 1`, unitAmountDecimal: `11111111`, },
+		{ name: `Frontend Jest Test Item 2`, unitAmountDecimal: `22222222`, },
+	];
+	const body = {
+		applicationCustomerId: applicationCustomerId,
+		customerId: customerId,
+		currency: 'usd',
+		items: items,
+		payoutData: payoutData,
+		publicDomain: apiBackend,
+	};
+
+	const result = await tsf.oneTimePayment(body);
+	console.log(`One Time Payment Checkout : ${JSON.stringify(result.payload, null, 2)}`);
+	expect(result.payload.url.length).toBeGreaterThan(30);
+
+});

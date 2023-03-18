@@ -40,7 +40,6 @@ export default function OneTimePayment(props) {
 		await new Promise(resolve => setTimeout(resolve, 10000));
 
 		setOneTimePaymentUrl(result.payload.url);
-		// await Linking.openURL(payments.payload[0].hosted_invoice_url);
 		setCheckoutSessionId(result.payload.id);
 		setActionButtonClicked(true);
 	};
