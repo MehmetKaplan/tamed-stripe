@@ -103,4 +103,8 @@ test('oneTimePayment', async () => {
 	console.log(`One Time Payment Checkout : ${JSON.stringify(result.payload, null, 2)}`);
 	expect(result.payload.url.length).toBeGreaterThan(30);
 
+	const checkoutSessionId = result.payload.id;
+	const result2 = await tsf.getOneTimePaymentStatus({checkoutSessionId});
+	console.log(`One Time Payment Status : ${JSON.stringify(result2.payload.rows[0], null, 2)}`);
+	expect(result2.payload.rows[0].payout_amount).toBe(payoutData.payoutAmount);
 });
