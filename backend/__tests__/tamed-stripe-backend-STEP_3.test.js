@@ -10,7 +10,7 @@ const accountId_TR = "acct_1MmHL3Fw4152XXeh";
 const logMessages = [];
 
 let poolName;
-let debugMode = true; // true 
+let debugMode = false; // true 
 
 beforeAll(async () => {
 	await tsb.init({

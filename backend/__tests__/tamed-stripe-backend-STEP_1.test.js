@@ -4,7 +4,7 @@ const sqls = require("../sqls.js");
 const { runSQL, } = require('tamed-pg');
 
 let poolName;
-const debugMode = true; // true 
+const debugMode = false; // true 
 
 const logMessages = [];
 

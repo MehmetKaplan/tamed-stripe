@@ -11,7 +11,7 @@ const accountId_FR = "acct_1MmHL5C23xTzM4MY";
 const logMessages = [];
 
 let poolName;
-let debugMode = true; // true 
+let debugMode = false; // true 
 
 beforeAll(async () => {
 	await tsb.init({
@@ -35,19 +35,19 @@ beforeAll(async () => {
 });
 
 afterAll(async () => {
-	tickLog.info(`\x1b[1;33m***************************************************************\x1b[0m`,true);
-	tickLog.info(`\x1b[1;33m***************************************************************\x1b[0m`,true);
-	tickLog.info(`\x1b[1;33m****************____ _____ _____ ____    ____  ****************\x1b[0m`,true);
-	tickLog.info(`\x1b[1;33m****************/ ___|_   _| ____|  _ \  |___ \ |***************\x1b[0m`,true);
-	tickLog.info(`\x1b[1;33m****************\___ \ | | |  _| | |_) |   __) ||***************\x1b[0m`,true);
-	tickLog.info(`\x1b[1;33m**************** ___) || | | |___|  __/   / __/ |***************\x1b[0m`,true);
-	tickLog.info(`\x1b[1;33m****************|____/ |_| |_____|_|     |_____||***************\x1b[0m`,true);
-	tickLog.info(`\x1b[1;33m***************************************************************\x1b[0m`,true);
+	tickLog.info(`\x1b[1;33m***************************************************************\x1b[0m`, true);
+	tickLog.info(`\x1b[1;33m***************************************************************\x1b[0m`, true);
+	tickLog.info(`\x1b[1;33m****************____ _____ _____ ____    ____  ****************\x1b[0m`, true);
+	tickLog.info(`\x1b[1;33m****************/ ___|_   _| ____|  _ \  |___ \ |***************\x1b[0m`, true);
+	tickLog.info(`\x1b[1;33m****************\___ \ | | |  _| | |_) |   __) ||***************\x1b[0m`, true);
+	tickLog.info(`\x1b[1;33m**************** ___) || | | |___|  __/   / __/ |***************\x1b[0m`, true);
+	tickLog.info(`\x1b[1;33m****************|____/ |_| |_____|_|     |_____||***************\x1b[0m`, true);
+	tickLog.info(`\x1b[1;33m***************************************************************\x1b[0m`, true);
 	logMessages.forEach((message) => {
 		tickLog.info(message, true);
 	});
-	tickLog.info(`\x1b[1;33m***************************************************************\x1b[0m`,true);
-	tickLog.info(`\x1b[1;33m***************************************************************\x1b[0m`,true);
+	tickLog.info(`\x1b[1;33m***************************************************************\x1b[0m`, true);
+	tickLog.info(`\x1b[1;33m***************************************************************\x1b[0m`, true);
 });
 
 test('oneTimePayment without payOut', async () => {
@@ -62,6 +62,7 @@ test('oneTimePayment without payOut', async () => {
 	const payoutData = undefined;
 	const publicDomain = "https://development.eseme.one:61983";
 	const response4 = await tsb.oneTimePayment({ applicationCustomerId, customerId, currency, items, payoutData, publicDomain });
+	expect(response4.payload.url.length).toBeGreaterThan(0);
 });
 
 test('oneTimePayment with payOut to FR', async () => {
@@ -80,6 +81,7 @@ test('oneTimePayment with payOut to FR', async () => {
 	};
 	const publicDomain = "https://development.eseme.one:61983";
 	const response4 = await tsb.oneTimePayment({ applicationCustomerId, customerId, currency, items, payoutData, publicDomain, });
+	expect(response4.payload.url.length).toBeGreaterThan(0);
 	logMessages.push(`\x1b[1;33m Flush before this URL \x1b[0m`);
 	logMessages.push(`\t\t\t\x1b[0;31mcd ~/.pm2/logs\x1b[0m`);
 	logMessages.push(`\t\t\t\x1b[0;31mpm2 flush tamed-stripe-backend-example\x1b[0m`);
@@ -104,6 +106,7 @@ test('oneTimePayment with payOut to TR', async () => {
 	};
 	const publicDomain = "https://development.eseme.one:61983";
 	const response4 = await tsb.oneTimePayment({ applicationCustomerId, customerId, currency, items, payoutData, publicDomain, });
+	expect(response4.payload.url.length).toBeGreaterThan(0);
 });
 
 test('generateSubscription', async () => {
@@ -146,4 +149,5 @@ test('generateSubscription', async () => {
 		recurringPriceId: priceData.id,
 		description: description,
 	});
+	expect(response3.payload.latest_invoice.length).toBeGreaterThan(0);
 });

@@ -43,8 +43,8 @@ const generateCustomer = (body) => new Promise(async (resolve, reject) => {
 	try {
 		let { applicationCustomerId, description, email, metadata, name, phone, address, publicDomain, successRoute, cancelRoute } = body;
 		// {CHECKOUT_SESSION_ID} is to be used by Stripe, DON'T modify it!
-		let successUrl = `${publicDomain}${successRoute}?session_id={CHECKOUT_SESSION_ID}`;
-		let cancelUrl = `${publicDomain}${cancelRoute}?session_id={CHECKOUT_SESSION_ID}`;
+		let successUrl = `${publicDomain}${successRoute || "/generate-customer-success-route"}?session_id={CHECKOUT_SESSION_ID}`;
+		let cancelUrl = `${publicDomain}${cancelRoute || "/generate-customer-cancel-route"}?session_id={CHECKOUT_SESSION_ID}`;
 
 		let lowCaseEmail = email.toLowerCase().trim();
 		const customer = await stripe.customers.create({
@@ -124,6 +124,20 @@ const generateSubscription = (body) => new Promise(async (resolve, reject) => {
 		return resolve({
 			result: 'OK',
 			payload: subscription,
+		});
+	} catch (error) /* istanbul ignore next */ {
+		return reject(error);
+	}
+});
+
+/* istanbul ignore next */
+const getSubscriptionPaymentsByStripeCustomerId = (body) => new Promise(async (resolve, reject) => {
+	try {
+		const { customerId } = body;
+		const result = await runSQL(poolName, sqls.selectSubscriptionPaymentsByStripeCustomerId, [customerId], debugMode);
+		return resolve({
+			result: 'OK',
+			payload: result.rows,
 		});
 	} catch (error) /* istanbul ignore next */ {
 		return reject(error);
@@ -294,7 +308,7 @@ const oneTimePayment = (body) => new Promise(async (resolve, reject) => {
 		// items: [{name, unitAmountDecimal}]
 		const { applicationCustomerId, customerId, currency, items, payoutData, publicDomain, } = body;
 		const successRoute = body?.successRoute || '/one-time-payment-success-route';
-		const cancelRoute = body?.successRoute || '/one-time-payment-cancel-route';
+		const cancelRoute = body?.cancelRoute || '/one-time-payment-cancel-route';
 
 		// In case there is payout
 		// convert payoutData to payment intent structure
@@ -351,6 +365,21 @@ const oneTimePaymentCancelRoute = (body) => new Promise(async (resolve, reject) 
 	return resolve(closePage(`<h1>FAIL!</h1><p>Checkout failed, please try again later.</p><br>${debugMode ? JSON.stringify(body) : ''}`, 3000));
 });
 
+/* istanbul ignore next */
+const getOneTimePaymentStatus = (body) => new Promise(async (resolve, reject) => {
+	const { checkoutSessionId } = body;
+	try {
+		const oneTimePayment = await runSQL(poolName, sqls.selectOneTimePayment, [checkoutSessionId], debugMode);
+		/* istanbul ignore next */
+		if (debugMode) tickLog.success(`retrieved oneTimePayment: ${JSON.stringify(oneTimePayment)}`, true);
+		return resolve({
+			result: 'OK',
+			payload: oneTimePayment,
+		});
+	} catch (error) /* istanbul ignore next */ {
+
+	}
+});
 
 // Scenario 1: Customer registration & card payment method setup save (failed)
 const webhookCheckoutSessionFailedSetup = (props) => new Promise(async (resolve, reject) => {
@@ -545,9 +574,11 @@ module.exports = {
 	oneTimePayment,
 	oneTimePaymentSuccessRoute,
 	oneTimePaymentCancelRoute,
+	getOneTimePaymentStatus,
 	webhook,
 	exportedForTesting: {
 		poolInfoForTests: poolInfoForTests,
+		getSubscriptionPaymentsByStripeCustomerId,
 	}
 }
 

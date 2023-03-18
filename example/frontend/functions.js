@@ -6,7 +6,7 @@ let apiBackend, routes, debugMode;
 const init = async (props) => {
 	debugMode = props.debugMode;
 	if (debugMode) console.log(`\x1b[1;33m;API Backend: ${props.apiBackend}\x1b[0m`);
-	if (debugMode) console.log(`\x1b[1;33mTo be used routes: ${JSON.stringify(props.routes)}\x1b[0m`);
+	if (debugMode) console.log(`\x1b[1;33mTo be used routes: ${JSON.stringify(props.routes, null, 2)}\x1b[0m`);
 	apiBackend = props.apiBackend;
 	routes = props.routes;
 };
@@ -39,9 +39,10 @@ const generateCustomer = (props) => new Promise(async (resolve, reject) => {
 		body.phone = props.phone;
 		body.address = props.address;
 		body.publicDomain = props.publicDomain;
-		body.successRoute = props.successRoute;
-		body.cancelRoute = props.cancelRoute;
-		const response = backendCaller('POST', routes.generateCustomer, {}, body);
+		body.successRoute = props?.successRoute;
+		body.cancelRoute = props?.cancelRoute;
+
+		const response = await backendCaller('POST', routes.generateCustomer, {}, body);
 		return resolve(response);
 	} catch (error) {
 		if (debugMode) console.log(`\x1b[0;31mError: ${JSON.stringify(error)}\x1b[0m`);
@@ -58,7 +59,7 @@ const generateProduct = (props) => new Promise(async (resolve, reject) => {
 			unitAmountDecimal: props.unitAmountDecimal,
 			interval: props.interval,
 		};
-		const response = backendCaller('POST', routes.generateProduct, {}, body);
+		const response = await backendCaller('POST', routes.generateProduct, {}, body);
 		return resolve(response);
 	} catch (error) {
 		if (debugMode) console.log(`\x1b[0;31mError: ${JSON.stringify(error)}\x1b[0m`);
@@ -73,7 +74,7 @@ const generateSubscription = (props) => new Promise(async (resolve, reject) => {
 			recurringPriceId: props.recurringPriceId,
 			description: props.description,
 		};
-		const response = backendCaller('POST', routes.generateSubscription, {}, body);
+		const response = await backendCaller('POST', routes.generateSubscription, {}, body);
 		return resolve(response);
 	} catch (error) {
 		if (debugMode) console.log(`\x1b[0;31mError: ${JSON.stringify(error)}\x1b[0m`);
@@ -85,22 +86,15 @@ const generateSubscription = (props) => new Promise(async (resolve, reject) => {
 const generateAccount = (props) => new Promise(async (resolve, reject) => {
 	try {
 		let body = {};
+		body.applicationCustomerId = props.applicationCustomerId;
 		body.email = props.email;
 		body.publicDomain = props.publicDomain;
-		body.refreshUrlRoute = props.refreshUrlRoute;
-		body.returnUrlRoute = props.returnUrlRoute;
-		body.capabilities = props.capabilities;
 		body.country = props.country;
 
+		body.refreshUrlRoute = props?.refreshUrlRoute;
+		body.returnUrlRoute = props?.returnUrlRoute;
 
-		let uri = `${apiBackend}${routes.generateAccount}`;
-
-		if (debugMode) console.log(`\x1b[1;33m;Request: ${uri}\x1b[0m`);
-		if (debugMode) console.log(`\x1b[1;33m;Request: ${JSON.stringify(body)}\x1b[0m`);
-		const response = await fetchLean('POST', uri, {}, body);
-		if (debugMode) console.log(`\x1b[0;32mResponse: ${JSON.stringify(response)}\x1b[0m`);
-
-
+		const response = await backendCaller('POST', routes.generateAccount, {}, body);
 		return resolve(response);
 	} catch (error) {
 		if (debugMode) console.log(`\x1b[0;31mError: ${JSON.stringify(error)}\x1b[0m`);
@@ -112,25 +106,45 @@ const oneTimePayment = (props) => new Promise(async (resolve, reject) => {
 	try {
 		// payoutData: {payoutAmount, payoutAccountId}
 		// items: [{name, unitAmountDecimal}]
-		// customerId, currency, items, payoutData, publicDomain, successRoute, cancelRoute 
-
+		// applicationCustomerId, customerId, currency, items, payoutData, publicDomain,
 		let body = {};
-		body.customerId = props.customerId; 
-		body.currency = props.currency; 
-		body.items = props.items; 
-		body.payoutData = props.payoutData; 
-		body.publicDomain = props.publicDomain; 
-		body.successRoute = props.successRoute; 
-		body.cancelRoute = props.cancelRoute;
+		body.applicationCustomerId = props.applicationCustomerId;
+		body.customerId = props.customerId;
+		body.currency = props.currency;
+		body.items = props.items;
+		body.payoutData = props.payoutData;
+		body.publicDomain = props.publicDomain;
 
+		body.successRoute = props?.successRoute;
+		body.cancelRoute = props?.cancelRoute;
 
-		let uri = `${apiBackend}${routes.oneTimePayment}`;
+		const response = await backendCaller('POST', routes.oneTimePayment, {}, body);
+		return resolve(response);
+	} catch (error) {
+		if (debugMode) console.log(`\x1b[0;31mError: ${JSON.stringify(error)}\x1b[0m`);
+		return reject(error);
+	}
+});
 
-		if (debugMode) console.log(`\x1b[1;33m;Request: ${uri}\x1b[0m`);
-		if (debugMode) console.log(`\x1b[1;33m;Request: ${JSON.stringify(body)}\x1b[0m`);
-		const response = await fetchLean('POST', uri, {}, body);
-		if (debugMode) console.log(`\x1b[0;32mResponse: ${JSON.stringify(response)}\x1b[0m`);
+const getSubscriptionPaymentsByStripeCustomerId = (props) => new Promise(async (resolve, reject) => {
+	try {
+		const body = {
+			customerId: props.customerId,
+		};
+		const response = backendCaller('POST', routes.getSubscriptionPaymentsByStripeCustomerId, {}, body);
+		return resolve(response);
+	} catch (error) {
+		if (debugMode) console.log(`\x1b[0;31mError: ${JSON.stringify(error)}\x1b[0m`);
+		return reject(error);
+	}
+});
 
+const getOneTimePaymentStatus = (props) => new Promise(async (resolve, reject) => {
+	try {
+		const body = {
+			checkoutSessionId: props.checkoutSessionId,
+		};
+		const response = backendCaller('POST', routes.getOneTimePaymentStatus, {}, body);
 		return resolve(response);
 	} catch (error) {
 		if (debugMode) console.log(`\x1b[0;31mError: ${JSON.stringify(error)}\x1b[0m`);
@@ -160,5 +174,9 @@ module.exports = {
 	generateSubscription,
 	generateAccount,
 	oneTimePayment,
+	getOneTimePaymentStatus,
 	StripeActionWebView: StripeActionWebView,
+	exportedForTesting: {
+		getSubscriptionPaymentsByStripeCustomerId
+	}
 };
