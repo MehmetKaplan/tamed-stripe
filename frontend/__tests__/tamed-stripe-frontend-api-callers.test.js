@@ -12,8 +12,6 @@ const customerId = 'cus_NXM3AR5EfpIS7C';
 const accountId_TR = "acct_1MmHL3Fw4152XXeh";
 const accountId_FR = "acct_1MmHL5C23xTzM4MY";
 
-jest.setTimeout(10000);
-
 beforeAll(async () => {
 	tsf.init({
 		apiBackend: apiBackend,
@@ -69,4 +67,16 @@ test('generateSubscription', async () => {
 	});
 	tickLog.info(`Payments : ${JSON.stringify(payments.payload, null, 2)}`, true);
 	expect(payments.payload[0].hosted_invoice_url.length).toBeGreaterThan(30);
+}, 10000);
+
+test('generateAccount', async () => {
+	const now = new Date().getTime();
+	const account = await tsf.generateAccount({
+		applicationCustomerId: applicationCustomerId,
+		email: `Frontend-Jest-Tes-Account-${now}@yopmail.com`,
+		publicDomain:  apiBackend,
+		country: 'TR',
+	});
+	expect(account.payload.id.length).toBeGreaterThan(10);
+	expect(account.payload.accountLinkURL.length).toBeGreaterThan(30);
 });
