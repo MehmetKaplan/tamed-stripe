@@ -1,7 +1,5 @@
 ## Stripe registration
 
-### Stripe related actions
-
 1. Generate your account and get your publishable key and secret key from [here](https://dashboard.stripe.com/register).
 2. Make sure you have correct icon, logo, business name, etc from https://dashboard.stripe.com/settings/connect
 3. Configure your webhook events from following links
@@ -25,31 +23,15 @@
 			```
 			account.updated
 			```
-### Apple Pay
+4. Before production, you'll need your Stripe account to be approved. You can do this by following [this link](https://stripe.com/docs/connect/testing#testing-account-approval).
 
-Add `merchantIdentifier` to `app.json` file. You can find it in your Apple Developer account. 
 
-- For production, you should have an account in Apple's accepted banks listed [here](https://support.apple.com/en-us/HT204916).
-- For 
-  - Live, configure merchant from here: https://developer.apple.com/account/resources/identifiers/add/merchant 
-  - Testing, you can use `merchant.com.example` as a placeholder. (As stated [here](https://stripe.com/docs/apple-pay?platform=react-native#testing-apple-pay) stripe will accept any value for the merchant identifier when testing.)
+### Sub libraries
 
-```javascript
-{
-  "expo": {
-    ...
-    "plugins": [
-      [
-        "@stripe/stripe-react-native",
-        {
-          "merchantIdentifier": "merchant.com.example", // MODIFY THIS FOR PRODUCTION
-          "enableGooglePay": false // MODIFY THIS TO ENABLE GOOGLE PAY
-        }
-      ]
-    ],
-  }
-}
-```
+- [DB setup]([https://](https://github.com/MehmetKaplan/tamed-stripe/blob/master/database-setup/README.md))
+- [tamed-stripe-backend](https://github.com/MehmetKaplan/tamed-stripe/blob/master/tamed-stripe-backend/README.md)
+- [tamed-stripe-frontend](https://github.com/MehmetKaplan/tamed-stripe/blob/master/tamed-stripe-frontend/README.md)
+
 
 ### License
 
