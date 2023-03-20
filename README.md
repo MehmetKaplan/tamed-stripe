@@ -28,7 +28,7 @@
 
 ### Sub libraries
 
-- [DB setup]([https://](https://github.com/MehmetKaplan/tamed-stripe/blob/master/database-setup/README.md))
+- [DB setup](https://github.com/MehmetKaplan/tamed-stripe/blob/master/database-setup/README.md)
 - [tamed-stripe-backend](https://github.com/MehmetKaplan/tamed-stripe/blob/master/tamed-stripe-backend/README.md)
 - [tamed-stripe-frontend](https://github.com/MehmetKaplan/tamed-stripe/blob/master/tamed-stripe-frontend/README.md)
 
