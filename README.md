@@ -8,30 +8,23 @@
 	- Production: https://dashboard.stripe.com/webhooks
 	- Test: https://dashboard.stripe.com/test/webhooks
 	- Scope for both:
-		```
-		subscription_schedule.aborted
-		subscription_schedule.released
-		subscription_schedule.updated
-		customer.subscription.paused
-		subscription_schedule.created
-		person.deleted
-		person.updated
-		person.created
-		payout.paid
-		payout.failed
-		payout.created
-		payout.canceled
-		payment_intent.succeeded
-		payment_intent.payment_failed
-		payment_intent.canceled
-		account.updated // sent for all kinds of account updates
-		account.external_account.created // sent for bank account
-		customer.created
-		customer.deleted
-		customer.updated
-		customer.subscription.created
-		customer.subscription.deleted
-		```
+    	- Account webhook
+			```
+			subscription_schedule.updated
+			invoice.paid
+			payout.failed
+			payout.paid
+			checkout.session.async_payment_failed
+			checkout.session.async_payment_succeeded
+			checkout.session.completed
+			checkout.session.expired
+			payment_intent.succeeded
+			account.updated
+			```
+		- Connect webhook
+			```
+			account.updated
+			```
 ### Apple Pay
 
 Add `merchantIdentifier` to `app.json` file. You can find it in your Apple Developer account. 
