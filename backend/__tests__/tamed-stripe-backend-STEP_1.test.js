@@ -4,13 +4,14 @@ const sqls = require("../sqls.js");
 const { runSQL, } = require('tamed-pg');
 
 let poolName;
-const debugMode = false; // true 
+
+const debugMode = false;
 
 const logMessages = [];
 
 beforeAll(async () => {
 	await tsb.init({
-		debugMode: debugMode,
+		debugMode,
 		// coming from database-setup
 		pgKeys: {
 			user: 'tamedstripeapp',
@@ -93,7 +94,7 @@ test('generateAccount (connected account for payouts) in TR', async () => {
 	};
 	const response1 = await tsb.generateAccount(props);
 	const accountData = response1.payload;
-	tickLog.info(`Account generated with following significant information:\n   id:                  ${accountData.id}\n   type:                ${accountData.type}\n   capabilities:        ${JSON.stringify(accountData.capabilities)}\n   email:               ${accountData.email}\n   Payment Schedule:    ${JSON.stringify(accountData.settings.payouts.schedule)}\n   accountLinkURL:      ${accountData.accountLinkURL}`, true);
+	if (debugMode) tickLog.info(`Account generated with following significant information:\n   id:                  ${accountData.id}\n   type:                ${accountData.type}\n   capabilities:        ${JSON.stringify(accountData.capabilities)}\n   email:               ${accountData.email}\n   Payment Schedule:    ${JSON.stringify(accountData.settings.payouts.schedule)}\n   accountLinkURL:      ${accountData.accountLinkURL}`, true);
 	expect(accountData.id).not.toBeNull();
 	expect(accountData.type).toEqual('express');
 	// jest compare object
@@ -122,7 +123,7 @@ test('generateAccount (connected account for payouts) in FR', async () => {
 	};
 	const response1 = await tsb.generateAccount(props);
 	const accountData = response1.payload;
-	tickLog.info(`Account generated with following significant information:\n   id:                  ${accountData.id}\n   type:                ${accountData.type}\n   capabilities:        ${JSON.stringify(accountData.capabilities)}\n   email:               ${accountData.email}\n   Payment Schedule:    ${JSON.stringify(accountData.settings.payouts.schedule)}\n   accountLinkURL:      ${accountData.accountLinkURL}`, true);
+	if (debugMode) tickLog.info(`Account generated with following significant information:\n   id:                  ${accountData.id}\n   type:                ${accountData.type}\n   capabilities:        ${JSON.stringify(accountData.capabilities)}\n   email:               ${accountData.email}\n   Payment Schedule:    ${JSON.stringify(accountData.settings.payouts.schedule)}\n   accountLinkURL:      ${accountData.accountLinkURL}`, true);
 	expect(accountData.id).not.toBeNull();
 	expect(accountData.type).toEqual('express');
 	// jest compare object

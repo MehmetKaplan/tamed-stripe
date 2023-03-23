@@ -4,18 +4,21 @@ const sqls = require("../sqls.js");
 const { runSQL, } = require('tamed-pg');
 
 // The following items are coming from STEP 1
-const customerId = 'cus_NXM3AR5EfpIS7C';
-const accountId_TR = "acct_1MmHL3Fw4152XXeh";
-const accountId_FR = "acct_1MmHL5C23xTzM4MY";
+// REPLACE AREA
+const customerId = 'cus_NZz7DUmOV3mtaB';
+const accountId_TR = "acct_1Mop9ECDNsGA70wp";
+const accountId_FR = "acct_1Mop9GC49YYTVK6S";
+// END OF REPLACE AREA
 
 const logMessages = [];
 
 let poolName;
-let debugMode = false; // true 
+
+const debugMode = false;
 
 beforeAll(async () => {
 	await tsb.init({
-		debugMode: debugMode,
+		debugMode,
 		// coming from database-setup
 		pgKeys: {
 			user: 'tamedstripeapp',
@@ -28,7 +31,7 @@ beforeAll(async () => {
 	poolName = tsb.exportedForTesting.poolInfoForTests.poolName;
 
 	logMessages.push(`\n\n\n\x1b[1;33mFirst get generateSubscription log: \x1b[0;31m  \x1b[0m\n`);
-	logMessages.push(`\t\t\t\x1b[0;31mgrep -i "webhook received" tamed-stripe-backend-example*.log > generate-subscription-event.json\x1b[0m`);
+	logMessages.push(`\t\t\t\x1b[0;31mgrep -i "webhook received" tamed-stripe-backend-example*.log |grep invoice.paid > generate-subscription-event.json\x1b[0m`);
 	logMessages.push(`\t\t\t\t\x1b[0;31m(Modify this file for proper JSON format)\x1b[0m\n`);
 	logMessages.push(`\n\n\n\x1b[1;33mComplete following URL's and save the webhook requests to corresponding files:\x1b[0m\n`);
 
@@ -126,7 +129,7 @@ test('generateSubscription', async () => {
 	const response2 = await tsb.generateProduct(productProps);
 	const productData = response2.payload.product;
 	const priceData = response2.payload.price;
-	tickLog.info(`Product generated with following significant information:
+	if (debugMode) tickLog.info(`Product generated with following significant information:
 		id:                  ${productData.id}
 		name:                ${productData.name}
 		description:         ${productData.description}
@@ -134,7 +137,7 @@ test('generateSubscription', async () => {
 		default_price:       ${productData.default_price}
 		livemode:            ${productData.livemode}
 	`, true);
-	tickLog.info(`price generated with following significant information:
+	if (debugMode) tickLog.info(`price generated with following significant information:
 		id:                  ${priceData.id},
 		currency:            ${priceData.currency},
 		livemode:            ${priceData.livemode},

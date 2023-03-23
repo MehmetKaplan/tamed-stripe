@@ -1,16 +1,17 @@
 const tickLog = require("tick-log");
 const tsf = require("../tamed-stripe-frontend-api-callers.js");
 
-const debugMode = true; // true 
+const debugMode = false;
 
 const apiBackend = "https://development.eseme.one:61983";
 
 const applicationCustomerId = `Frontend Jest Test Customer-${(new Date()).getTime()}`;
 
 // The following items are coming from BACKEND TESTS STEP 1
-const customerId = 'cus_NXM3AR5EfpIS7C';
-const accountId_TR = "acct_1MmHL3Fw4152XXeh";
-const accountId_FR = "acct_1MmHL5C23xTzM4MY";
+// REPLACE AREA
+const customerId = 'cus_NZz7DUmOV3mtaB';
+const accountId_TR = "acct_1Mop9ECDNsGA70wp";
+// END OF REPLACE AREA
 
 beforeAll(async () => {
 	tsf.init({

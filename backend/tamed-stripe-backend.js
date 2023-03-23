@@ -9,7 +9,8 @@ const tickLog = require('tick-log');
 
 let poolName;
 const poolInfoForTests = {};
-let debugMode = true;
+
+let debugMode; // will be set in init()
 
 const closePage = (content, duration) => {
 	/* istanbul ignore next */
@@ -41,22 +42,32 @@ const init = (p_params) => new Promise(async (resolve, reject) => {
 
 const generateCustomer = (body) => new Promise(async (resolve, reject) => {
 	try {
-		let { applicationCustomerId, description, email, metadata, name, phone, address, publicDomain, successRoute, cancelRoute } = body;
+		let { applicationCustomerId, paymentMethodId, description, email, metadata, name, phone, address, publicDomain, successRoute, cancelRoute, testClockId } = body;
 		// {CHECKOUT_SESSION_ID} is to be used by Stripe, DON'T modify it!
+		/* istanbul ignore next */
 		let successUrl = `${publicDomain}${successRoute || "/generate-customer-success-route"}?session_id={CHECKOUT_SESSION_ID}`;
+		/* istanbul ignore next */
 		let cancelUrl = `${publicDomain}${cancelRoute || "/generate-customer-cancel-route"}?session_id={CHECKOUT_SESSION_ID}`;
 
 		let lowCaseEmail = email.toLowerCase().trim();
-		const customer = await stripe.customers.create({
+		const customerParameters = {
 			description,
 			email: lowCaseEmail,
 			metadata,
 			name,
 			phone,
 			address,
-		});
-		const checkoutSession = await stripe.checkout.sessions.create({
-			payment_method_types: ['card'], // MODIFYME try by removing this line
+		};
+		/* istanbul ignore else */
+		if (paymentMethodId) {
+			customerParameters.payment_method = paymentMethodId;
+			customerParameters.invoice_settings = { default_payment_method: paymentMethodId };
+		}
+		/* istanbul ignore else */
+		if (testClockId) customerParameters.test_clock = testClockId;
+		const customer = await stripe.customers.create(customerParameters);
+		const checkoutSession = paymentMethodId ? undefined : await stripe.checkout.sessions.create({
+			payment_method_types: ['card'],
 			mode: 'setup',
 			customer: customer.id,
 			success_url: successUrl,
@@ -67,7 +78,7 @@ const generateCustomer = (body) => new Promise(async (resolve, reject) => {
 			tickLog.success(`generated customer: ${JSON.stringify(customer)}`, true);
 			tickLog.success(`generated checkoutSession: ${JSON.stringify(checkoutSession)}`, true);
 		}
-		await runSQL(poolName, sqls.insertCustomer, [applicationCustomerId, customer.id, 'W', customer.email, customer.name, customer.phone, customer.address, JSON.stringify(customer.metadata), checkoutSession.id, '', JSON.stringify(customer)]);
+		await runSQL(poolName, sqls.insertCustomer, [applicationCustomerId, customer.id, 'W', customer.email, customer.name, customer.phone, customer.address, JSON.stringify(customer.metadata), checkoutSession?.id, '', JSON.stringify(customer)]);
 		return resolve({
 			result: 'OK',
 			payload: {
@@ -98,13 +109,46 @@ const generateCustomerCancelRoute = (body) => new Promise(async (resolve, reject
 	return resolve(closePage(`<h1>Cancelled!</h1><p>You can close this window now.</p><br>`, 3000));
 });
 
+const generateProduct = (body) => new Promise(async (resolve, reject) => {
+	try {
+		const { name, description, currency, unitAmountDecimal, interval } = body;
+		// interval can be one of day, week, month, or year
+		const product = await stripe.products.create({ name, description });
+		const priceData = {
+			product: product.id,
+			unit_amount_decimal: unitAmountDecimal,
+			currency: currency,
+		}
+		/* istanbul ignore else */
+		if (['day', 'week', 'month', 'year'].includes(interval)) priceData.recurring = { interval };
+		const price = await stripe.prices.create(priceData);
+		/* istanbul ignore next  */
+		if (debugMode) tickLog.success(`generated product: ${JSON.stringify(product)}`, true);
+		/* istanbul ignore next */
+		if (debugMode) tickLog.success(`generated price: ${JSON.stringify(price)}`, true);
+		const insertResult = await runSQL(poolName, sqls.insertProduct, [product.id, name, description, currency, unitAmountDecimal, /* istanbul ignore next */(interval ? interval : ''), JSON.stringify(product), JSON.stringify(price)]);
+		/* istanbul ignore next */
+		if (debugMode) tickLog.info(`Product insert result: ${JSON.stringify(insertResult)}`, true);
+		return resolve({
+			result: 'OK',
+			payload: {
+				product,
+				price
+			},
+		});
+	} catch (error) /* istanbul ignore next */ {
+		if (debugMode) tickLog.error(`tamed-stripe-backend related error. Failure while calling generateProduct(${JSON.stringify(body)}). Error: ${JSON.stringify(error)}`, true);
+		return reject(error);
+	}
+});
+
 // Scenario 2: subscription first and next recurring payments (success & failed)
 const generateSubscription = (body) => new Promise(async (resolve, reject) => {
 	try {
 		let { customerId, recurringPriceId, description } = body;
 		const subscription = await stripe.subscriptions.create({
 			customer: customerId,
-			items: [{ price: recurringPriceId }],
+			items: [{ price: recurringPriceId }], // for subscriptions, we assume there is only one item
 			description: description,
 		});
 		/* istanbul ignore next */
@@ -157,39 +201,6 @@ const cancelSubscription = (body) => new Promise(async (resolve, reject) => {
 			payload: subscription,
 		});
 	} catch (error) /* istanbul ignore next */ {
-		return reject(error);
-	}
-});
-
-const generateProduct = (body) => new Promise(async (resolve, reject) => {
-	try {
-		const { name, description, currency, unitAmountDecimal, interval } = body;
-		// interval can be one of day, week, month, or year
-		const product = await stripe.products.create({ name, description });
-		const priceData = {
-			product: product.id,
-			unit_amount_decimal: unitAmountDecimal,
-			currency: currency,
-		}
-		/* istanbul ignore else */
-		if (['day', 'week', 'month', 'year'].includes(interval)) priceData.recurring = { interval };
-		const price = await stripe.prices.create(priceData);
-		/* istanbul ignore next  */
-		if (debugMode) tickLog.success(`generated product: ${JSON.stringify(product)}`, true);
-		/* istanbul ignore next */
-		if (debugMode) tickLog.success(`generated price: ${JSON.stringify(price)}`, true);
-		const insertResult = await runSQL(poolName, sqls.insertProduct, [product.id, name, description, currency, unitAmountDecimal, /* istanbul ignore next */(interval ? interval : ''), JSON.stringify(product), JSON.stringify(price)]);
-		/* istanbul ignore next */
-		if (debugMode) tickLog.info(`Product insert result: ${JSON.stringify(insertResult)}`, true);
-		return resolve({
-			result: 'OK',
-			payload: {
-				product,
-				price
-			},
-		});
-	} catch (error) /* istanbul ignore next */ {
-		if (debugMode) tickLog.error(`tamed-stripe-backend related error. Failure while calling generateProduct(${JSON.stringify(body)}). Error: ${JSON.stringify(error)}`, true);
 		return reject(error);
 	}
 });
@@ -432,37 +443,12 @@ const webhookCheckoutSessionCompletedSetup = (props) => new Promise(async (resol
 });
 
 // Scenario 2: subscription first and next recurring payments (success & failed)
-const webhookPaymentIntentSucceeded = (event) => new Promise(async (resolve, reject) => {
+const webhookSubscriptionInvoicePaid = (event) => new Promise(async (resolve, reject) => {
 	try {
-		const invoice = await stripe.invoices.retrieve(event.data.object.invoice);
-		/* istanbul ignore next */
-		if (debugMode) tickLog.success(`invoice: ${JSON.stringify(invoice)}`, true);
-		const subscription = await stripe.subscriptions.retrieve(invoice.subscription);
-		/* istanbul ignore next */
-		if (debugMode) tickLog.success(`subscription: ${JSON.stringify(subscription)}`, true);
-		const subscriptionPayments = await runSQL(poolName, sqls.selectSubscriptionPaymentsByStripeCustomerId, [invoice.customer], debugMode);
-		/* istanbul ignore next */
-		if (debugMode) tickLog.success(`subscriptionPayments: ${JSON.stringify(subscriptionPayments)}`, true);
-		let periodStart, periodEnd;
-		/*istanbul ignore else */
-		if (invoice.status === 'paid') {
-			/* istanbul ignore next */
-			if (subscriptionPayments.rows.length > 0) periodStart = subscriptionPayments.rows[0].subscription_covered_to;
-			else periodStart = new Date();
-			periodEnd = new Date(); // to be overridden below
-			/*istanbul ignore next */
-			switch (subscription.items.data[0].price.recurring.interval) {
-				case 'day':
-					periodEnd.setDate(periodStart.getDate() + 1);
-					break;
-				case 'week':
-					periodEnd.setDate(periodStart.getDate() + 7);
-					break;
-				case 'month':
-					periodEnd.setMonth(periodStart.getMonth() + 1);
-					break;
-			}
-		}
+		const invoice = event.data.object;
+		// subscription invoice should have only 1 line
+		const periodStart = new Date (invoice.lines.data[0].period.start * 1000);
+		const periodEnd = new Date (invoice.lines.data[0].period.end * 1000);
 		// stripe_subscription_id, invoice_id, hosted_invoice_url, insert_time, unit_amount_decimal, currency, state, subscription_covered_from, subscription_covered_to, subscription_payment_object
 		await runSQL(poolName, sqls.insertSubscriptionPayment, [invoice.subscription, invoice.id, invoice.hosted_invoice_url, `${invoice.amount_paid}`, invoice.currency, /* istanbul ignore next */ (invoice.status === 'paid') ? 'P' : 'F', periodStart, periodEnd, event], debugMode);
 		return resolve({
@@ -537,9 +523,9 @@ const webhook = (body) => new Promise(async (resolve, reject) => {
 					await webhookCheckoutSessionFailedSetup({ checkoutSessionId: event.data.object.id });
 				}
 				break;
-			case 'payment_intent.succeeded':
-				if (event.data.object.description === "Subscription creation") {
-					await webhookPaymentIntentSucceeded(event); // Scenario 2: subscription first and next recurring payments (success & failed)
+			case 'invoice.paid':
+				if ((event.data.object.billing_reason.match(/subscription_/)) && (event.data.object.status === 'paid')) {
+					await webhookSubscriptionInvoicePaid(event); // Scenario 2: subscription first and next recurring payments (success & failed)
 				};
 				break;
 			case 'account.updated':
