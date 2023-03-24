@@ -394,6 +394,17 @@ Additionally, for successfully paid customers, if you need to show your customer
 | payoutAmount | string | Amount to be paid to the payee, in cents. |
 | payoutAccountId | string | Stripe account id of the payee. |
 
+#### Returns
+
+Returns the checkoutSession object created by Stripe. The `url` field of the returned payload can be used to redirect the end user to the Stripe's website to complete the payment process.
+
+```javascript
+{
+	result: 'OK',
+	payload: checkoutSession,
+}
+```
+
 ### oneTimePaymentSuccessRoute
 
 Provides the default route content for th `/one-time-payment-success-route` route. This route is used to handle the return URL of the checkout session. The default route content can be used as is, or you can use it as a template to create your own route content. We suggest to use this route because it helps to manage the frontend application web view state.
@@ -422,10 +433,20 @@ The `payload` holds the database state of the requested payment.
 ```javascript
 {
 	result: 'OK',
-	payload: oneTimePayment,
+	payload: rows,
 }
 ```
 
+The `payload.rows[0]` is a database row in the following form:
+
+```sql
+ id |              application_customer_id               | stripe_customer_id |                        checkout_session_id                         |        update_time         | total_amount_decimal | currency | state |         invoice_id          |                                                                      hosted_invoice_url                                                                       | payout_amount |   payout_account_id   | payout_state 
+----+----------------------------------------------------+--------------------+--------------------------------------------------------------------+----------------------------+----------------------+----------+-------+-----------------------------+---------------------------------------------------------------------------------------------------------------------------------------------------------------+---------------+-----------------------+--------------
+  2 | Application Customer-1679582193973                 | cus_... | cs_xxxx... | 2023-03-24 14:34:57.000013 |               450000 | eur      | P     | in_... | https://invoice.stripe.com/i/acct_.../test_...?s=ap |        225000 | acct_... | W
+
+```
+Here the `state = 'P'` means the payment is completed. And you can ues the url in the `hosted_invoice_url` field to show the invoice to the customer.
+ 
 ### webhook
 
 This is a webhook endpoint that can be used to handle the Stripe events. The events are directed to different functions.
