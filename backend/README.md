@@ -49,6 +49,8 @@ The `init` function initializes the database connection pool. Additionally it pr
 
 **Example:**
 ```javascript
+const tsb = require("../tamed-stripe-backend.js");
+...
 await tsb.init({
 	debugMode: debugMode,
 	// coming from database-setup
