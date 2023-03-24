@@ -30,7 +30,7 @@ export TAMED_STRIPE_SECRET_KEY="YOUR_STRIPE_SECRET_KEY" # starts with sk_
 
 ## API
 
-### `init`
+### init
 
 The `init` function initializes the database connection pool. Additionally it provides a method to increase the log level.
 
@@ -38,14 +38,14 @@ The `init` function initializes the database connection pool. Additionally it pr
 | --- | --- | --- |
 | p_params | Object | Parameters for the backend server. |
 
-#### `p_params`
+#### p_params
 
 | Key | Type | Value |
 | --- | --- | --- |
 | pgKeys | Object | PostgreSQL connection parameters. |
 | debugMode | Boolean | If `true`, the library will log debug messages. |
 
-**Returns:** If successful, resolves to `true`. Otherwise, rejects with an error message.
+#### Returns: If successful, resolves to `true`. Otherwise, rejects with an error message.
 
 **Example:**
 ```javascript
@@ -76,7 +76,7 @@ Once a customer is generated, you can reach the customer within your database fr
 | --- | --- | --- |
 | body | Object | Parameters for the generating a payer customer at Stripe |
 
-#### `body`
+#### body
 
 | Key | Type | Value |
 | --- | --- | --- |
@@ -93,7 +93,7 @@ Once a customer is generated, you can reach the customer within your database fr
 | cancelRoute | string | Route to redirect to on cancelled checkout. Defaults to `/generate-customer-cancel-route` which is handled by the library function `generateCustomerCancelRoute`. We suggest you to keep this as undefined and use the default value because the default value signals frontend a method to close WebViews. |
 | testClockId<br>(optional) | string | This is an optional clock id that is a method that Stripe provides for future dated tests. For an example usage, you can refer to [subscriptionPayment - next 2 months](./__tests__/tamed-stripe-backend-STEP_4.test.js) tests. |
 
-###### `address`
+###### address
 
 | Key | Type | Value |
 | --- | --- | --- |
@@ -104,7 +104,7 @@ Once a customer is generated, you can reach the customer within your database fr
 | postal_code | string | Postal code of the customer. |
 | state | string | State of the customer. |
 
-**Returns:** If successful, resolves to below JSON object. The checkoutSession object is optional and it holds the checkout session information which can be used to collect the default payment method information from users. Otherwise, rejects with an error message.
+#### Returns: If successful, resolves to below JSON object. The checkoutSession object is optional and it holds the checkout session information which can be used to collect the default payment method information from users. Otherwise, rejects with an error message.
 ```js
 {
 	result: 'OK',
@@ -138,7 +138,7 @@ Generates a product that can be used in checkout sessions that is to be a basis 
 | --- | --- | --- |
 | body | Object | Parameters for the generating a payer customer at Stripe |
 
-#### `body`
+#### body
 
 | Key | Type | Value |
 | --- | --- | --- |
@@ -149,7 +149,7 @@ Generates a product that can be used in checkout sessions that is to be a basis 
 | interval | string | Interval of the product. This can be one of following values; `'day'`, `'week'`, `'month'`, `'year'`. |
 
 
-**Returns:** If successful, resolves to below JSON object. Otherwise, rejects with an error message.
+#### Returns: If successful, resolves to below JSON object. Otherwise, rejects with an error message.
 ```js
 {
 	result: 'OK',
@@ -192,7 +192,7 @@ For example below row from the `tamedstripe.subscription_payments` table indicat
 | --- | --- | --- |
 | body | Object | Parameters for the generating a subscription at Stripe |
 
-#### `body`
+#### body
 
 | Key | Type | Value |
 | --- | --- | --- |
@@ -200,7 +200,7 @@ For example below row from the `tamedstripe.subscription_payments` table indicat
 | recurringPriceId | string | Stripe price id of the recurring price, which should be previously generated using `generateProduct` function. |
 | description | string | Description of the subscription. |
 
-**Returns:** If successful, resolves to below JSON object. Otherwise, rejects with an error message.
+#### Returns: If successful, resolves to below JSON object. Otherwise, rejects with an error message.
 ```javascript
 {
 	result: 'OK',
@@ -236,13 +236,13 @@ Cancels a subscription.
 | --- | --- | --- |
 | body | Object | Parameters for the generating a payer customer at Stripe |
 
-#### `body`
+#### body
 
 | Key | Type | Value |
 | --- | --- | --- |
 | subscriptionId | string | Id of the subscription to be cancelled. |
 
-**Returns:** If successful, resolves to below JSON object where `subscription` object is coming from Stripe. Otherwise, rejects with an error message.
+#### Returns: If successful, resolves to below JSON object where `subscription` object is coming from Stripe. Otherwise, rejects with an error message.
 ```js
 {
 	result: 'OK',
@@ -272,7 +272,7 @@ The connected account information for a customer is kept in the `tamedstripe.con
 | --- | --- | --- |
 | body | Object | Parameters for the generating a payee account at Stripe |
 
-#### `body`
+#### body
 
 | Key | Type | Value |
 | --- | --- | --- |
@@ -284,7 +284,7 @@ The connected account information for a customer is kept in the `tamedstripe.con
 | country | String | Country of the account. Defaults to `US`. |
 | capabilities | JSON | Defaults to `{transfers: { requested: true }}` |
 
-**Returns:** 
+#### Returns: 
 You should expect 3 different responses from this function.
 
 - If there is a successfully generated account for the given `applicationCustomerId`, then the response will be as below, and the  `payload.id` can be used as Stripe side payee (`connected_account`) `id`.
@@ -352,7 +352,7 @@ Additionally, for successfully paid customers, if you need to show your customer
 | --- | --- | --- |
 | body | Object | Parameters for the generating a one time payment checkout session at Stripe |
 
-#### `body`
+#### body
 
 | Key | Type | Value |
 | --- | --- | --- |
@@ -394,13 +394,13 @@ Returns the status of a one time payment.
 | --- | --- | --- |
 | body | Object | Parameters for the generating a one time payment checkout session at Stripe |
 
-#### `body`
+#### body
 
 | Key | Type | Value |
 | --- | --- | --- |
 | checkoutSessionId | string | Id of the checkout session. |
 
-**Returns:**
+#### Returns:
 The `payload` holds the database state of the requested payment.
 ```javascript
 {
