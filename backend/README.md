@@ -45,9 +45,12 @@ The `init` function initializes the database connection pool. Additionally it pr
 | pgKeys | Object | PostgreSQL connection parameters. |
 | debugMode | Boolean | If `true`, the library will log debug messages. |
 
-#### Returns: If successful, resolves to `true`. Otherwise, rejects with an error message.
+#### Returns
 
-**Example:**
+If successful, resolves to `true`. Otherwise, rejects with an error message.
+
+#### Example
+
 ```javascript
 const tsb = require("../tamed-stripe-backend.js");
 ...
@@ -104,7 +107,9 @@ Once a customer is generated, you can reach the customer within your database fr
 | postal_code | string | Postal code of the customer. |
 | state | string | State of the customer. |
 
-#### Returns: If successful, resolves to below JSON object. The checkoutSession object is optional and it holds the checkout session information which can be used to collect the default payment method information from users. Otherwise, rejects with an error message.
+#### Returns
+
+If successful, resolves to below JSON object. The checkoutSession object is optional and it holds the checkout session information which can be used to collect the default payment method information from users. Otherwise, rejects with an error message.
 ```js
 {
 	result: 'OK',
@@ -115,7 +120,8 @@ Once a customer is generated, you can reach the customer within your database fr
 }
 ```
 
-**Example:**
+#### Example
+
 ```javascript
    ...
 	const body = { applicationCustomerId, description, email, metadata, name, phone, address, publicDomain };
@@ -149,7 +155,9 @@ Generates a product that can be used in checkout sessions that is to be a basis 
 | interval | string | Interval of the product. This can be one of following values; `'day'`, `'week'`, `'month'`, `'year'`. |
 
 
-#### Returns: If successful, resolves to below JSON object. Otherwise, rejects with an error message.
+#### Returns
+
+If successful, resolves to below JSON object. Otherwise, rejects with an error message.
 ```js
 {
 	result: 'OK',
@@ -160,7 +168,8 @@ Generates a product that can be used in checkout sessions that is to be a basis 
 }
 ```
 
-**Example:**
+#### Example
+
 ```javascript
 	const body = {
 		name: 'Test Product',
@@ -200,7 +209,9 @@ For example below row from the `tamedstripe.subscription_payments` table indicat
 | recurringPriceId | string | Stripe price id of the recurring price, which should be previously generated using `generateProduct` function. |
 | description | string | Description of the subscription. |
 
-#### Returns: If successful, resolves to below JSON object. Otherwise, rejects with an error message.
+#### Returns
+
+If successful, resolves to below JSON object. Otherwise, rejects with an error message.
 ```javascript
 {
 	result: 'OK',
@@ -242,7 +253,9 @@ Cancels a subscription.
 | --- | --- | --- |
 | subscriptionId | string | Id of the subscription to be cancelled. |
 
-#### Returns: If successful, resolves to below JSON object where `subscription` object is coming from Stripe. Otherwise, rejects with an error message.
+#### Returns
+
+If successful, resolves to below JSON object where `subscription` object is coming from Stripe. Otherwise, rejects with an error message.
 ```js
 {
 	result: 'OK',
@@ -250,7 +263,8 @@ Cancels a subscription.
 }
 ```
 
-**Example:**
+#### Example
+
 ```javascript
 	const body = {
 		subscriptionId: 'sub_1234567890',
@@ -284,7 +298,8 @@ The connected account information for a customer is kept in the `tamedstripe.con
 | country | String | Country of the account. Defaults to `US`. |
 | capabilities | JSON | Defaults to `{transfers: { requested: true }}` |
 
-#### Returns: 
+#### Returns
+
 You should expect 3 different responses from this function.
 
 - If there is a successfully generated account for the given `applicationCustomerId`, then the response will be as below, and the  `payload.id` can be used as Stripe side payee (`connected_account`) `id`.
@@ -319,7 +334,8 @@ You should expect 3 different responses from this function.
 }
 ```
 
-**Example:**
+#### Example
+
 ```javascript
 const props = {
 	applicationCustomerId,
@@ -400,7 +416,8 @@ Returns the status of a one time payment.
 | --- | --- | --- |
 | checkoutSessionId | string | Id of the checkout session. |
 
-#### Returns:
+#### Returns
+
 The `payload` holds the database state of the requested payment.
 ```javascript
 {
