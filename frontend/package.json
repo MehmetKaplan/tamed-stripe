@@ -1,6 +1,6 @@
 {
 	"name": "tamed-stripe-frontend",
-	"version": "1.0.67",
+	"version": "1.0.70",
 	"description": "The frontend library for the tamed-stripe",
 	"repository": "https://github.com/MehmetKaplan/tamed-stripe",
 	"main": "tamed-stripe-frontend.js",
