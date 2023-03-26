@@ -91,6 +91,11 @@ If as a result you see the below output, it means everything OK up to now.
 
 Else there may be a problem in the steps and we suggest you go back to the start of this file and follow the steps once more. And if there is still problems persisting, you may need a PostgreSQL expert to check your installation.
 
+## ERD
+
+Once the DB is ready, the ERD of the DB is as follows:
+
+![ERD](erd.png)
 #### Next
 
 Once you finish above items, please go back to [tamed-stripe](https://github.com/MehmetKaplan/tamed-stripe) and continue with the next steps.

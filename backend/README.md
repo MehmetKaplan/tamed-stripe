@@ -459,6 +459,14 @@ This library handles following events
 | `invoice.paid` | `webhookSubscriptionInvoicePaid` | We use this event to detect subscription payments. For this purpose we check if the `event.data.object.billing_reason` field is subscription related or not. (If it is not subscription related, it is ignored.) |
 | `account.updated` | `webhookAccountUpdated` | We use this event to detect connected account updates. And we check the `event.data.object.charges_enabled` and the `event.data.object.payouts_enabled` parameters to decide if the connected account is successfully generated or not. |
 
+## Using the data in the DB
+
+The tamed-stripe libraries provide the fundamental functionalities connecting to the Stripe. However, if there is no change at Stripe, the data in the database can be used to get latest state of the customers, connected accounts, subscriptions and payments without calling Stripe.
+
+For these purposes we suggest to familiarize yourself with the database structure. The ERD of the database can be found below.
+
+![ERD](../database-setup/erd.png)
+
 ## More Examples
 
 The example application can be found [here](https://github.com/MehmetKaplan/tamed-stripe/blob/master/example/backend).
