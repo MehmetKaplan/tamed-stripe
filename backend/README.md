@@ -465,7 +465,8 @@ The tamed-stripe libraries provide the fundamental functionalities connecting to
 
 For these purposes we suggest to familiarize yourself with the database structure. The ERD of the database can be found below.
 
-![ERD](../database-setup/erd.png)
+![ERD](https://raw.githubusercontent.com/MehmetKaplan/tamed-stripe/master/database-setup/ERD.png)
+
 
 ## More Examples
 

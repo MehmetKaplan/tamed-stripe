@@ -95,7 +95,7 @@ Else there may be a problem in the steps and we suggest you go back to the start
 
 Once the DB is ready, the ERD of the DB is as follows:
 
-![ERD](erd.png)
+![ERD](https://raw.githubusercontent.com/MehmetKaplan/tamed-stripe/master/database-setup/ERD.png)
 #### Next
 
 Once you finish above items, please go back to [tamed-stripe](https://github.com/MehmetKaplan/tamed-stripe) and continue with the next steps.
