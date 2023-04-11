@@ -154,3 +154,28 @@ test('generateSubscription', async () => {
 	});
 	expect(response3.payload.latest_invoice.length).toBeGreaterThan(0);
 });
+
+test('getAccount', async () => {
+	const country = "TR";
+	const now = Date.now();
+	const applicationCustomerId = `Application Customer-${now}`;
+	const email = `${now}@yopmail.com`;
+	const publicDomain = "https://development.eseme.one:61983";
+	const props = {
+		applicationCustomerId: applicationCustomerId,
+		email: email,
+		publicDomain: publicDomain,
+		country: country,
+	};
+	const response1 = await tsb.generateAccount(props);
+	const accountData = response1.payload;
+	const response2 = await tsb.getAccount({applicationCustomerId});
+	expect(response2.payload.stripe_account_id).toBe(accountData.id);
+});
+
+test ('getCustomer', async () => {
+	// find previously generated customer
+	const customerAtDB = await runSQL(poolName, sqls.selectCustomer, [customerId], debugMode);
+	const response1 = await tsb.getCustomer({applicationCustomerId: customerAtDB.rows[0].application_customer_id});
+	expect(response1.payload.stripe_customer_id).toBe(customerId);
+});

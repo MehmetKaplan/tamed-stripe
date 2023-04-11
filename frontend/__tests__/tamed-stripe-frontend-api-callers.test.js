@@ -18,9 +18,11 @@ beforeAll(async () => {
 		apiBackend: apiBackend,
 		routes: {
 			"generateCustomer": "/generate-customer",
+			"getCustomer": "/get-customer",
 			"generateSubscription": "/generate-subscription",
 			"generateProduct": "/generate-product",
 			"generateAccount": "/generate-account",
+			"getAccount": "/get-account",
 			"oneTimePayment": "/one-time-payment",
 			"getOneTimePaymentStatus": "/get-one-time-payment-status",
 			"getSubscriptionPaymentsByStripeCustomerId": "/test/get-subscription-payments-by-stripe-customer-id",
@@ -45,6 +47,10 @@ test('generateCustomer', async () => {
 	expect(result.payload.customer.id.length).toBeGreaterThan(0);
 	expect(result.payload.checkoutSession.url.length).toBeGreaterThan(30);
 });
+
+test('getCustomer should rely on backend tests because it requires (A) Active customer', async () => {
+});
+
 
 test('generateSubscription', async () => {
 	const now = new Date().getTime();
@@ -80,6 +86,20 @@ test('generateAccount', async () => {
 	});
 	expect(account.payload.id.length).toBeGreaterThan(10);
 	expect(account.payload.accountLinkURL.length).toBeGreaterThan(30);
+});
+
+test('getAccount', async () => {
+	const now = new Date().getTime();
+	const account = await tsf.generateAccount({
+		applicationCustomerId: applicationCustomerId,
+		email: `Frontend-Jest-Tes-Account-${now}@yopmail.com`,
+		publicDomain:  apiBackend,
+		country: 'TR',
+	});
+	const result = await tsf.getAccount({
+		applicationCustomerId
+	});
+	expect(result.payload.stripe_account_id).toBe(account.payload.id);
 });
 
 test('oneTimePayment', async () => {

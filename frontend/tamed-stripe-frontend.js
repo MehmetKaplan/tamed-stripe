@@ -3,9 +3,11 @@ import WebView from 'react-native-webview';
 const { 
 	init,
 	generateCustomer,
+	getCustomer,
 	generateProduct,
 	generateSubscription,
 	generateAccount,
+	getAccount,
 	oneTimePayment,
 	getOneTimePaymentStatus,
 	exportedForTesting
@@ -29,9 +31,11 @@ const StripeActionWebView = (props) => {
 module.exports = {
 	init,
 	generateCustomer,
+	getCustomer,
 	generateProduct,
 	generateSubscription,
 	generateAccount,
+	getAccount,
 	oneTimePayment,
 	getOneTimePaymentStatus,
 	StripeActionWebView: StripeActionWebView,

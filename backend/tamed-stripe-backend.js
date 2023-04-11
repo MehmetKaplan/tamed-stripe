@@ -109,6 +109,26 @@ const generateCustomerCancelRoute = (body) => new Promise(async (resolve, reject
 	return resolve(closePage(`<h1>Cancelled!</h1><p>You can close this window now.</p><br>`, 3000));
 });
 
+const getCustomer = (body) => new Promise(async (resolve, reject) => {
+	try {
+		const { applicationCustomerId } = body;
+		const customer = await runSQL(poolName, sqls.getCustomer, [applicationCustomerId], debugMode);
+		if (customer.rows.length > 0) {
+			return resolve({
+				result: 'OK',
+				payload: customer.rows[0]
+			});
+		}
+		/* istanbul ignore next */ 
+		return resolve({
+			result: 'NOK',
+		});
+	} catch (error) /* istanbul ignore next */ {
+		if (debugMode) tickLog.error(`tamed-stripe-backend related error. Failure while calling getCustomer(${JSON.stringify(body)}). Error: ${JSON.stringify(error)}`, true);
+		return reject(error);
+	}
+});
+
 const generateProduct = (body) => new Promise(async (resolve, reject) => {
 	try {
 		const { name, description, currency, unitAmountDecimal, interval } = body;
@@ -303,6 +323,26 @@ const generateAccountSuccessRoute = (body) => new Promise(async (resolve, reject
 const generateAccountCancelRoute = (body) => new Promise(async (resolve, reject) => {
 	/* istanbul ignore next */
 	return resolve(closePage(`<h1>FAIL!</h1><p>Account generation failed, please try again later.</p><br>${debugMode ? JSON.stringify(body) : ''}`, 3000));
+});
+
+const getAccount = (body) => new Promise(async (resolve, reject) => {
+	try {
+		const { applicationCustomerId } = body;
+		const result = await runSQL(poolName, sqls.getAccount, [applicationCustomerId], debugMode);
+		if (result.rows.length > 0) {
+			return resolve({
+				result: 'OK',
+				payload: result.rows[0]
+			});
+		}
+		/* istanbul ignore next */ 
+		return resolve({
+			result: 'NOK',
+		});
+	} catch (error) /* istanbul ignore next */ {
+		if (debugMode) tickLog.error(`tamed-stripe-backend related error. Failure while calling getAccount(${JSON.stringify(body)}). Error: ${JSON.stringify(error)}`, true);
+		return reject(error);
+	}
 });
 
 const getItemsTotalPrice = (items) => {
@@ -551,12 +591,14 @@ module.exports = {
 	generateCustomer,
 	generateCustomerSuccessRoute,
 	generateCustomerCancelRoute,
+	getCustomer,
 	generateSubscription,
 	cancelSubscription,
 	generateProduct,
 	generateAccount,
 	generateAccountSuccessRoute,
 	generateAccountCancelRoute,
+	getAccount,
 	oneTimePayment,
 	oneTimePaymentSuccessRoute,
 	oneTimePaymentCancelRoute,

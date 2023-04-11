@@ -55,6 +55,18 @@ const generateCustomer = (props) => new Promise(async (resolve, reject) => {
 	}
 });
 
+const getCustomer = (props) => new Promise(async (resolve, reject) => {
+	try {
+		let body = {};
+		body.applicationCustomerId = props.applicationCustomerId;
+		const response = await backendCaller('POST', routes.getCustomer, {}, body);
+		return resolve(response);
+	} catch (error) /* istanbul ignore next */ {
+		if (debugMode) console.log(`\x1b[0;31mError: ${JSON.stringify(error)}\x1b[0m`);
+		return reject(error);
+	}
+});
+
 const generateProduct = (props) => new Promise(async (resolve, reject) => {
 	try {
 		const body = {
@@ -106,6 +118,19 @@ const generateAccount = (props) => new Promise(async (resolve, reject) => {
 		return reject(error);
 	}
 });
+
+const getAccount = (props) => new Promise(async (resolve, reject) => {
+	try {
+		let body = {};
+		body.applicationCustomerId = props.applicationCustomerId;
+		const response = await backendCaller('POST', routes.getAccount, {}, body);
+		return resolve(response);
+	} catch (error) /* istanbul ignore next */ {
+		if (debugMode) console.log(`\x1b[0;31mError: ${JSON.stringify(error)}\x1b[0m`);
+		return reject(error);
+	}
+});
+
 
 const oneTimePayment = (props) => new Promise(async (resolve, reject) => {
 	try {
@@ -161,9 +186,11 @@ const getOneTimePaymentStatus = (props) => new Promise(async (resolve, reject) =
 module.exports = {
 	init,
 	generateCustomer,
+	getCustomer,
 	generateProduct,
 	generateSubscription,
 	generateAccount,
+	getAccount,
 	oneTimePayment,
 	getOneTimePaymentStatus,
 	exportedForTesting: {

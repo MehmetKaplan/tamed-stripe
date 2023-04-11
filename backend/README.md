@@ -136,6 +136,40 @@ This is the default route handler for the `generateCustomer` handler. This is us
 
 This is the default route handler for the `generateCustomer` handler. This is used if the `cancelRoute` parameter of the `generateCustomer` handler is a falsy value. We suggest you to use this handler because the redirect signals frontend a method to close WebViews, and it also unlinks a customer so that it can not provide hurdles for future operations.
 
+### getCustomer
+
+Gets stripe customer information from the database, using the `applicationCustomerId` parameter.
+
+| Parameter | Type | Description |
+| --- | --- | --- |
+| body | Object | Parameters for the generating a payer customer at Stripe |
+
+#### body
+
+| Key | Type | Value |
+| --- | --- | --- |
+| applicationCustomerId | string | This is your application's customer id that you can use to link your application customer structure with stripe side customer id. |
+
+#### Returns
+
+If successful, resolves to below JSON object. Otherwise, rejects with an error message.
+```js
+{
+	result: 'OK',
+	payload: {
+		customer // customer.rows[0] from DB with selected columns
+	},
+}
+```
+
+#### Example
+
+```javascript
+   ...
+	const body = { applicationCustomerId };
+	let response = await tsb.getCustomer(body);
+```
+
 ### generateProduct
 
 Generates a product that can be used in checkout sessions that is to be a basis for subscriptions. Once a product is generated, you can reach the product within your database from the `tamedstripe.products` table. The `stripe_product_id` field of the `tamedstripe.products` table is the Stripe's product id.
@@ -353,6 +387,38 @@ Provides the default route content for th `/generate-account-success-route` rout
 ### generateAccountCancelRoute
 
 Provides the default route content for th `/generate-account-cancel-route` route. This route is used to handle the refresh URL of the account link. The default route content can be used as is, or you can use it as a template to create your own route content.
+
+### getAccount
+
+Gets the account information for the given `applicationCustomerId`.
+
+| Parameter | Type | Description |
+| --- | --- | --- |
+| body | Object | Parameters for the generating a payee account at Stripe |
+
+#### body
+
+| Key | Type | Value |
+| --- | --- | --- |
+| applicationCustomerId | string | Id of the application customer that the account will be generated for. |
+
+#### Returns
+
+If successful, resolves to below JSON object. Otherwise, rejects with an error message.
+
+```js
+{
+	result: 'OK',
+	payload: account, // account.rows[0] from DB with selected columns
+}
+```
+
+#### Example
+
+```javascript
+	const response2 = await tsb.getAccount({applicationCustomerId});
+```
+
 
 ### oneTimePayment
 

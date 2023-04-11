@@ -149,6 +149,41 @@ const screen = (customerCheckoutSessionUrl.length > 0)
 ...
 ```
 
+### getCustomer
+
+Gets a stripe customer using the backend [getCustomer](https://github.com/MehmetKaplan/tamed-stripe/tree/master/backend#getcustomer)
+
+| Name | Type | Description |
+| --- | --- | --- |
+| props | object | The props object. |
+
+#### props
+
+| Name | Type | Description |
+| --- | --- | --- |
+| applicationCustomerId | string | The application customer id. |
+
+#### Returns
+
+Returns a customer object.
+
+```javascript
+{
+	result: 'OK',
+	payload: {
+		customer
+	},
+}
+```
+
+#### Example
+
+```javascript
+const result = await tsf.getCustomer({
+	applicationCustomerId: applicationCustomerId,
+});
+```
+
 ### generateProduct
 
 Generates a product to be used for subscription generation using the backend [generateProduct](https://github.com/MehmetKaplan/tamed-stripe/tree/master/backend#generateproduct)
@@ -356,6 +391,39 @@ const screen = (accountLinkUrl.length > 0)
 	</View>
 	: <> </>
 ...
+```
+
+### getAccount
+
+Gets the connected account that is to be used as a **payee**, using the backend [getAccount](https://github.com/MehmetKaplan/tamed-stripe/tree/master/backend#getaccount).
+
+| Name | Type | Description |
+| --- | --- | --- |
+| props | object | The props object. |
+
+#### props
+
+| Name | Type | Description |
+| --- | --- | --- |
+| applicationCustomerId | string | The application customer id, used to link the application customer to the Stripe connected account. |
+
+#### Returns
+
+Returns the connected account that is to be used as a **payee**.
+
+```javascript
+{
+	result: 'OK',
+	payload: account,
+}
+```
+
+#### Example
+
+```javascript
+const account = await tsf.getAccount({
+	applicationCustomerId: applicationCustomerId,
+});
 ```
 
 ### oneTimePayment
