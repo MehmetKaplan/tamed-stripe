@@ -6,13 +6,15 @@ This is the frontend library for the Tamed Stripe architecture. This library aim
 
 0. Assure the database and backend applications are up and running.
 
-1. Install the library 
+1. Install the library with peer dependencies
+
 
 ```
-yarn add tamed-stripe-frontend 
+yarn add tamed-stripe-frontend react-native-webview@11.26.0
 ```
 
 2. import the library
+
 
 ```
 import tsf from 'tamed-stripe-frontend';

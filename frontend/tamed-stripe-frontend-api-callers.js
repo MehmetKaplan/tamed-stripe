@@ -35,7 +35,8 @@ const backendCaller = (method, route, headers, props, successCallback, failCallb
 
 const generateCustomer = (props) => new Promise(async (resolve, reject) => {
 	try {
-		let body = {};
+		const header = props?.header ? props.header : {};
+		const body = {};
 		body.applicationCustomerId = props.applicationCustomerId;
 		body.description = props.description;
 		body.email = props.email;
@@ -47,7 +48,7 @@ const generateCustomer = (props) => new Promise(async (resolve, reject) => {
 		body.successRoute = props?.successRoute;
 		body.cancelRoute = props?.cancelRoute;
 
-		const response = await backendCaller('POST', routes.generateCustomer, {}, body);
+		const response = await backendCaller('POST', routes.generateCustomer, header, body);
 		return resolve(response);
 	} catch (error) /* istanbul ignore next */ {
 		if (debugMode) console.log(`\x1b[0;31mError: ${JSON.stringify(error)}\x1b[0m`);
@@ -57,9 +58,10 @@ const generateCustomer = (props) => new Promise(async (resolve, reject) => {
 
 const getCustomer = (props) => new Promise(async (resolve, reject) => {
 	try {
-		let body = {};
+		const header = props?.header ? props.header : {};
+		const body = {};
 		body.applicationCustomerId = props.applicationCustomerId;
-		const response = await backendCaller('POST', routes.getCustomer, {}, body);
+		const response = await backendCaller('POST', routes.getCustomer, header, body);
 		return resolve(response);
 	} catch (error) /* istanbul ignore next */ {
 		if (debugMode) console.log(`\x1b[0;31mError: ${JSON.stringify(error)}\x1b[0m`);
@@ -69,6 +71,7 @@ const getCustomer = (props) => new Promise(async (resolve, reject) => {
 
 const generateProduct = (props) => new Promise(async (resolve, reject) => {
 	try {
+		const header = props?.header ? props.header : {};
 		const body = {
 			name: props.name,
 			description: props.description,
@@ -76,7 +79,7 @@ const generateProduct = (props) => new Promise(async (resolve, reject) => {
 			unitAmountDecimal: props.unitAmountDecimal,
 			interval: props.interval,
 		};
-		const response = await backendCaller('POST', routes.generateProduct, {}, body);
+		const response = await backendCaller('POST', routes.generateProduct, header, body);
 		return resolve(response);
 	} catch (error) /* istanbul ignore next */ {
 		if (debugMode) console.log(`\x1b[0;31mError: ${JSON.stringify(error)}\x1b[0m`);
@@ -86,12 +89,13 @@ const generateProduct = (props) => new Promise(async (resolve, reject) => {
 
 const generateSubscription = (props) => new Promise(async (resolve, reject) => {
 	try {
+		const header = props?.header ? props.header : {};
 		const body = {
 			customerId: props.customerId,
 			recurringPriceId: props.recurringPriceId,
 			description: props.description,
 		};
-		const response = await backendCaller('POST', routes.generateSubscription, {}, body);
+		const response = await backendCaller('POST', routes.generateSubscription, header, body);
 		return resolve(response);
 	} catch (error) /* istanbul ignore next */ {
 		if (debugMode) console.log(`\x1b[0;31mError: ${JSON.stringify(error)}\x1b[0m`);
@@ -102,7 +106,8 @@ const generateSubscription = (props) => new Promise(async (resolve, reject) => {
 
 const generateAccount = (props) => new Promise(async (resolve, reject) => {
 	try {
-		let body = {};
+		const header = props?.header ? props.header : {};
+		const body = {};
 		body.applicationCustomerId = props.applicationCustomerId;
 		body.email = props.email;
 		body.publicDomain = props.publicDomain;
@@ -111,7 +116,7 @@ const generateAccount = (props) => new Promise(async (resolve, reject) => {
 		body.refreshUrlRoute = props?.refreshUrlRoute;
 		body.returnUrlRoute = props?.returnUrlRoute;
 
-		const response = await backendCaller('POST', routes.generateAccount, {}, body);
+		const response = await backendCaller('POST', routes.generateAccount, header, body);
 		return resolve(response);
 	} catch (error) /* istanbul ignore next */ {
 		if (debugMode) console.log(`\x1b[0;31mError: ${JSON.stringify(error)}\x1b[0m`);
@@ -121,9 +126,10 @@ const generateAccount = (props) => new Promise(async (resolve, reject) => {
 
 const getAccount = (props) => new Promise(async (resolve, reject) => {
 	try {
-		let body = {};
+		const header = props?.header ? props.header : {};
+		const body = {};
 		body.applicationCustomerId = props.applicationCustomerId;
-		const response = await backendCaller('POST', routes.getAccount, {}, body);
+		const response = await backendCaller('POST', routes.getAccount, header, body);
 		return resolve(response);
 	} catch (error) /* istanbul ignore next */ {
 		if (debugMode) console.log(`\x1b[0;31mError: ${JSON.stringify(error)}\x1b[0m`);
@@ -137,7 +143,8 @@ const oneTimePayment = (props) => new Promise(async (resolve, reject) => {
 		// payoutData: {payoutAmount, payoutAccountId}
 		// items: [{name, unitAmountDecimal}]
 		// applicationCustomerId, customerId, currency, items, payoutData, publicDomain,
-		let body = {};
+		const header = props?.header ? props.header : {};
+		const body = {};
 		body.applicationCustomerId = props.applicationCustomerId;
 		body.customerId = props.customerId;
 		body.currency = props.currency;
@@ -148,7 +155,7 @@ const oneTimePayment = (props) => new Promise(async (resolve, reject) => {
 		body.successRoute = props?.successRoute;
 		body.cancelRoute = props?.cancelRoute;
 
-		const response = await backendCaller('POST', routes.oneTimePayment, {}, body);
+		const response = await backendCaller('POST', routes.oneTimePayment, header, body);
 		return resolve(response);
 	} catch (error) /* istanbul ignore next */ {
 		if (debugMode) console.log(`\x1b[0;31mError: ${JSON.stringify(error)}\x1b[0m`);
@@ -158,12 +165,13 @@ const oneTimePayment = (props) => new Promise(async (resolve, reject) => {
 
 const getSubscriptionPaymentsByStripeCustomerId = (props) => new Promise(async (resolve, reject) => {
 	try {
+		const header = props?.header ? props.header : {}; 
 		const body = {
 			customerId: props.customerId,
 		};
-		const response = backendCaller('POST', routes.getSubscriptionPaymentsByStripeCustomerId, {}, body);
+		const response = backendCaller('POST', routes.getSubscriptionPaymentsByStripeCustomerId, header, body);
 		return resolve(response);
-	} catch (error) /* istanbul ignore next */{
+	} catch (error) /* istanbul ignore next */ {
 		if (debugMode) console.log(`\x1b[0;31mError: ${JSON.stringify(error)}\x1b[0m`);
 		return reject(error);
 	}
@@ -171,10 +179,11 @@ const getSubscriptionPaymentsByStripeCustomerId = (props) => new Promise(async (
 
 const getOneTimePaymentStatus = (props) => new Promise(async (resolve, reject) => {
 	try {
+		const header = props?.header ? props.header : {}; 
 		const body = {
 			checkoutSessionId: props.checkoutSessionId,
 		};
-		const response = backendCaller('POST', routes.getOneTimePaymentStatus, {}, body);
+		const response = backendCaller('POST', routes.getOneTimePaymentStatus, header, body);
 		return resolve(response);
 	} catch (error) /* istanbul ignore next */ {
 		if (debugMode) console.log(`\x1b[0;31mError: ${JSON.stringify(error)}\x1b[0m`);
