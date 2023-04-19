@@ -27,7 +27,6 @@ export default function OneTimePayment(props) {
 		];
 		const body = {
 			applicationCustomerId: props.applicationCustomerId,
-			customerId: props.customerId,
 			currency: 'usd',
 			items: items,
 			payoutData: payoutData,

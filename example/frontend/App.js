@@ -46,10 +46,10 @@ export default function App() {
 			screen = <Subscription tsf={tsf} setActiveScreen={setActiveScreen} applicationCustomerId={applicationCustomerId} setSubscriptionId={setSubscriptionId} />
 			break;
 		case 'Account':
-			screen = <Account apiBackend={apiBackend} tsf={tsf} setActiveScreen={setActiveScreen} applicationCustomerId={applicationCustomerId} customerId={customerId} setAccountId={setAccountId} />
+			screen = <Account apiBackend={apiBackend} tsf={tsf} setActiveScreen={setActiveScreen} applicationCustomerId={applicationCustomerId} setAccountId={setAccountId} />
 			break;
 		case 'OneTimePayment':
-			screen = <OneTimePayment apiBackend={apiBackend} tsf={tsf} setActiveScreen={setActiveScreen} applicationCustomerId={applicationCustomerId} customerId={customerId} accountId={accountId} />
+			screen = <OneTimePayment apiBackend={apiBackend} tsf={tsf} setActiveScreen={setActiveScreen} applicationCustomerId={applicationCustomerId} accountId={accountId} />
 			break;
 		case 'EndApp':
 			screen = <EndApp />

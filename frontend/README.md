@@ -441,7 +441,6 @@ Generates a checkout session that is to be used to charge a customer and optiona
 | Name | Type | Description |
 | --- | --- | --- |
 | applicationCustomerId | string | The application customer id, used to link the application customer to the payment. |
-| customerId | string | The stripe customer id that the payment is to be charged to. |
 | currency | string | The currency of the payment. Defaults to `'usd'` |
 | items | Array | The items to be charged. |
 | payoutData | Object | The payout data. |
@@ -490,7 +489,6 @@ const oneTimePayment = async () => {
 	];
 	const body = {
 		applicationCustomerId,
-		customerId,
 		currency: 'usd',
 		items,
 		payoutData,

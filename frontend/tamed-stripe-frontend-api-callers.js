@@ -159,7 +159,6 @@ const oneTimePayment = (props) => new Promise(async (resolve, reject) => {
 		const header = props?.header ? props.header : {};
 		const body = {};
 		body.applicationCustomerId = props.applicationCustomerId;
-		body.customerId = props.customerId;
 		body.currency = props.currency;
 		body.items = props.items;
 		body.payoutData = props.payoutData;

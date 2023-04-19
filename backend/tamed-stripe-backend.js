@@ -392,9 +392,15 @@ const oneTimePayment = (body) => new Promise(async (resolve, reject) => {
 	try {
 		// payoutData: {payoutAmount, payoutAccountId}
 		// items: [{name, unitAmountDecimal}]
-		const { applicationCustomerId, customerId, currency, items, payoutData, publicDomain, } = body;
+		const { applicationCustomerId, currency, items, payoutData, publicDomain, } = body;
 		const successRoute = body?.successRoute || '/one-time-payment-success-route';
 		const cancelRoute = body?.cancelRoute || '/one-time-payment-cancel-route';
+
+		const customerData = await runSQL(poolName, sqls.getCustomer, [applicationCustomerId], debugMode);
+		if (customerData.rows.length === 0) {
+			return reject("No customer found for one time payment");
+		}
+		const customerId = customerData.rows[0].stripe_customer_id;
 
 		// In case there is payout
 		// convert payoutData to payment intent structure

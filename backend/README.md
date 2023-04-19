@@ -470,7 +470,6 @@ Additionally, for successfully paid customers, if you need to show your customer
 | Key | Type | Value |
 | --- | --- | --- |
 | applicationCustomerId | string | Id of the application customer that the payment will be generated for. |
-| customerId | string | Stripe customer id of the customer that the payment will be generated for. |
 | currency | string | Currency of the payment. |
 | items | Array | Array of items to be paid. |
 | payoutData | Object | Payout data for the payment. |
@@ -500,6 +499,30 @@ Returns the checkoutSession object created by Stripe. The `url` field of the ret
 	result: 'OK',
 	payload: checkoutSession,
 }
+```
+
+#### Example
+
+```javascript
+const currency = 'eur';
+const items = [
+	{ name: "iPhone", unitAmountDecimal: "100000" },
+	{ name: "iPad", unitAmountDecimal: "150000" },
+	{ name: "iMac", unitAmountDecimal: "200000" },
+];
+const payoutData = {
+	payoutAmount: "225000",
+	payoutAccountId: "some-account-id-who-will-receive-the-payment",
+	useOnBehalfOf: true
+};
+const props = {
+	applicationCustomerId,
+	currency,
+	items,
+	payoutData,
+	publicDomain,
+};
+const response3 = await tsb.oneTimePayment(props);
 ```
 
 ### oneTimePaymentSuccessRoute

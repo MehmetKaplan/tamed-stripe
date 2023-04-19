@@ -5,7 +5,6 @@ const { runSQL, } = require('tamed-pg');
 
 // The following items are coming from STEP 1
 // REPLACE AREA
-const customerId = 'cus_NZz7DUmOV3mtaB';
 const applicationCustomerId = 'Jest Application Customer-1679581787363';
 const accountId_TR = "acct_1Mop9ECDNsGA70wp";
 const accountId_FR = "acct_1Mop9GC49YYTVK6S";
@@ -64,7 +63,7 @@ test('oneTimePayment without payOut', async () => {
 	];
 	const payoutData = undefined;
 	const publicDomain = "https://development.eseme.one:61983";
-	const response4 = await tsb.oneTimePayment({ applicationCustomerId, customerId, currency, items, payoutData, publicDomain });
+	const response4 = await tsb.oneTimePayment({ applicationCustomerId, currency, items, payoutData, publicDomain });
 	expect(response4.payload.url.length).toBeGreaterThan(0);
 });
 
@@ -82,7 +81,7 @@ test('oneTimePayment with payOut to FR', async () => {
 		useOnBehalfOf: true
 	};
 	const publicDomain = "https://development.eseme.one:61983";
-	const response4 = await tsb.oneTimePayment({ applicationCustomerId, customerId, currency, items, payoutData, publicDomain, });
+	const response4 = await tsb.oneTimePayment({ applicationCustomerId, currency, items, payoutData, publicDomain, });
 	expect(response4.payload.url.length).toBeGreaterThan(0);
 	logMessages.push(`\x1b[1;33m Flush before this URL \x1b[0m`);
 	logMessages.push(`\t\t\t\x1b[0;31mcd ~/.pm2/logs\x1b[0m`);
@@ -106,7 +105,7 @@ test('oneTimePayment with payOut to TR', async () => {
 		useOnBehalfOf: true
 	};
 	const publicDomain = "https://development.eseme.one:61983";
-	const response4 = await tsb.oneTimePayment({ applicationCustomerId, customerId, currency, items, payoutData, publicDomain, });
+	const response4 = await tsb.oneTimePayment({ applicationCustomerId, currency, items, payoutData, publicDomain, });
 	expect(response4.payload.url.length).toBeGreaterThan(0);
 });
 
@@ -173,5 +172,5 @@ test('getAccount', async () => {
 
 test('getCustomer', async () => {
 	const response1 = await tsb.getCustomer({ applicationCustomerId });
-	expect(response1.payload.stripe_customer_id).toBe(customerId);
+	expect(response1.payload.stripe_customer_id.length).toBeGreaterThan(10);
 });

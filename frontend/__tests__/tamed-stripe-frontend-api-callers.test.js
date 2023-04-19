@@ -83,7 +83,7 @@ test('generateAccount', async () => {
 	const account = await tsf.generateAccount({
 		applicationCustomerId: applicationCustomerIdNEW,
 		email: `Frontend-Jest-Tes-Account-${now}@yopmail.com`,
-		publicDomain:  apiBackend,
+		publicDomain: apiBackend,
 		country: 'TR',
 	});
 	expect(account.payload.id.length).toBeGreaterThan(10);
@@ -95,7 +95,7 @@ test('getAccount', async () => {
 	const account = await tsf.generateAccount({
 		applicationCustomerId: applicationCustomerIdNEW,
 		email: `Frontend-Jest-Tes-Account-${now}@yopmail.com`,
-		publicDomain:  apiBackend,
+		publicDomain: apiBackend,
 		country: 'TR',
 	});
 	const result = await tsf.getAccount({
@@ -114,8 +114,7 @@ test('oneTimePayment', async () => {
 		{ name: `Frontend Jest Test Item 2`, unitAmountDecimal: `22222222`, },
 	];
 	const body = {
-		applicationCustomerId: applicationCustomerIdNEW,
-		customerId: customerId,
+		applicationCustomerId: applicationCustomerId,
 		currency: 'usd',
 		items: items,
 		payoutData: payoutData,
@@ -127,7 +126,7 @@ test('oneTimePayment', async () => {
 	expect(result.payload.url.length).toBeGreaterThan(30);
 
 	const checkoutSessionId = result.payload.id;
-	const result2 = await tsf.getOneTimePaymentStatus({checkoutSessionId});
+	const result2 = await tsf.getOneTimePaymentStatus({ checkoutSessionId });
 	console.log(`One Time Payment Status : ${JSON.stringify(result2.payload.rows[0], null, 2)}`);
 	expect(result2.payload.rows[0].payout_amount).toBe(payoutData.payoutAmount);
 });
