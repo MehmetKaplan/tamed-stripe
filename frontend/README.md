@@ -242,7 +242,7 @@ Generates a subscription using the backend [generateSubscription](https://github
 
 | Name | Type | Description |
 | --- | --- | --- |
-| customerId | string | The stripe customer id. |
+| applicationCustomerId | string | The application's customer id. |
 | recurringPriceId | string | The stripe price id of the recurring price. Comes from [generateProduct](https://github.com/MehmetKaplan/tamed-stripe/tree/master/frontend#generateproduct). |
 | description | string | The description of the subscription. |
 #### Returns
@@ -269,7 +269,7 @@ const resultProduct = await tsf.generateProduct({
 });
 // then generate a subscription using the product
 const resultSubscription = await tsf.generateSubscription({
-	customerId: customerId,
+	applicationCustomerId: props.applicationCustomerId,
 	recurringPriceId: resultProduct.payload.price.id,
 	description: `${subscriptionName} Subscription`,
 });

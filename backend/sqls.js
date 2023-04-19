@@ -14,13 +14,14 @@ module.exports = {
 	selectPaymentSheets: "select * from tamedstripe.payment_sheets where stripe_customer_id = $1 order by id desc",
 	selectProduct: "select * from tamedstripe.products where stripe_product_id = $1",
 	insertProduct: "insert into tamedstripe.products (stripe_product_id, name, description, currency, unit_amount_decimal, interval, update_time, product_object, price_object) values ($1, $2, $3, $4, $5, $6, now(), $7, $8) ",
+	selectSubscriptionWithProduct: "select * from tamedstripe.subscriptions where stripe_customer_id = $1 and stripe_product_id = $2 and state = 'A'",
 	selectSubscription: "select * from tamedstripe.subscriptions where stripe_subscription_id = $1 and state = 'A'",
 	insertSubscription: "insert into tamedstripe.subscriptions (stripe_subscription_id, stripe_customer_id, stripe_product_id, description, currency, unit_amount_decimal, interval, update_time, state, subscription_object) values ($1, $2, $3, $4, $5, $6, $7, now(), 'A', $8) ",
 	updateSubscription: "update tamedstripe.subscriptions set state = 'C' where stripe_subscription_id = $1",
 	insertSubscriptionPayment: "insert into tamedstripe.subscription_payments (stripe_subscription_id, invoice_id, hosted_invoice_url, insert_time, unit_amount_decimal, currency, state, subscription_covered_from, subscription_covered_to, subscription_payment_object) values ($1, $2, $3, now(), $4, $5, $6, $7, $8, $9) ",
 	selectSubscriptionPayments: `
 		select a.application_customer_id, a.stripe_customer_id, 
-				b.stripe_product_id, b.currency, b.unit_amount_decimal, 
+				b.stripe_subscription_id, b.stripe_product_id, b.currency, b.unit_amount_decimal, 
 				c.insert_time, c.unit_amount_decimal, c.state,
 				c.subscription_covered_from, c.subscription_covered_to,
 				c.invoice_id, c.hosted_invoice_url
@@ -34,7 +35,7 @@ module.exports = {
 	`,
 	selectSubscriptionPaymentsByStripeCustomerId: `
 		select a.application_customer_id, a.stripe_customer_id, 
-				b.stripe_product_id, b.currency, b.unit_amount_decimal, 
+				b.stripe_subscription_id, b.stripe_product_id, b.currency, b.unit_amount_decimal, 
 				c.insert_time, c.unit_amount_decimal, c.state,
 				c.subscription_covered_from, c.subscription_covered_to,
 				c.invoice_id, c.hosted_invoice_url

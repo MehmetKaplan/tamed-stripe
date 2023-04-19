@@ -6,6 +6,7 @@ const { runSQL, } = require('tamed-pg');
 // The following items are coming from STEP 1
 // REPLACE AREA
 const customerId = 'cus_NZz7DUmOV3mtaB';
+const applicationCustomerId = 'Jest Application Customer-1679581787363';
 // END OF REPLACE AREA
 
 const logMessages = [];
@@ -87,7 +88,7 @@ test('cancelSubscription', async () => {
 	  `, true);
 
 	const response3 = await tsb.generateSubscription({
-		customerId: customerId,
+		applicationCustomerId: applicationCustomerId,
 		recurringPriceId: priceData.id,
 		description: description,
 	});

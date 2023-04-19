@@ -46,8 +46,9 @@ afterAll(async () => {
 
 test('generateCustomer', async () => {
 	const now = new Date().getTime();
+	const applicationCustomerId = `Jest Application Customer-${now}`;
 	const body = {
-		applicationCustomerId: `Jest Application Customer-${now}`,
+		applicationCustomerId: applicationCustomerId,
 		description: `Jest Customer ${now}`,
 		email: `test-${now}@yopmail.com`,
 		metadata: { "test": "test" },
@@ -78,16 +79,17 @@ test('generateCustomer', async () => {
 	expect(customerAtDB.rows[0].customer_object).toEqual(customerData);
 	logMessages.push(`\t\t\x1b[1;33mCustomer payment URL\x1b[0m: \x1b[0;31m${checkoutSessionData.url}\x1b[0m`);
 	logMessages.push(`\t\t\x1b[1;33mcustomerID\x1b[0m: \x1b[0;31m${customerData.id}\x1b[0m`);
+	logMessages.push(`\t\t\x1b[1;applicationCustomerId\x1b[0m: \x1b[0;31m${applicationCustomerId}\x1b[0m`);
 });
 
 test('generateAccount (connected account for payouts) in TR', async () => {
 	const country = "TR";
 	const now = Date.now();
-	const applicationCustomerId = `Application Customer-${now}`;
+	const applicationCustomerIdTR = `Application Customer-${now}`;
 	const email = `${now}@yopmail.com`;
 	const publicDomain = "https://development.eseme.one:61983";
 	const props = {
-		applicationCustomerId: applicationCustomerId,
+		applicationCustomerId: applicationCustomerIdTR,
 		email: email,
 		publicDomain: publicDomain,
 		country: country,
@@ -101,22 +103,23 @@ test('generateAccount (connected account for payouts) in TR', async () => {
 	expect(accountData.capabilities).toEqual({ "transfers": "inactive" });
 	expect(accountData.email).toEqual(email);
 	expect(accountData.settings.payouts.schedule.interval).toEqual('daily');
-	let accountAtDB = await runSQL(poolName, sqls.selectAccount, [applicationCustomerId], debugMode);
+	let accountAtDB = await runSQL(poolName, sqls.selectAccount, [applicationCustomerIdTR], debugMode);
 	expect(accountAtDB.rows.length).toBe(1);
 	expect(accountAtDB.rows[0].stripe_account_id).toEqual(accountData.id);
 	expect(accountAtDB.rows[0].account_object).toEqual(accountData);
 	logMessages.push(`\t\t\x1b[1;33mAccount URL\x1b[0m: \x1b[0;31m${accountData.accountLinkURL}\x1b[0m`);
 	logMessages.push(`\t\t\x1b[1;33maccountId_TR\x1b[0m: \x1b[0;31m${accountData.id}\x1b[0m`);
+	logMessages.push(`\t\t\x1b[1;33mapplicationCustomerId_TR\x1b[0m: \x1b[0;31m${applicationCustomerIdTR}\x1b[0m`);
 });
 
 test('generateAccount (connected account for payouts) in FR', async () => {
 	const country = "FR";
 	const now = Date.now();
-	const applicationCustomerId = `Application Customer-${now}`;
+	const applicationCustomerIdFR = `Application Customer-${now}`;
 	const email = `${now}@yopmail.com`;
 	const publicDomain = "https://development.eseme.one:61983";
 	const props = {
-		applicationCustomerId: applicationCustomerId,
+		applicationCustomerId: applicationCustomerIdFR,
 		email: email,
 		publicDomain: publicDomain,
 		country: country,
@@ -130,11 +133,12 @@ test('generateAccount (connected account for payouts) in FR', async () => {
 	expect(accountData.capabilities).toEqual({ "transfers": "inactive" });
 	expect(accountData.email).toEqual(email);
 	expect(accountData.settings.payouts.schedule.interval).toEqual('daily');
-	let accountAtDB = await runSQL(poolName, sqls.selectAccount, [applicationCustomerId], debugMode);
+	let accountAtDB = await runSQL(poolName, sqls.selectAccount, [applicationCustomerIdFR], debugMode);
 	expect(accountAtDB.rows.length).toBe(1);
 	expect(accountAtDB.rows[0].stripe_account_id).toEqual(accountData.id);
 	expect(accountAtDB.rows[0].account_object).toEqual(accountData);
 	logMessages.push(`\t\t\x1b[1;33mAccount URL\x1b[0m: \x1b[0;31m${accountData.accountLinkURL}\x1b[0m`);
 	logMessages.push(`\t\t\x1b[1;33maccountId_FR\x1b[0m: \x1b[0;31m${accountData.id}\x1b[0m`);
+	logMessages.push(`\t\t\x1b[1;33mapplicationCustomerId_FR\x1b[0m: \x1b[0;31m${applicationCustomerIdFR}\x1b[0m`);
 });
 

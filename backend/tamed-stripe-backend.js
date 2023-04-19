@@ -78,7 +78,8 @@ const generateCustomer = (body) => new Promise(async (resolve, reject) => {
 			tickLog.success(`generated customer: ${JSON.stringify(customer)}`, true);
 			tickLog.success(`generated checkoutSession: ${JSON.stringify(checkoutSession)}`, true);
 		}
-		await runSQL(poolName, sqls.insertCustomer, [applicationCustomerId, customer.id, 'W', customer.email, customer.name, customer.phone, customer.address, JSON.stringify(customer.metadata), checkoutSession?.id, '', JSON.stringify(customer)]);
+		const customerState = paymentMethodId ? 'A': 'W';
+		await runSQL(poolName, sqls.insertCustomer, [applicationCustomerId, customer.id, customerState, customer.email, customer.name, customer.phone, customer.address, JSON.stringify(customer.metadata), checkoutSession?.id, '', JSON.stringify(customer)]);
 		return resolve({
 			result: 'OK',
 			payload: {
@@ -165,7 +166,21 @@ const generateProduct = (body) => new Promise(async (resolve, reject) => {
 // Scenario 2: subscription first and next recurring payments (success & failed)
 const generateSubscription = (body) => new Promise(async (resolve, reject) => {
 	try {
-		let { customerId, recurringPriceId, description } = body;
+		const { applicationCustomerId, recurringPriceId, description } = body;
+		let customerId;
+		const customer = await runSQL(poolName, sqls.getCustomer, [applicationCustomerId], debugMode);
+		/* istanbul ignore else */
+		if (customer.rows.length > 0) {
+			customerId = customer.rows[0].stripe_customer_id;
+		} else {
+			return reject("No customer found for subscription");
+		}
+		// check if customer has a subscription witn the same recurringPriceId
+		const existingSubscription = await runSQL(poolName, sqls.selectSubscriptionWithProduct, [customerId, recurringPriceId], debugMode);
+		/* istanbul ignore else */
+		if (existingSubscription.rows.length > 0) {
+			return reject("Customer already has a subscription with the same recurringPriceId");
+		}
 		const subscription = await stripe.subscriptions.create({
 			customer: customerId,
 			items: [{ price: recurringPriceId }], // for subscriptions, we assume there is only one item
@@ -198,6 +213,26 @@ const generateSubscription = (body) => new Promise(async (resolve, reject) => {
 const getSubscriptionPaymentsByStripeCustomerId = (body) => new Promise(async (resolve, reject) => {
 	try {
 		const { customerId } = body;
+		const result = await runSQL(poolName, sqls.selectSubscriptionPaymentsByStripeCustomerId, [customerId], debugMode);
+		return resolve({
+			result: 'OK',
+			payload: result.rows,
+		});
+	} catch (error) /* istanbul ignore next */ {
+		return reject(error);
+	}
+});
+
+const getSubscriptionPayments = (body) => new Promise(async (resolve, reject) => {
+	try {
+		const { applicationCustomerId } = body;
+		// find stripe customer id from application customer id
+		const customer = await runSQL(poolName, sqls.getCustomer, [applicationCustomerId], debugMode);
+		/* istanbul ignore else */
+		if (customer.rows.length === 0) {
+			return reject("No customer found for subscription");
+		}
+		const customerId = customer.rows[0].stripe_customer_id;
 		const result = await runSQL(poolName, sqls.selectSubscriptionPaymentsByStripeCustomerId, [customerId], debugMode);
 		return resolve({
 			result: 'OK',
@@ -593,6 +628,7 @@ module.exports = {
 	generateCustomerCancelRoute,
 	getCustomer,
 	generateSubscription,
+	getSubscriptionPayments,
 	cancelSubscription,
 	generateProduct,
 	generateAccount,

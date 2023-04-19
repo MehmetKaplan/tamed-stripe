@@ -5,11 +5,12 @@ const debugMode = false;
 
 const apiBackend = "https://development.eseme.one:61983";
 
-const applicationCustomerId = `Frontend Jest Test Customer-${(new Date()).getTime()}`;
+const applicationCustomerIdNEW = `Frontend Jest Test Customer-${(new Date()).getTime()}`;
 
 // The following items are coming from BACKEND TESTS STEP 1
 // REPLACE AREA
 const customerId = 'cus_NZz7DUmOV3mtaB';
+const applicationCustomerId = 'Jest Application Customer-1679581787363';
 const accountId_TR = "acct_1Mop9ECDNsGA70wp";
 // END OF REPLACE AREA
 
@@ -20,6 +21,7 @@ beforeAll(async () => {
 			"generateCustomer": "/generate-customer",
 			"getCustomer": "/get-customer",
 			"generateSubscription": "/generate-subscription",
+			"getSubscriptionPayments": "/get-subscription-payments",
 			"generateProduct": "/generate-product",
 			"generateAccount": "/generate-account",
 			"getAccount": "/get-account",
@@ -34,7 +36,7 @@ beforeAll(async () => {
 test('generateCustomer', async () => {
 	const now = new Date().getTime();
 	const result = await tsf.generateCustomer({
-		applicationCustomerId: applicationCustomerId,
+		applicationCustomerId: applicationCustomerIdNEW,
 		description: `Mobile App Test Customer ${now}`,
 		email: `Frontend-Jest-Test-${now}@yopmail.com`,
 		metadata: { "test": "test" },
@@ -52,7 +54,7 @@ test('getCustomer should rely on backend tests because it requires (A) Active cu
 });
 
 
-test('generateSubscription', async () => {
+test('generateSubscription and getSubscriptionPayments', async () => {
 	const now = new Date().getTime();
 	const resultProduct = await tsf.generateProduct({
 		name: `Frontend Jest Test Product ${now}`,
@@ -62,15 +64,15 @@ test('generateSubscription', async () => {
 		interval: 'month',
 	});
 	const resultSubscription = await tsf.generateSubscription({
-		customerId: customerId,
+		applicationCustomerId: applicationCustomerId,
 		recurringPriceId: resultProduct.payload.price.id,
 		description: `Frontend Jest Subscription - ${now}`,
 	});
 	tickLog.info(`Subscription : ${JSON.stringify(resultSubscription.payload, null, 2)}`, true);
 	// wait 10 seconds for the webhook to fire
 	await new Promise(resolve => setTimeout(resolve, 3000));
-	const payments = await tsf.exportedForTesting.getSubscriptionPaymentsByStripeCustomerId({
-		customerId: customerId
+	const payments = await tsf.getSubscriptionPayments({
+		applicationCustomerId: applicationCustomerId,
 	});
 	tickLog.info(`Payments : ${JSON.stringify(payments.payload, null, 2)}`, true);
 	expect(payments.payload[0].hosted_invoice_url.length).toBeGreaterThan(30);
@@ -79,7 +81,7 @@ test('generateSubscription', async () => {
 test('generateAccount', async () => {
 	const now = new Date().getTime();
 	const account = await tsf.generateAccount({
-		applicationCustomerId: applicationCustomerId,
+		applicationCustomerId: applicationCustomerIdNEW,
 		email: `Frontend-Jest-Tes-Account-${now}@yopmail.com`,
 		publicDomain:  apiBackend,
 		country: 'TR',
@@ -91,13 +93,13 @@ test('generateAccount', async () => {
 test('getAccount', async () => {
 	const now = new Date().getTime();
 	const account = await tsf.generateAccount({
-		applicationCustomerId: applicationCustomerId,
+		applicationCustomerId: applicationCustomerIdNEW,
 		email: `Frontend-Jest-Tes-Account-${now}@yopmail.com`,
 		publicDomain:  apiBackend,
 		country: 'TR',
 	});
 	const result = await tsf.getAccount({
-		applicationCustomerId
+		applicationCustomerId: applicationCustomerIdNEW
 	});
 	expect(result.payload.stripe_account_id).toBe(account.payload.id);
 });
@@ -112,7 +114,7 @@ test('oneTimePayment', async () => {
 		{ name: `Frontend Jest Test Item 2`, unitAmountDecimal: `22222222`, },
 	];
 	const body = {
-		applicationCustomerId: applicationCustomerId,
+		applicationCustomerId: applicationCustomerIdNEW,
 		customerId: customerId,
 		currency: 'usd',
 		items: items,

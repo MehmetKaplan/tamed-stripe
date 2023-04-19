@@ -26,6 +26,7 @@ export default function App() {
 			routes: {
 				"generateCustomer": "/generate-customer",
 				"generateSubscription": "/generate-subscription",
+				"getSubscriptionPayments": "/get-subscription-payments",
 				"generateProduct": "/generate-product",
 				"generateAccount": "/generate-account",
 				"oneTimePayment": "/one-time-payment",
@@ -42,7 +43,7 @@ export default function App() {
 			screen = <Customer apiBackend={apiBackend} tsf={tsf} setActiveScreen={setActiveScreen} applicationCustomerId={applicationCustomerId} setCustomerId={setCustomerId} />
 			break;
 		case 'Subscription':
-			screen = <Subscription tsf={tsf} setActiveScreen={setActiveScreen} customerId={customerId} setSubscriptionId={setSubscriptionId} />
+			screen = <Subscription tsf={tsf} setActiveScreen={setActiveScreen} applicationCustomerId={applicationCustomerId} setSubscriptionId={setSubscriptionId} />
 			break;
 		case 'Account':
 			screen = <Account apiBackend={apiBackend} tsf={tsf} setActiveScreen={setActiveScreen} applicationCustomerId={applicationCustomerId} customerId={customerId} setAccountId={setAccountId} />

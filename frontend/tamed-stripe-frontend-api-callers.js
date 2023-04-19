@@ -91,7 +91,7 @@ const generateSubscription = (props) => new Promise(async (resolve, reject) => {
 	try {
 		const header = props?.header ? props.header : {};
 		const body = {
-			customerId: props.customerId,
+			applicationCustomerId: props.applicationCustomerId,
 			recurringPriceId: props.recurringPriceId,
 			description: props.description,
 		};
@@ -103,6 +103,19 @@ const generateSubscription = (props) => new Promise(async (resolve, reject) => {
 	}
 });
 
+const getSubscriptionPayments = (props) => new Promise(async (resolve, reject) => {
+	try {
+		const header = props?.header ? props.header : {};
+		const body = {
+			applicationCustomerId: props.applicationCustomerId,
+		};
+		const response = await backendCaller('POST', routes.getSubscriptionPayments, header, body);
+		return resolve(response);
+	} catch (error) /* istanbul ignore next */ {
+		if (debugMode) console.log(`\x1b[0;31mError: ${JSON.stringify(error)}\x1b[0m`);
+		return reject(error);
+	}
+});
 
 const generateAccount = (props) => new Promise(async (resolve, reject) => {
 	try {
@@ -198,6 +211,7 @@ module.exports = {
 	getCustomer,
 	generateProduct,
 	generateSubscription,
+	getSubscriptionPayments,
 	generateAccount,
 	getAccount,
 	oneTimePayment,

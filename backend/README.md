@@ -266,11 +266,42 @@ const response2 = await tsb.generateProduct(productProps);
 const priceData = response2.payload.price;
 ...
 await tsb.generateSubscription({
-	customerId: customerId,
+	applicationCustomerId: applicationCustomerId,
 	recurringPriceId: priceData.id,
 	description: description,
 });
 
+```
+
+### getSubscriptionPayments
+
+Gets the payments of an application customer id for all subscriptions. The retrieved list can be filtered to find the needed payments.
+
+| Parameter | Type | Description |
+| --- | --- | --- |
+| body | Object | Parameters for the generating a payer customer at Stripe |
+
+#### body
+
+| Key | Type | Value |
+| --- | --- | --- |
+| applicationCustomerId | string | Application customer id of the customer that the subscription payments will be retrieved for. |
+
+#### Returns
+
+If successful, resolves to below JSON object. Otherwise, rejects with an error message.
+```js
+{
+	result: 'OK',
+	payload: subscriptionPayments,
+}
+```
+
+**Example**
+```javascript
+const response = await tsb.getSubscriptionPayments({
+	applicationCustomerId: applicationCustomerId,
+});
 ```
 
 ### cancelSubscription

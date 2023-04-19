@@ -27,6 +27,7 @@ beforeAll(async () => {
 
 test('subscriptionPayment - next 2 months', async () => {
 	const now = new Date().getTime();
+	const l_applicationCustomerId =`Jest Application Customer-${now}`;
 	const clockStartTime = Math.ceil(now / 1000);
 	const clockNextMonth1 = Math.ceil(new Date(now).setMonth(new Date(now).getMonth() + 1) / 1000);
 	const clockNextMonth2 = Math.ceil(new Date(now).setMonth(new Date(now).getMonth() + 2) / 1000);
@@ -64,7 +65,7 @@ test('subscriptionPayment - next 2 months', async () => {
 	if (debugMode) tickLog.info(`paymentMethod: ${JSON.stringify(paymentMethod, null, 2)}`);
 
 	const body = {
-		applicationCustomerId: `Jest Application Customer-${now}`,
+		applicationCustomerId: l_applicationCustomerId,
 		description: `Jest Customer ${now}`,
 		email: `subscriptionPaymentTestNext2Months-${now}@yopmail.com`,
 		metadata: { "test": "test" },
@@ -82,7 +83,7 @@ test('subscriptionPayment - next 2 months', async () => {
 	if (debugMode) tickLog.info(`customer: ${JSON.stringify(customer, null, 2)}`);
 
 	const response3 = await tsb.generateSubscription({
-		customerId: customer.id,
+		applicationCustomerId: l_applicationCustomerId,
 		recurringPriceId: priceData.id,
 		description: description,
 	});
@@ -116,5 +117,10 @@ test('subscriptionPayment - next 2 months', async () => {
 		await new Promise(r => setTimeout(r, 1000));
 	} while (curState2.status !== 'ready');
 
+	const response4 = await tsb.getSubscriptionPayments({ 
+		applicationCustomerId: l_applicationCustomerId,
+	});
+	if (debugMode) tickLog.info(`response4: ${JSON.stringify(response4, null, 2)}`);
+	expect(response4.payload.length).toBe(2);
 }, 130000);
 

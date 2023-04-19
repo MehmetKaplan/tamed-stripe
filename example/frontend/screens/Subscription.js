@@ -18,7 +18,7 @@ export default function Subscription(props) {
 			interval: 'month',
 		});
 		const resultSubscription = await props.tsf.generateSubscription({
-			customerId: props.customerId,
+			applicationCustomerId: props.applicationCustomerId,
 			recurringPriceId: resultProduct.payload.price.id,
 			description: `${subscriptionName} Subscription`,
 		});
@@ -26,8 +26,8 @@ export default function Subscription(props) {
 		props.setSubscriptionId(resultSubscription.payload.id);
 		// wait 10 seconds for the webhook to fire
 		await new Promise(resolve => setTimeout(resolve, 10000));
-		const payments = await props.tsf.exportedForTesting.getSubscriptionPaymentsByStripeCustomerId({
-			customerId: props.customerId
+		const payments = await props.tsf.getSubscriptionPayments({
+			applicationCustomerId: props.applicationCustomerId,
 		});
 		console.log(`Payments : ${JSON.stringify(payments.payload, null, 2)}`);
 		await Linking.openURL(payments.payload[0].hosted_invoice_url);

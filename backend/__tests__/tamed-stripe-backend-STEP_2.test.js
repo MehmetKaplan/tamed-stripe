@@ -6,6 +6,7 @@ const { runSQL, } = require('tamed-pg');
 // The following items are coming from STEP 1
 // REPLACE AREA
 const customerId = 'cus_NZz7DUmOV3mtaB';
+const applicationCustomerId = 'Jest Application Customer-1679581787363';
 const accountId_TR = "acct_1Mop9ECDNsGA70wp";
 const accountId_FR = "acct_1Mop9GC49YYTVK6S";
 // END OF REPLACE AREA
@@ -55,7 +56,6 @@ afterAll(async () => {
 
 test('oneTimePayment without payOut', async () => {
 	const now = new Date();
-	const applicationCustomerId = `Application Customer-${now}`;
 	const currency = 'try';
 	const items = [
 		{ name: "iPhone", unitAmountDecimal: "100000" },
@@ -70,7 +70,6 @@ test('oneTimePayment without payOut', async () => {
 
 test('oneTimePayment with payOut to FR', async () => {
 	const now = new Date().getTime();
-	const applicationCustomerId = `Application Customer-${now}`;
 	const currency = 'eur';
 	const items = [
 		{ name: "iPhone", unitAmountDecimal: "100000" },
@@ -95,7 +94,6 @@ test('oneTimePayment with payOut to FR', async () => {
 
 test('oneTimePayment with payOut to TR', async () => {
 	const now = new Date().getTime();
-	const applicationCustomerId = `Application Customer-${now}`;
 	const currency = 'try';
 	const items = [
 		{ name: "iPhone", unitAmountDecimal: "2000000" },
@@ -148,7 +146,7 @@ test('generateSubscription', async () => {
 	  `, true);
 
 	const response3 = await tsb.generateSubscription({
-		customerId: customerId,
+		applicationCustomerId: applicationCustomerId,
 		recurringPriceId: priceData.id,
 		description: description,
 	});
@@ -169,13 +167,11 @@ test('getAccount', async () => {
 	};
 	const response1 = await tsb.generateAccount(props);
 	const accountData = response1.payload;
-	const response2 = await tsb.getAccount({applicationCustomerId});
+	const response2 = await tsb.getAccount({ applicationCustomerId });
 	expect(response2.payload.stripe_account_id).toBe(accountData.id);
 });
 
-test ('getCustomer', async () => {
-	// find previously generated customer
-	const customerAtDB = await runSQL(poolName, sqls.selectCustomer, [customerId], debugMode);
-	const response1 = await tsb.getCustomer({applicationCustomerId: customerAtDB.rows[0].application_customer_id});
+test('getCustomer', async () => {
+	const response1 = await tsb.getCustomer({ applicationCustomerId });
 	expect(response1.payload.stripe_customer_id).toBe(customerId);
 });
