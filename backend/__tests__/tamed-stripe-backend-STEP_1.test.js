@@ -82,6 +82,45 @@ test('generateCustomer', async () => {
 	logMessages.push(`\t\t\x1b[1;applicationCustomerId\x1b[0m: \x1b[0;31m${applicationCustomerId}\x1b[0m`);
 });
 
+test('generateCustomer with same applicationCustomerId', async () => {
+	const now = new Date().getTime();
+	const applicationCustomerId = `Jest Application Customer-${now}`;
+	const body = {
+		applicationCustomerId: applicationCustomerId,
+		description: `Jest Customer ${now}`,
+		email: `test-${now}@yopmail.com`,
+		metadata: { "test": "test" },
+		name: `Jest Customer ${now}`,
+		phone: `1234567890`,
+		address: { "line1": "1234 Main St", "city": "San Francisco", "state": "CA", "postal_code": "94111" },
+		publicDomain: "https://development.eseme.one:61983",
+		successRoute: "/generate-customer-success-route",
+		cancelRoute: "/generate-customer-cancel-route",
+	};
+	const resultDummy = await tsb.generateCustomer(body);
+	const result1 = await tsb.generateCustomer(body);
+	const customerData = result1.payload.customer;
+	const checkoutSessionData = result1.payload.checkoutSession;
+	expect(customerData.id).toBeTruthy();
+	expect(checkoutSessionData).toBeTruthy();
+	expect(checkoutSessionData.id).toBeTruthy();
+	expect(checkoutSessionData.customer).toBeTruthy();
+	expect(checkoutSessionData.customer).toBe(customerData.id);
+	expect(checkoutSessionData.success_url).toBeTruthy();
+	expect(checkoutSessionData.cancel_url).toBeTruthy();
+	expect(checkoutSessionData.success_url).toBe(`${body.publicDomain}${body.successRoute}?session_id={CHECKOUT_SESSION_ID}`);
+	expect(checkoutSessionData.cancel_url).toBe(`${body.publicDomain}${body.cancelRoute}?session_id={CHECKOUT_SESSION_ID}`);
+	if (debugMode) tickLog.success(`generateCustomer result: ${JSON.stringify(customerData, null, 2)}`, true);
+	if (debugMode) tickLog.success(`checkoutSessionData result: ${JSON.stringify(checkoutSessionData, null, 2)}`, true);
+	let customerAtDB = await runSQL(poolName, sqls.selectCustomer, [customerData.id], debugMode);
+	expect(customerAtDB.rows.length).toBe(1);
+	expect(customerAtDB.rows[0].stripe_customer_id).toEqual(customerData.id);
+	expect(customerAtDB.rows[0].customer_object).toEqual(customerData);
+	logMessages.push(`\t\t\x1b[1;33mCustomer payment URL\x1b[0m: \x1b[0;31m${checkoutSessionData.url}\x1b[0m`);
+	logMessages.push(`\t\t\x1b[1;33mcustomerID\x1b[0m: \x1b[0;31m${customerData.id}\x1b[0m`);
+	logMessages.push(`\t\t\x1b[1;applicationCustomerId\x1b[0m: \x1b[0;31m${applicationCustomerId}\x1b[0m`);
+});
+
 test('generateAccount (connected account for payouts) in TR', async () => {
 	const country = "TR";
 	const now = Date.now();

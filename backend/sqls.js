@@ -4,6 +4,7 @@ module.exports = {
 	modifyCustomerPayment: "update tamedstripe.customers set state = $2, update_time = now(), payment_method_id = $3 where stripe_customer_id = $1",
 	unlinkCustomer: "update tamedstripe.customers set application_customer_id = null, state = 'U' where stripe_customer_id = $1",
 	selectCustomer: "select * from tamedstripe.customers where stripe_customer_id = $1",
+	selectCustomer2: "select * from tamedstripe.customers where application_customer_id = $1",
 	getCustomer: "select stripe_customer_id, update_time, email, metadata from tamedstripe.customers where application_customer_id = cast($1 as varchar) and state = 'A'",
 	insertConnectedAccount: "insert into tamedstripe.connected_accounts (application_customer_id, stripe_account_id, state, update_time, capabilities, email, payment_schedule, account_object) values ($1, $2, $3, now(), $4, $5, $6, $7) ",
 	selectAccount: "select * from tamedstripe.connected_accounts where application_customer_id = cast($1 as varchar)",

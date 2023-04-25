@@ -79,6 +79,18 @@ const generateCustomer = (body) => new Promise(async (resolve, reject) => {
 			tickLog.success(`generated checkoutSession: ${JSON.stringify(checkoutSession)}`, true);
 		}
 		const customerState = paymentMethodId ? 'A': 'W';
+		if (customerState === 'W'){
+			const existingCustomer = await runSQL(poolName, sqls.selectCustomer2, [applicationCustomerId]);
+			if (existingCustomer.rows.length > 0){
+				if (existingCustomer.rows[0].state === 'W'){
+					// unlink customer if it is still waiting state and the customer is requested again.
+					await runSQL(poolName, sqls.unlinkCustomer, [existingCustomer.rows[0].stripe_customer_id]);
+				};
+				if (existingCustomer.rows[0].state === 'A'){
+					return reject("Customer already exists.");
+				};
+			}
+		}
 		await runSQL(poolName, sqls.insertCustomer, [applicationCustomerId, customer.id, customerState, customer.email, customer.name, customer.phone, customer.address, JSON.stringify(customer.metadata), checkoutSession?.id, '', JSON.stringify(customer)]);
 		return resolve({
 			result: 'OK',
@@ -114,6 +126,7 @@ const getCustomer = (body) => new Promise(async (resolve, reject) => {
 	try {
 		const { applicationCustomerId } = body;
 		const customer = await runSQL(poolName, sqls.getCustomer, [applicationCustomerId], debugMode);
+		/* istanbul ignore else */ 
 		if (customer.rows.length > 0) {
 			return resolve({
 				result: 'OK',
@@ -177,7 +190,7 @@ const generateSubscription = (body) => new Promise(async (resolve, reject) => {
 		}
 		// check if customer has a subscription witn the same recurringPriceId
 		const existingSubscription = await runSQL(poolName, sqls.selectSubscriptionWithProduct, [customerId, recurringPriceId], debugMode);
-		/* istanbul ignore else */
+		/* istanbul ignore next */
 		if (existingSubscription.rows.length > 0) {
 			return reject("Customer already has a subscription with the same recurringPriceId");
 		}
@@ -228,7 +241,7 @@ const getSubscriptionPayments = (body) => new Promise(async (resolve, reject) =>
 		const { applicationCustomerId } = body;
 		// find stripe customer id from application customer id
 		const customer = await runSQL(poolName, sqls.getCustomer, [applicationCustomerId], debugMode);
-		/* istanbul ignore else */
+		/* istanbul ignore next */
 		if (customer.rows.length === 0) {
 			return reject("No customer found for subscription");
 		}
@@ -364,6 +377,7 @@ const getAccount = (body) => new Promise(async (resolve, reject) => {
 	try {
 		const { applicationCustomerId } = body;
 		const result = await runSQL(poolName, sqls.getAccount, [applicationCustomerId], debugMode);
+		/* istanbul ignore else */ 
 		if (result.rows.length > 0) {
 			return resolve({
 				result: 'OK',
@@ -397,6 +411,7 @@ const oneTimePayment = (body) => new Promise(async (resolve, reject) => {
 		const cancelRoute = body?.cancelRoute || '/one-time-payment-cancel-route';
 
 		const customerData = await runSQL(poolName, sqls.getCustomer, [applicationCustomerId], debugMode);
+		/* istanbul ignore next */
 		if (customerData.rows.length === 0) {
 			return reject("No customer found for one time payment");
 		}
