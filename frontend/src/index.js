@@ -14,7 +14,7 @@ import {
 
 import { StripeActionPage } from './stripe-action-page';
 
-export default {
+export {
 	init,
 	generateCustomer,
 	getCustomer,
@@ -25,6 +25,6 @@ export default {
 	getAccount,
 	oneTimePayment,
 	getOneTimePaymentStatus,
-	StripeActionPage: StripeActionPage,
+	StripeActionPage,
 	exportedForTesting,
 };
