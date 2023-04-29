@@ -1,4 +1,4 @@
-const {
+import {
 	init,
 	generateCustomer,
 	getCustomer,
@@ -10,11 +10,11 @@ const {
 	oneTimePayment,
 	getOneTimePaymentStatus,
 	exportedForTesting,
-} = require('./tamed-stripe-frontend-api-callers.js');
+} from './tamed-stripe-frontend-api-callers.js';
 
-const { StripeActionPage } = require('./stripe-action-page');
+import { StripeActionPage } from './stripe-action-page';
 
-module.exports = {
+export default {
 	init,
 	generateCustomer,
 	getCustomer,
