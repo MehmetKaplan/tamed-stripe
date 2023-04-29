@@ -1,6 +1,6 @@
 {
 	"name": "tamed-stripe-frontend",
-	"version": "1.0.81",
+	"version": "1.0.107",
 	"description": "The frontend library for the tamed-stripe",
 	"repository": "https://github.com/MehmetKaplan/tamed-stripe",
 	"main": "tamed-stripe-frontend.js",
@@ -21,6 +21,10 @@
 	"dependencies": {},
 	"peerDependencies": {
 		"fetch-lean": "*",
-		"react-native-webview": "11.26.0"
+		"react": "*",
+		"react-native": "*",
+		"react-native-web": "*",
+		"react-native-webview": "*",
+		"react-native-webview-with-web": "*"
 	}
 }

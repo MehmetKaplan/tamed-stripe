@@ -11,3 +11,6 @@ deploy_backend-EXLUDEDFROMGIT.sh
 code-analysis
 test-routes-remote.sh
 tamed-stripe-backend-example
+frontend/web-examples
+.DS_Store
+deleteme*

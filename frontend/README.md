@@ -18,7 +18,7 @@ yarn add tamed-stripe-frontend react-native-webview@11.26.0
 
 ```
 import tsf from 'tamed-stripe-frontend';
-import { StripeActionWebView } from 'tamed-stripe-frontend';
+import { StripeActionPage } from 'tamed-stripe-frontend';
 ```
 
 At this point you can use the library.
@@ -53,7 +53,7 @@ useEffect(() => {
 
 ```
 
-### StripeActionWebView
+### StripeActionPage
 
 Uses `react-native-webview` to show the Stripe action pages.
 
@@ -66,7 +66,7 @@ Uses `react-native-webview` to show the Stripe action pages.
 #### Example
 
 ```react
-<StripeActionWebView
+<StripeActionPage
 	url={accountLinkUrl}
 	setUrl={setAccountLinkUrl}
 />
@@ -142,7 +142,7 @@ setCustomerCheckoutSessionUrl(result.payload.checkoutSession.url);
 ...
 const screen = (customerCheckoutSessionUrl.length > 0)
 		? <View style={{ height: '100%', width: '100%' }}>
-			<StripeActionWebView
+			<StripeActionPage
 				url={customerCheckoutSessionUrl}
 				setUrl={setCustomerCheckoutSessionUrl}
 			/>
@@ -386,7 +386,7 @@ const generateAccount = async () => {
 ...
 const screen = (accountLinkUrl.length > 0)
 	? <View style={{ height: '100%', width: '100%' }}>
-		<StripeActionWebView
+		<StripeActionPage
 			url={accountLinkUrl}
 			setUrl={setAccountLinkUrl}
 		/>
@@ -505,7 +505,7 @@ const oneTimePayment = async () => {
 ...
 const screen = (oneTimePaymentUrl.length > 0)
 		? <View style={{ height: '100%', width: '100%' }}>
-			<StripeActionWebView
+			<StripeActionPage
 				url={oneTimePaymentUrl}
 				setUrl={setOneTimePaymentUrl}
 			/>

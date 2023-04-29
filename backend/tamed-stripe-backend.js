@@ -24,7 +24,24 @@ const closePage = (content, duration) => {
 
 const webViewClose = (body) => new Promise(async (resolve, reject) => {
 	/* istanbul ignore next */
-	return resolve(`<p>Please Close This Window</p>`);
+	return resolve(`
+		<html>
+			<head>
+				<script>
+					function postMessage() {
+						if (window.opener) {
+							window.opener.postMessage(window.location.href, "*");
+							window.close();
+						};
+					}
+					window.onload = postMessage;
+				</script>
+			</head>
+			<body>
+				<p>Please Close This Window</p>
+			</body>
+		</html>
+	`);
 });
 
 const init = (p_params) => new Promise(async (resolve, reject) => {
