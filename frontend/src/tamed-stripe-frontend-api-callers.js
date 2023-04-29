@@ -204,7 +204,7 @@ const getOneTimePaymentStatus = (props) => new Promise(async (resolve, reject) =
 });
 
 
-module.exports = {
+export default {
 	init,
 	generateCustomer,
 	getCustomer,

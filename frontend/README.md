@@ -10,7 +10,7 @@ This is the frontend library for the Tamed Stripe architecture. This library aim
 
 
 ```
-yarn add tamed-stripe-frontend react-native-webview@11.26.0
+yarn add tamed-stripe-frontend react-native-webview@11.26.0 react-native-webview-with-web
 ```
 
 2. import the library

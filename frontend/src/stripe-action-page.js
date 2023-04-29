@@ -26,6 +26,6 @@ const StripeActionPage = (props) => {
 }
 
 /* istanbul ignore next */
-module.exports = {
+export default {
 	StripeActionPage
 };
