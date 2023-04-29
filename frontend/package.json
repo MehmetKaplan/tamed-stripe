@@ -1,30 +1,152 @@
 {
-	"name": "tamed-stripe-frontend",
-	"version": "1.0.107",
-	"description": "The frontend library for the tamed-stripe",
-	"repository": "https://github.com/MehmetKaplan/tamed-stripe",
-	"main": "tamed-stripe-frontend.js",
-	"author": "Mehmet Kaplan",
-	"license": "MIT",
-	"private": false,
-	"scripts": {
-		"test": "jest --runInBand --coverage --no-cache --forceExit "
-	},
-	"devDependencies": {
-		"@babel/core": "^7.21.3",
-		"@babel/preset-env": "^7.20.2",
-		"babel-jest": "^29.5.0",
-		"fetch-lean": "^1.0.5",
-		"jest": "^29.5.0",
-		"tick-log": "^1.1.4"
-	},
-	"dependencies": {},
-	"peerDependencies": {
-		"fetch-lean": "*",
-		"react": "*",
-		"react-native": "*",
-		"react-native-web": "*",
-		"react-native-webview": "*",
-		"react-native-webview-with-web": "*"
-	}
+  "name": "tamed-stripe-frontend",
+  "version": "0.1.0",
+  "description": "test",
+  "main": "lib/commonjs/index",
+  "module": "lib/module/index",
+  "react-native": "src/index",
+  "source": "src/index",
+  "files": [
+    "src",
+    "lib",
+    "android",
+    "ios",
+    "cpp",
+    "*.podspec",
+    "!ios/build",
+    "!android/build",
+    "!android/gradle",
+    "!android/gradlew",
+    "!android/gradlew.bat",
+    "!android/local.properties",
+    "!**/__tests__",
+    "!**/__fixtures__",
+    "!**/__mocks__",
+    "!**/.*"
+  ],
+  "scripts": {
+    "test": "jest",
+    "lint": "eslint \"**/*.{js,ts,tsx}\"",
+    "prepack": "bob build",
+    "release": "release-it"
+  },
+  "keywords": [
+    "react-native",
+    "ios",
+    "android"
+  ],
+  "repository": "https://github.com/MehmetKaplan/tamed-stripe-frontend",
+  "author": "Mehmet Kaplan <mehmet.kaplan@gmail.com> (https://github.com/MehmetKaplan)",
+  "license": "MIT",
+  "bugs": {
+    "url": "https://github.com/MehmetKaplan/tamed-stripe-frontend/issues"
+  },
+  "homepage": "https://github.com/MehmetKaplan/tamed-stripe-frontend#readme",
+  "publishConfig": {
+    "registry": "https://registry.npmjs.org/"
+  },
+  "devDependencies": {
+    "@commitlint/config-conventional": "^17.0.2",
+    "@evilmartians/lefthook": "^1.2.2",
+    "@react-native-community/eslint-config": "^3.0.2",
+    "@release-it/conventional-changelog": "^5.0.0",
+    "@types/jest": "^28.1.2",
+    "@types/react": "~17.0.21",
+    "@types/react-native": "0.70.0",
+    "commitlint": "^17.0.2",
+    "del-cli": "^5.0.0",
+    "eslint": "^8.4.1",
+    "eslint-config-prettier": "^8.5.0",
+    "eslint-plugin-prettier": "^4.0.0",
+    "fetch-lean": "^1.0.5",
+    "jest": "^28.1.1",
+    "pod-install": "^0.1.0",
+    "prettier": "^2.0.5",
+    "react": "18.2.0",
+    "react-native": "0.71.7",
+    "react-native-builder-bob": "^0.20.0",
+    "release-it": "^15.0.0",
+    "tick-log": "^1.1.4",
+    "typescript": "^4.5.2"
+  },
+  "resolutions": {
+    "@types/react": "17.0.21"
+  },
+  "peerDependencies": {
+    "react": "*",
+    "react-native": "*",
+    "react-native-web": "*",
+    "react-native-webview": "*",
+    "react-native-webview-with-web": "*"
+  },
+  "engines": {
+    "node": ">= 16.0.0"
+  },
+  "packageManager": "^yarn@1.22.15",
+  "jest": {
+    "preset": "react-native",
+    "modulePathIgnorePatterns": [
+      "<rootDir>/lib/"
+    ]
+  },
+  "commitlint": {
+    "extends": [
+      "@commitlint/config-conventional"
+    ]
+  },
+  "release-it": {
+    "git": {
+      "commitMessage": "chore: release ${version}",
+      "tagName": "v${version}"
+    },
+    "npm": {
+      "publish": true
+    },
+    "github": {
+      "release": true
+    },
+    "plugins": {
+      "@release-it/conventional-changelog": {
+        "preset": "angular"
+      }
+    }
+  },
+  "eslintConfig": {
+    "root": true,
+    "extends": [
+      "@react-native-community",
+      "prettier"
+    ],
+    "rules": {
+      "prettier/prettier": [
+        "error",
+        {
+          "quoteProps": "consistent",
+          "singleQuote": true,
+          "tabWidth": 2,
+          "trailingComma": "es5",
+          "useTabs": false
+        }
+      ]
+    }
+  },
+  "eslintIgnore": [
+    "node_modules/",
+    "lib/"
+  ],
+  "prettier": {
+    "quoteProps": "consistent",
+    "singleQuote": true,
+    "tabWidth": 2,
+    "trailingComma": "es5",
+    "useTabs": false
+  },
+  "react-native-builder-bob": {
+    "source": "src",
+    "output": "lib",
+    "targets": [
+      "commonjs",
+      "module"
+    ]
+  }
 }
