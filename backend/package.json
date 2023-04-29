@@ -1,6 +1,6 @@
 {
 	"name": "tamed-stripe-backend",
-	"version": "1.0.82",
+	"version": "1.1.4",
 	"description": "The backend library for the tamed-stripe",
 	"repository": "https://github.com/MehmetKaplan/tamed-stripe",
 	"main": "tamed-stripe-backend.js",
