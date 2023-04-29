@@ -8,7 +8,7 @@ import Account from './screens/Account';
 import OneTimePayment from './screens/OneTimePayment';
 import EndApp from './screens/EndApp';
 
-import tsf from 'tamed-stripe-frontend';
+import * as tsf from 'tamed-stripe-frontend';
 
 const apiBackend = "https://development.eseme.one:61983";
 
@@ -21,6 +21,7 @@ export default function App() {
 
 
 	useEffect(() => {
+console.log(`\x1b[1;33mTSF:\n\n${JSON.stringify(tsf, null, 2)}\x1b[0m`); // deleteme
 		tsf.init({
 			apiBackend: apiBackend,
 			routes: {

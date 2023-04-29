@@ -1,7 +1,7 @@
 const fetchLean = require('fetch-lean');
 
 let apiBackend, routes, debugMode;
-const init = async (props) => {
+export const init = async (props) => {
 	debugMode = props.debugMode;
 	/* istanbul ignore next */
 	if (debugMode) console.log(`\x1b[1;33m;API Backend: ${props.apiBackend}\x1b[0m`);
@@ -11,7 +11,7 @@ const init = async (props) => {
 	routes = props.routes;
 };
 
-const backendCaller = (method, route, headers, props, successCallback, failCallback, absoluteURI = false) => new Promise(async (resolve, reject) => {
+export const backendCaller = (method, route, headers, props, successCallback, failCallback, absoluteURI = false) => new Promise(async (resolve, reject) => {
 	let result;
 	/* istanbul ignore next */
 	let l_url = `${absoluteURI ? '' : apiBackend}${route}`;
@@ -33,7 +33,7 @@ const backendCaller = (method, route, headers, props, successCallback, failCallb
 	}
 });
 
-const generateCustomer = (props) => new Promise(async (resolve, reject) => {
+export const generateCustomer = (props) => new Promise(async (resolve, reject) => {
 	try {
 		const header = props?.header ? props.header : {};
 		const body = {};
@@ -56,7 +56,7 @@ const generateCustomer = (props) => new Promise(async (resolve, reject) => {
 	}
 });
 
-const getCustomer = (props) => new Promise(async (resolve, reject) => {
+export const getCustomer = (props) => new Promise(async (resolve, reject) => {
 	try {
 		const header = props?.header ? props.header : {};
 		const body = {};
@@ -69,7 +69,7 @@ const getCustomer = (props) => new Promise(async (resolve, reject) => {
 	}
 });
 
-const generateProduct = (props) => new Promise(async (resolve, reject) => {
+export const generateProduct = (props) => new Promise(async (resolve, reject) => {
 	try {
 		const header = props?.header ? props.header : {};
 		const body = {
@@ -87,7 +87,7 @@ const generateProduct = (props) => new Promise(async (resolve, reject) => {
 	}
 });
 
-const generateSubscription = (props) => new Promise(async (resolve, reject) => {
+export const generateSubscription = (props) => new Promise(async (resolve, reject) => {
 	try {
 		const header = props?.header ? props.header : {};
 		const body = {
@@ -103,7 +103,7 @@ const generateSubscription = (props) => new Promise(async (resolve, reject) => {
 	}
 });
 
-const getSubscriptionPayments = (props) => new Promise(async (resolve, reject) => {
+export const getSubscriptionPayments = (props) => new Promise(async (resolve, reject) => {
 	try {
 		const header = props?.header ? props.header : {};
 		const body = {
@@ -117,7 +117,7 @@ const getSubscriptionPayments = (props) => new Promise(async (resolve, reject) =
 	}
 });
 
-const generateAccount = (props) => new Promise(async (resolve, reject) => {
+export const generateAccount = (props) => new Promise(async (resolve, reject) => {
 	try {
 		const header = props?.header ? props.header : {};
 		const body = {};
@@ -137,7 +137,7 @@ const generateAccount = (props) => new Promise(async (resolve, reject) => {
 	}
 });
 
-const getAccount = (props) => new Promise(async (resolve, reject) => {
+export const getAccount = (props) => new Promise(async (resolve, reject) => {
 	try {
 		const header = props?.header ? props.header : {};
 		const body = {};
@@ -150,8 +150,7 @@ const getAccount = (props) => new Promise(async (resolve, reject) => {
 	}
 });
 
-
-const oneTimePayment = (props) => new Promise(async (resolve, reject) => {
+export const oneTimePayment = (props) => new Promise(async (resolve, reject) => {
 	try {
 		// payoutData: {payoutAmount, payoutAccountId}
 		// items: [{name, unitAmountDecimal}]
@@ -175,9 +174,9 @@ const oneTimePayment = (props) => new Promise(async (resolve, reject) => {
 	}
 });
 
-const getSubscriptionPaymentsByStripeCustomerId = (props) => new Promise(async (resolve, reject) => {
+export const getSubscriptionPaymentsByStripeCustomerId = (props) => new Promise(async (resolve, reject) => {
 	try {
-		const header = props?.header ? props.header : {}; 
+		const header = props?.header ? props.header : {};
 		const body = {
 			customerId: props.customerId,
 		};
@@ -189,9 +188,9 @@ const getSubscriptionPaymentsByStripeCustomerId = (props) => new Promise(async (
 	}
 });
 
-const getOneTimePaymentStatus = (props) => new Promise(async (resolve, reject) => {
+export const getOneTimePaymentStatus = (props) => new Promise(async (resolve, reject) => {
 	try {
-		const header = props?.header ? props.header : {}; 
+		const header = props?.header ? props.header : {};
 		const body = {
 			checkoutSessionId: props.checkoutSessionId,
 		};
@@ -203,19 +202,6 @@ const getOneTimePaymentStatus = (props) => new Promise(async (resolve, reject) =
 	}
 });
 
-
-export default {
-	init,
-	generateCustomer,
-	getCustomer,
-	generateProduct,
-	generateSubscription,
-	getSubscriptionPayments,
-	generateAccount,
-	getAccount,
-	oneTimePayment,
-	getOneTimePaymentStatus,
-	exportedForTesting: {
-		getSubscriptionPaymentsByStripeCustomerId
-	}
+export const exportedForTesting = {
+	getSubscriptionPaymentsByStripeCustomerId
 };

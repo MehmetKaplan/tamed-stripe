@@ -2,7 +2,7 @@ import * as React from 'react';
 import ReactNativeWebviewWithWeb from 'react-native-webview-with-web';
 
 /* istanbul ignore next */
-const StripeActionPage = (props) => {
+export const StripeActionPage = (props) => {
 	const [urlReceived, setUrlReceived] = React.useState(false);
 	const [url, setUrl] = React.useState('');
 	const [waitMessage, setWaitMessage] = React.useState('Stripe process ongoing in new window');
@@ -24,8 +24,3 @@ const StripeActionPage = (props) => {
 			/>
 	);
 }
-
-/* istanbul ignore next */
-export default {
-	StripeActionPage
-};
