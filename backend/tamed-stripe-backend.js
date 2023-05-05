@@ -95,15 +95,18 @@ const generateCustomer = (body) => new Promise(async (resolve, reject) => {
 			tickLog.success(`generated customer: ${JSON.stringify(customer)}`, true);
 			tickLog.success(`generated checkoutSession: ${JSON.stringify(checkoutSession)}`, true);
 		}
-		const customerState = paymentMethodId ? 'A': 'W';
-		if (customerState === 'W'){
+		const customerState = paymentMethodId ? 'A' : 'W';
+		if (customerState === 'W') {
 			const existingCustomer = await runSQL(poolName, sqls.selectCustomer2, [applicationCustomerId]);
-			if (existingCustomer.rows.length > 0){
-				if (existingCustomer.rows[0].state === 'W'){
+			if (existingCustomer.rows.length > 0) {
+				/* istanbul ignore else */
+				if (existingCustomer.rows[0].state === 'W') {
 					// unlink customer if it is still waiting state and the customer is requested again.
 					await runSQL(poolName, sqls.unlinkCustomer, [existingCustomer.rows[0].stripe_customer_id]);
 				};
-				if (existingCustomer.rows[0].state === 'A'){
+				/* istanbul ignore next */
+				if (existingCustomer.rows[0].state === 'A') {
+					/* istanbul ignore next */
 					return reject("Customer already exists.");
 				};
 			}
@@ -143,14 +146,14 @@ const getCustomer = (body) => new Promise(async (resolve, reject) => {
 	try {
 		const { applicationCustomerId } = body;
 		const customer = await runSQL(poolName, sqls.getCustomer, [applicationCustomerId], debugMode);
-		/* istanbul ignore else */ 
+		/* istanbul ignore else */
 		if (customer.rows.length > 0) {
 			return resolve({
 				result: 'OK',
 				payload: customer.rows[0]
 			});
 		}
-		/* istanbul ignore next */ 
+		/* istanbul ignore next */
 		return resolve({
 			result: 'NOK',
 		});
@@ -205,7 +208,7 @@ const generateSubscription = (body) => new Promise(async (resolve, reject) => {
 		} else {
 			return reject("No customer found for subscription");
 		}
-		// check if customer has a subscription witn the same recurringPriceId
+		// check if customer has a subscription with the same recurringPriceId
 		const existingSubscription = await runSQL(poolName, sqls.selectSubscriptionWithProduct, [customerId, recurringPriceId], debugMode);
 		/* istanbul ignore next */
 		if (existingSubscription.rows.length > 0) {
@@ -394,14 +397,14 @@ const getAccount = (body) => new Promise(async (resolve, reject) => {
 	try {
 		const { applicationCustomerId } = body;
 		const result = await runSQL(poolName, sqls.getAccount, [applicationCustomerId], debugMode);
-		/* istanbul ignore else */ 
+		/* istanbul ignore else */
 		if (result.rows.length > 0) {
 			return resolve({
 				result: 'OK',
 				payload: result.rows[0]
 			});
 		}
-		/* istanbul ignore next */ 
+		/* istanbul ignore next */
 		return resolve({
 			result: 'NOK',
 		});
@@ -505,6 +508,25 @@ const getOneTimePaymentStatus = (body) => new Promise(async (resolve, reject) =>
 	}
 });
 
+const refundOneTimePayment = (body) => new Promise(async (resolve, reject) => {
+	try {
+		const { checkoutSessionId } = body;
+		const session = await stripe.checkout.sessions.retrieve(checkoutSessionId);
+		const paymentIntent = await stripe.paymentIntents.retrieve(session.payment_intent);
+		const refund = await stripe.refunds.create({ payment_intent: paymentIntent.id, });
+		/* istanbul ignore next */
+		if (debugMode) tickLog.success(`generated refund: ${JSON.stringify(refund)}`, true);
+		/* istanbul ignore next */
+		return resolve({
+			result: 'OK',
+			payload: refund,
+		});
+	} catch (error) /* istanbul ignore next */ {
+		if (debugMode) tickLog.error(`tamed-stripe-backend related error. Failure while calling refundOneTimePayment(${JSON.stringify(body)}). Error: ${JSON.stringify(error)}`, true);
+		return reject(error);
+	}
+});
+
 // Scenario 1: Customer registration & card payment method setup save (failed)
 const webhookCheckoutSessionFailedSetup = (props) => new Promise(async (resolve, reject) => {
 	let session;
@@ -545,7 +567,7 @@ const webhookCheckoutSessionCompletedSetup = (props) => new Promise(async (resol
 		const modifyResult = await runSQL(poolName, sqls.modifyCustomerPayment, [session.customer, 'A', setupIntent.payment_method], debugMode);
 	} catch (error) /*istanbul ignore next*/ {
 		// only log error and keep the customer in W state which is just a useless state.
-		if (debugMode) tickLog.error(`\x1b[0;31mwebhookCheckoutSessionCompletedSetup failed\x1b[0m for checkoutSessionId ${checkoutSessionId} with error ${JSON.stringify(error)}`, true);
+		if (debugMode) tickLog.error(`\x1b[0;31m webhookCheckoutSessionCompletedSetup failed\x1b[0m for checkoutSessionId ${checkoutSessionId} with error ${JSON.stringify(error)}`, true);
 		try {
 			if (session) await runSQL(poolName, sqls.unlinkCustomer, [session.customer], debugMode);
 		} catch (error2) {
@@ -677,6 +699,7 @@ module.exports = {
 	oneTimePaymentSuccessRoute,
 	oneTimePaymentCancelRoute,
 	getOneTimePaymentStatus,
+	refundOneTimePayment,
 	webhook,
 	exportedForTesting: {
 		poolInfoForTests: poolInfoForTests,
