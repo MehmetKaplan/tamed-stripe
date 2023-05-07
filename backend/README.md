@@ -567,6 +567,38 @@ The `payload.rows[0]` is a database row in the following form:
 ```
 Here the `state = 'P'` means the payment is completed. And you can ues the url in the `hosted_invoice_url` field to show the invoice to the customer.
  
+### refundOneTimePayment
+
+Refunds a **completed** one time payment using the checkout session id.
+
+| Parameter | Type | Description |
+| --- | --- | --- |
+| body | Object | The object that holds the parmeters |
+
+
+#### body
+
+| Key | Type | Value |
+| --- | --- | --- |
+| checkoutSessionId | string | Id of the checkout session. |
+
+#### Returns
+
+The `payload` holds the refund object coming from Stripe.
+```javascript
+{
+	result: 'OK',
+	payload: refund,
+}
+```
+
+#### Example
+
+```javascript
+const checkoutSessionIdToRefund = "cs_XXX"; // completed checkout session id of the payment to be refunded
+await tsb.refundOneTimePayment({ checkoutSessionId: checkoutSessionIdToRefund });
+```
+
 ### webhook
 
 This is a webhook endpoint that can be used to handle the Stripe events. The events are directed to different functions.
