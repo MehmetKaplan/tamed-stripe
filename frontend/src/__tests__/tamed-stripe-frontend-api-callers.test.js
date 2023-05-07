@@ -28,6 +28,7 @@ beforeAll(async () => {
 			"oneTimePayment": "/one-time-payment",
 			"getOneTimePaymentStatus": "/get-one-time-payment-status",
 			"getSubscriptionPaymentsByStripeCustomerId": "/test/get-subscription-payments-by-stripe-customer-id",
+			"refundOneTimePayment": "/refund-one-time-payment",
 		},
 		debugMode: true
 	});
@@ -51,7 +52,7 @@ test('generateCustomer', async () => {
 });
 
 test('getCustomer should rely on backend tests because it requires (A) Active customer', async () => {
-});
+}, 10000);
 
 
 test('generateSubscription and getSubscriptionPayments', async () => {
@@ -88,7 +89,7 @@ test('generateAccount', async () => {
 	});
 	expect(account.payload.id.length).toBeGreaterThan(10);
 	expect(account.payload.accountLinkURL.length).toBeGreaterThan(30);
-});
+}, 10000);
 
 test('getAccount', async () => {
 	const now = new Date().getTime();
@@ -102,7 +103,7 @@ test('getAccount', async () => {
 		applicationCustomerId: applicationCustomerIdNEW
 	});
 	expect(result.payload.stripe_account_id).toBe(account.payload.id);
-});
+}, 10000);
 
 test('oneTimePayment', async () => {
 	const payoutData = {
@@ -129,4 +130,30 @@ test('oneTimePayment', async () => {
 	const result2 = await tsf.getOneTimePaymentStatus({ checkoutSessionId });
 	console.log(`One Time Payment Status : ${JSON.stringify(result2.payload.rows[0], null, 2)}`);
 	expect(result2.payload.rows[0].payout_amount).toBe(payoutData.payoutAmount);
-});
+}, 10000);
+
+test('refundOneTimePayment', async () => {
+	// retrieve this ecample from tamedstripedb database
+	// sql: 
+	// 			select update_time, state, checkout_session_id from tamedstripe.one_time_payments where state = 'P' order by update_time asc limit 1;
+	// 	and update the used checkoutSessionIdToRefund below sql: 
+	// 			update tamedstripe.one_time_payments set checkout_session_id = 'USED IN JEST TESTS - ' || cast(now() as varchar), state = 'W' where checkout_session_id = 'MODIFYME'
+	const checkoutSessionIdToRefund = "cs_test_b1OAx9jWgx0448byt5t2ReDvFnp7QSJT4V0IbXMTqSbOLsZFrglovumBHZ";
+	let response;
+	try {
+		response = await tsf.refundOneTimePayment({ checkoutSessionId: checkoutSessionIdToRefund });
+		if (debugMode) tickLog.success(`response: ${JSON.stringify(response, null, 2)}`);
+		if (response.result === 'OK') {
+			expect(response.result).toBe('OK');
+			// expect id to start with "re"
+			expect(response.payload.id).toMatch(/^re/);
+			expect(response.payload.object).toBe('refund');
+			expect(response.payload.status).toBe('succeeded');
+		} else {
+			tickLog.info(`Please correct the \x1b[1;33mcheckoutSessionIdToRefund\x1b[0m parameter in the \x1b[1;33mtamed-stripe-backend-STEP_5.test.js\x1b[0m file to test the \x1b[1;33mrefund functionality\x1b[0m.`, true);
+		};
+	} catch (error) {
+		tickLog.info(`Error: ${error}.`, true);
+		expect(true).toBe(false);
+	}
+}, 10000);

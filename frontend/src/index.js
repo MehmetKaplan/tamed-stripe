@@ -9,6 +9,7 @@ import {
 	getAccount,
 	oneTimePayment,
 	getOneTimePaymentStatus,
+	refundOneTimePayment,
 	exportedForTesting,
 } from './tamed-stripe-frontend-api-callers.js';
 
@@ -25,6 +26,7 @@ export {
 	getAccount,
 	oneTimePayment,
 	getOneTimePaymentStatus,
+	refundOneTimePayment,
 	StripeActionPage,
 	exportedForTesting,
 };

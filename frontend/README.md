@@ -558,6 +558,40 @@ console.log(`One Time Payment Status : ${JSON.stringify(result.payload.rows[0], 
 
 ```
 
+### refundOneTimePayment
+
+Used to refund a one time payment using the backend [refundOneTimePayment](https://github.com/MehmetKaplan/tamed-stripe/tree/master/backend#refundOneTimePayment).
+
+| Name | Type | Description |
+| --- | --- | --- |
+| props | object | The props object. |
+
+#### props
+
+| Name | Type | Description |
+| --- | --- | --- |
+| checkoutSessionId | string | The checkout session id. |
+
+#### Returns
+
+Returns the refund object created by Stripe.
+
+```javascript
+{
+	result: 'OK',
+	payload: refund,
+}
+```
+
+#### Example
+
+```javascript
+const result = await tsf.refundOneTimePayment({checkoutSessionId});
+console.log(`One Time Payment Refund : ${JSON.stringify(result.payload, null, 2)}`);
+
+```
+
+
 ## More Examples
 
 The example application (made with react-native and Expo) can be found [here](https://github.com/MehmetKaplan/tamed-stripe/blob/master/example/frontend).

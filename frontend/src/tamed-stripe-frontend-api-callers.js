@@ -202,6 +202,19 @@ export const getOneTimePaymentStatus = (props) => new Promise(async (resolve, re
 	}
 });
 
+export const refundOneTimePayment = (props) => new Promise(async (resolve, reject) => {
+	try {
+		const header = props?.header ? props.header : {};
+		const body = {
+			checkoutSessionId: props.checkoutSessionId,
+		};
+		const response = backendCaller('POST', routes.refundOneTimePayment, header, body);
+		return resolve(response);
+	} catch (error) /* istanbul ignore next */ {
+		return reject(error);
+	}
+});
+
 export const exportedForTesting = {
 	getSubscriptionPaymentsByStripeCustomerId
 };
