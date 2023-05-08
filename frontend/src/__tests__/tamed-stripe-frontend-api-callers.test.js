@@ -142,7 +142,7 @@ test('refundOneTimePayment', async () => {
 		or if there is no more checkout session id with state = 'P', then use the example frontend app to generate
 
 	*/
-	const checkoutSessionIdToRefund = "cs_test_b1OAx9jWgx0448byt5t2ReDvFnp7QSJT4V0IbXMTqSbOLsZFrglovumBHZ";
+	const checkoutSessionIdToRefund = "cs_test_b1JsNiiC1sFdF0DGhfbVADGNEkBZRVYoZL1TS66TnseaCy4VRxLNF6TzR5";
 	let response;
 	try {
 		response = await tsf.refundOneTimePayment({ checkoutSessionId: checkoutSessionIdToRefund });
