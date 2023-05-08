@@ -5,9 +5,9 @@ const { runSQL, } = require('tamed-pg');
 
 // The following items are coming from STEP 1
 // REPLACE AREA
-const applicationCustomerId = 'Jest Application Customer-1679581787363';
-const accountId_TR = "acct_1Mop9ECDNsGA70wp";
-const accountId_FR = "acct_1Mop9GC49YYTVK6S";
+const applicationCustomerId = 'Jest Application Customer-1683553167676';
+const accountId_TR = "acct_1N5UHlFtjICWZjcF";
+const accountId_FR = "acct_1N5UHnC5uma25Usk";
 // END OF REPLACE AREA
 
 const logMessages = [];

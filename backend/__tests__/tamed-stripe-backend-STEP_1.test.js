@@ -79,7 +79,7 @@ test('generateCustomer', async () => {
 	expect(customerAtDB.rows[0].customer_object).toEqual(customerData);
 	logMessages.push(`\t\t\x1b[1;33mCustomer payment URL\x1b[0m: \x1b[0;31m${checkoutSessionData.url}\x1b[0m`);
 	logMessages.push(`\t\t\x1b[1;33mcustomerID\x1b[0m: \x1b[0;31m${customerData.id}\x1b[0m`);
-	logMessages.push(`\t\t\x1b[1;applicationCustomerId\x1b[0m: \x1b[0;31m${applicationCustomerId}\x1b[0m`);
+	logMessages.push(`\t\t\x1b[1;33mapplicationCustomerId\x1b[0m: \x1b[0;31m${applicationCustomerId}\x1b[0m`);
 });
 
 test('generateCustomer with same applicationCustomerId', async () => {
@@ -116,9 +116,6 @@ test('generateCustomer with same applicationCustomerId', async () => {
 	expect(customerAtDB.rows.length).toBe(1);
 	expect(customerAtDB.rows[0].stripe_customer_id).toEqual(customerData.id);
 	expect(customerAtDB.rows[0].customer_object).toEqual(customerData);
-	logMessages.push(`\t\t\x1b[1;33mCustomer payment URL\x1b[0m: \x1b[0;31m${checkoutSessionData.url}\x1b[0m`);
-	logMessages.push(`\t\t\x1b[1;33mcustomerID\x1b[0m: \x1b[0;31m${customerData.id}\x1b[0m`);
-	logMessages.push(`\t\t\x1b[1;applicationCustomerId\x1b[0m: \x1b[0;31m${applicationCustomerId}\x1b[0m`);
 });
 
 test('generateAccount (connected account for payouts) in TR', async () => {

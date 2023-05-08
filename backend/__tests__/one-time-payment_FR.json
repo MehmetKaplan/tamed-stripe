@@ -1,11 +1,11 @@
 {
-	"id": "evt_1MopLLCDKfcpGwAfucE1DnQ6",
+	"id": "evt_1N5UZBCDKfcpGwAfUe5oZOpq",
 	"object": "event",
 	"api_version": "2022-11-15",
-	"created": 1679582539,
+	"created": 1683554249,
 	"data": {
 		"object": {
-			"id": "cs_test_b13O8HMca4chaisk5tQd6ibHLFINQfluBdKM0svsv7F7yeXZ95IXkVhTz3",
+			"id": "cs_test_b1nSmwOFeYkvKckigus4xIF6zB9Vd1sUVgRnmmOaFqQGHL6IA3o1ph3A2c",
 			"object": "checkout.session",
 			"after_expiration": null,
 			"allow_promotion_codes": null,
@@ -20,14 +20,15 @@
 			"client_reference_id": null,
 			"consent": null,
 			"consent_collection": null,
-			"created": 1679582194,
+			"created": 1683554193,
 			"currency": "eur",
+			"currency_conversion": null,
 			"custom_fields": [],
 			"custom_text": {
 				"shipping_address": null,
 				"submit": null
 			},
-			"customer": "cus_NZz7DUmOV3mtaB",
+			"customer": "cus_NrChrXptpUZ4fE",
 			"customer_creation": null,
 			"customer_details": {
 				"address": {
@@ -38,15 +39,15 @@
 					"postal_code": "94111",
 					"state": "CA"
 				},
-				"email": "test-1679581787363@yopmail.com",
-				"name": "Jest Customer 1679581787363",
+				"email": "test-1683553167676@yopmail.com",
+				"name": "Jest Customer 1683553167676",
 				"phone": null,
 				"tax_exempt": "none",
 				"tax_ids": []
 			},
 			"customer_email": null,
-			"expires_at": 1679668594,
-			"invoice": "in_1MopLKCDKfcpGwAftXXHETt1",
+			"expires_at": 1683640593,
+			"invoice": "in_1N5UZACDKfcpGwAfFIWwjMrc",
 			"invoice_creation": {
 				"enabled": true,
 				"invoice_data": {
@@ -62,7 +63,7 @@
 			"locale": null,
 			"metadata": {},
 			"mode": "payment",
-			"payment_intent": "pi_3MopLHCDKfcpGwAf0dWb7m5N",
+			"payment_intent": "pi_3N5UZ8CDKfcpGwAf0iKFfX04",
 			"payment_link": null,
 			"payment_method_collection": "always",
 			"payment_method_options": {},
