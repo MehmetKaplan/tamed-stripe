@@ -41,6 +41,7 @@ export default function OneTimePayment(props) {
 
 		setOneTimePaymentUrl(result.payload.url);
 		setCheckoutSessionId(result.payload.id);
+		props.setCheckoutSessionId(result.payload.id);
 		setActionButtonClicked(true);
 	};
 
@@ -62,7 +63,7 @@ export default function OneTimePayment(props) {
 						const result = await props.tsf.getOneTimePaymentStatus({ checkoutSessionId });
 						console.log(`One Time Payment Status : ${JSON.stringify(result.payload, null, 2)}`);
 						await Linking.openURL(result.payload.rows[0].hosted_invoice_url);
-						props.setActiveScreen('EndApp');
+						props.setActiveScreen('Refund');
 					}}
 				/>
 			</View>

@@ -6,6 +6,7 @@ import Customer from './screens/Customer';
 import Subscription from './screens/Subscription';
 import Account from './screens/Account';
 import OneTimePayment from './screens/OneTimePayment';
+import Refund from './screens/Refund';
 import EndApp from './screens/EndApp';
 
 import * as tsf from 'tamed-stripe-frontend';
@@ -18,6 +19,7 @@ export default function App() {
 	const [subscriptionId, setSubscriptionId] = useState('');
 	const [accountId, setAccountId] = useState('');
 	const [applicationCustomerId, setApplicationCustomerId] = useState(`Mobile App Test Application Customer-${(new Date()).getTime()}`);
+	const [checkoutSessionId, setCheckoutSessionId] = useState('');
 
 
 	useEffect(() => {
@@ -32,6 +34,7 @@ export default function App() {
 				"oneTimePayment": "/one-time-payment",
 				"getOneTimePaymentStatus": "/get-one-time-payment-status",
 				"getSubscriptionPaymentsByStripeCustomerId": "/test/get-subscription-payments-by-stripe-customer-id",
+				"refundOneTimePayment": "/refund-one-time-payment",
 			},
 			debugMode: true
 		});
@@ -49,7 +52,10 @@ export default function App() {
 			screen = <Account apiBackend={apiBackend} tsf={tsf} setActiveScreen={setActiveScreen} applicationCustomerId={applicationCustomerId} setAccountId={setAccountId} />
 			break;
 		case 'OneTimePayment':
-			screen = <OneTimePayment apiBackend={apiBackend} tsf={tsf} setActiveScreen={setActiveScreen} applicationCustomerId={applicationCustomerId} accountId={accountId} />
+			screen = <OneTimePayment apiBackend={apiBackend} tsf={tsf} setActiveScreen={setActiveScreen} applicationCustomerId={applicationCustomerId} accountId={accountId} setCheckoutSessionId={setCheckoutSessionId} />
+			break;
+		case 'Refund':
+			screen = <Refund apiBackend={apiBackend} tsf={tsf} setActiveScreen={setActiveScreen} checkoutSessionId={checkoutSessionId}/>
 			break;
 		case 'EndApp':
 			screen = <EndApp />
