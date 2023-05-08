@@ -21,7 +21,6 @@ export default function App() {
 
 
 	useEffect(() => {
-console.log(`\x1b[1;33mTSF:\n\n${JSON.stringify(tsf, null, 2)}\x1b[0m`); // deleteme
 		tsf.init({
 			apiBackend: apiBackend,
 			routes: {

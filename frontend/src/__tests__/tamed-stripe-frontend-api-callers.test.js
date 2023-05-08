@@ -133,11 +133,15 @@ test('oneTimePayment', async () => {
 }, 10000);
 
 test('refundOneTimePayment', async () => {
-	// retrieve this ecample from tamedstripedb database
-	// sql: 
-	// 			select update_time, state, checkout_session_id from tamedstripe.one_time_payments where state = 'P' order by update_time asc limit 1;
-	// 	and update the used checkoutSessionIdToRefund below sql: 
-	// 			update tamedstripe.one_time_payments set checkout_session_id = 'USED IN JEST TESTS - ' || cast(now() as varchar), state = 'W' where checkout_session_id = 'MODIFYME'
+	/*	retrieve this example from tamedstripedb database. SQL: 
+
+
+			select update_time, state, checkout_session_id from tamedstripe.one_time_payments where state = 'P' order by update_time asc limit 1;
+
+
+		or if there is no more checkout session id with state = 'P', then use the example frontend app to generate
+
+	*/
 	const checkoutSessionIdToRefund = "cs_test_b1OAx9jWgx0448byt5t2ReDvFnp7QSJT4V0IbXMTqSbOLsZFrglovumBHZ";
 	let response;
 	try {

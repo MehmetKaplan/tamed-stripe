@@ -26,13 +26,16 @@ beforeAll(async () => {
 });
 
 test('refund of a oneTimePayment with payOut to FR', async () => {
+	/*	retrieve this example from tamedstripedb database. SQL: 
 
-	// retrieve this ecample from tamedstripedb database
-	// sql: 
-	// 			select update_time, state, checkout_session_id from tamedstripe.one_time_payments where state = 'P' order by update_time asc limit 1;
-	// 	and update the used checkoutSessionIdToRefund below sql: 
-	// 			update tamedstripe.one_time_payments set checkout_session_id = 'USED IN JEST TESTS - ' || cast(now() as varchar), state = 'W' where checkout_session_id = 'MODIFYME'
-	const checkoutSessionIdToRefund = "cs_test_b1XzJUWBujCxIfyBomj9jQPnnWqNWFsrB0WXnYk8x76YUXqAoCGXBrEQKV";
+
+			select update_time, state, checkout_session_id from tamedstripe.one_time_payments where state = 'P' order by update_time asc limit 1;
+
+
+		or if there is no more checkout session id with state = 'P', then use the example frontend app to generate
+
+	*/
+	const checkoutSessionIdToRefund = "cs_test_b19cT4j8fkFwgHxQqQV2jRveDiz58x9F6RCmSgaFJX0o5aWMLh9bU61RaN";
 	let response;
 	try {
 		response = await tsb.refundOneTimePayment({ checkoutSessionId: checkoutSessionIdToRefund });
@@ -43,9 +46,15 @@ test('refund of a oneTimePayment with payOut to FR', async () => {
 		tickLog.info(`Error: ${error}.`, true);
 		return;
 	}
-	expect (response.result).toBe('OK');
+	const control = await runSQL(poolName, sqls.selectOneTimePaymentRefund, [checkoutSessionIdToRefund], debugMode);
+	const control2 = await runSQL(poolName, sqls.selectOneTimePayment, [checkoutSessionIdToRefund], debugMode);
+	if (debugMode) tickLog.success(`control.rows[0]: ${JSON.stringify(control.rows[0], null, 2)}`);
+	expect(response.result).toBe('OK');
 	// expect id to start with "re"
-	expect (response.payload.id).toMatch(/^re/);
-	expect (response.payload.object).toBe('refund');
-	expect (response.payload.status).toBe('succeeded');
+	expect(response.payload.id).toMatch(/^re/);
+	expect(response.payload.object).toBe('refund');
+	expect(response.payload.status).toBe('succeeded');
+	expect(control.rows[0].refund_id).toBe(response.payload.id);
+	expect(control.rows[0].checkout_session_id).toBe(checkoutSessionIdToRefund);
+	expect(control2.rows[0].state).toBe("R");
 });

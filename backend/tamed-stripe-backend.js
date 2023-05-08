@@ -514,6 +514,8 @@ const refundOneTimePayment = (body) => new Promise(async (resolve, reject) => {
 		const session = await stripe.checkout.sessions.retrieve(checkoutSessionId);
 		const paymentIntent = await stripe.paymentIntents.retrieve(session.payment_intent);
 		const refund = await stripe.refunds.create({ payment_intent: paymentIntent.id, });
+		await runSQL(poolName, sqls.refundOneTimePayment1, [checkoutSessionId], debugMode);
+		await runSQL(poolName, sqls.refundOneTimePayment2, [checkoutSessionId, refund.id], debugMode);
 		/* istanbul ignore next */
 		if (debugMode) tickLog.success(`generated refund: ${JSON.stringify(refund)}`, true);
 		/* istanbul ignore next */

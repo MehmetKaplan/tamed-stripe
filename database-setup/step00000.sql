@@ -8,6 +8,11 @@
 --                                  |___/
 
 -- TABLES 
+revoke all on tamedstripe.one_time_payment_refunds
+from
+	tamedstripeapp;
+
+drop table tamedstripe.one_time_payment_refunds;
 
 revoke all on tamedstripe.one_time_payments
 from
