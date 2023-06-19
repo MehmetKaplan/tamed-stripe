@@ -19,7 +19,7 @@ export default function Customer(props) {
 			metadata: { "test": "test" },
 			name: `Mobile App Test Customer ${now}`,
 			phone: `1234567890`,
-			address: { "line1": "1234 Main St", "city": "San Francisco", "state": "CA", "postal_code": "94111" },
+			address: { "line1": "77 Massachusetts Avenue", "city": "Cambridge", "state": "MA", "postal_code": "02139", "country": 'US' },
 			publicDomain: props.apiBackend,
 		});
 		setCustomerCheckoutSessionUrl(result.payload.checkoutSession.url);
