@@ -187,6 +187,8 @@ Generates a product that can be used in checkout sessions that is to be a basis 
 | currency | string | Currency of the product. |
 | unitAmountDecimal | number | Unit amount of the product **in CENTS**. |
 | interval | string | Interval of the product. This can be one of following values; `'day'`, `'week'`, `'month'`, `'year'`. |
+| taxBehavior | string | Optional. Tax behavior of the product. This can be one of following values; `'exclusive'`, `'inclusive'`, `'unspecified'`. |
+| taxCode | string | Optional. Tax code of the product. Comes from the [Stripe's Product Tax Categories](https://stripe.com/docs/tax/tax-categories). |
 
 
 #### Returns
@@ -211,6 +213,8 @@ If successful, resolves to below JSON object. Otherwise, rejects with an error m
 		currency: 'usd',
 		unitAmountDecimal: 1000, // This value is in cents, so it is $10.00, 
 		interval: 'month',
+		taxBehavior: 'exclusive',
+		taxCode: 'txcd_30060006' // Stripe tax code for hats. :-) 
 	};
 	let response = await tsb.generateProduct(body);
 ```
@@ -242,6 +246,7 @@ For example below row from the `tamedstripe.subscription_payments` table indicat
 | customerId | string | Stripe customer id that the subscription will be generated for. |
 | recurringPriceId | string | Stripe price id of the recurring price, which should be previously generated using `generateProduct` function. |
 | description | string | Description of the subscription. |
+| automaticTax | object | Optional. Automatic tax settings of the subscription. If to be used following object should be passed: ` { enabled: true }` |
 
 #### Returns
 
@@ -261,6 +266,8 @@ const productProps = {
 	currency: 'usd',
 	unitAmountDecimal: '1234567', // This value is in cents, so it is $12345,67,
 	interval: 'month',
+	taxBehavior: 'exclusive',
+	taxCode: 'txcd_30060006' // Stripe tax code for hats. :-)
 };
 const response2 = await tsb.generateProduct(productProps);
 const priceData = response2.payload.price;
@@ -269,6 +276,7 @@ await tsb.generateSubscription({
 	applicationCustomerId: applicationCustomerId,
 	recurringPriceId: priceData.id,
 	description: description,
+	automaticTax: { enabled: true },
 });
 
 ```
@@ -474,6 +482,7 @@ Additionally, for successfully paid customers, if you need to show your customer
 | items | Array | Array of items to be paid. |
 | payoutData | Object | Payout data for the payment. |
 | publicDomain | String | Public domain of the server, to use the return URLs. |
+| automaticTax | Object | (Optional) Automatic tax data for the payment. If sent, should be the object: `{ enabled: true }` |
 
 
 ##### items
@@ -482,6 +491,7 @@ Additionally, for successfully paid customers, if you need to show your customer
 | --- | --- | --- |
 | name | string | Name of the item. |
 | amount | string | Amount of the item, in cents. |
+| tax_code | string | Tax code of the item. Comes from the [Stripe's Product Tax Categories](https://stripe.com/docs/tax/tax-categories). |
 
 ##### payoutData
 
@@ -506,21 +516,24 @@ Returns the checkoutSession object created by Stripe. The `url` field of the ret
 ```javascript
 const currency = 'eur';
 const items = [
-	{ name: "iPhone", unitAmountDecimal: "100000" },
-	{ name: "iPad", unitAmountDecimal: "150000" },
-	{ name: "iMac", unitAmountDecimal: "200000" },
+	// txcd_30060006 is the tax code for the "Hats" category in https://stripe.com/docs/tax/tax-categories
+	{ name: "Red Hat", unitAmountDecimal: "100000", tax_code: 'txcd_30060006' }, 
+	{ name: "Green Hat", unitAmountDecimal: "200000", tax_code: 'txcd_30060006' },
+	{ name: "Blue Hat", unitAmountDecimal: "300000", tax_code: 'txcd_30060006' },
 ];
 const payoutData = {
 	payoutAmount: "225000",
 	payoutAccountId: "some-account-id-who-will-receive-the-payment",
 	useOnBehalfOf: true
 };
+const automaticTax = { enabled: true };
 const props = {
 	applicationCustomerId,
 	currency,
 	items,
 	payoutData,
 	publicDomain,
+	automaticTax,
 };
 const response3 = await tsb.oneTimePayment(props);
 ```

@@ -22,10 +22,10 @@ beforeAll(async () => {
 		},
 	});
 	poolName = tsb.exportedForTesting.poolInfoForTests.poolName;
-	logMessages.push(`\n\n\n\x1b[1;33mFirst complete the actions in URLs and then replace following customer and account id data in tamed-stripe-backend-STEP_\x1b[0;31m2\x1b[1;33m.test.js and tamed-stripe-backend-STEP_\x1b[0;31m3\x1b[1;33m.test.js files.\x1b[0m\n`);
-	logMessages.push(`\x1b[1;33mThen flush the pm2 logs: \x1b[0m\n`);
+	logMessages.push(`\n\n\n\x1b[1;33mFirst arrange the PM2 actions:\x1b[0m\n`);
 	logMessages.push(`\t\t\t\x1b[0;31mcd ~/.pm2/logs\x1b[0m`);
 	logMessages.push(`\t\t\t\x1b[0;31mpm2 flush tamed-stripe-backend-example\x1b[0m`);
+	logMessages.push(`\n\n\n\x1b[1;33mThen complete below actions in URLs and then replace following customer and account id data in tamed-stripe-backend-STEP_\x1b[0;31m2\x1b[1;33m.test.js and tamed-stripe-backend-STEP_\x1b[0;31m3\x1b[1;33m.test.js files.\x1b[0m\n`);
 
 });
 
@@ -54,7 +54,7 @@ test('generateCustomer', async () => {
 		metadata: { "test": "test" },
 		name: `Jest Customer ${now}`,
 		phone: `1234567890`,
-		address: { "line1": "1234 Main St", "city": "San Francisco", "state": "CA", "postal_code": "94111" },
+		address: { "line1": "77 Massachusetts Avenue", "city": "Cambridge", "state": "MA", "postal_code": "02139", "country": 'US' },
 		publicDomain: "https://development.eseme.one:61983",
 		successRoute: "/generate-customer-success-route",
 		cancelRoute: "/generate-customer-cancel-route",
@@ -78,7 +78,7 @@ test('generateCustomer', async () => {
 	expect(customerAtDB.rows[0].stripe_customer_id).toEqual(customerData.id);
 	expect(customerAtDB.rows[0].customer_object).toEqual(customerData);
 	logMessages.push(`\t\t\x1b[1;33mCustomer payment URL\x1b[0m: \x1b[0;31m${checkoutSessionData.url}\x1b[0m`);
-	logMessages.push(`\t\t\x1b[1;33mcustomerID\x1b[0m: \x1b[0;31m${customerData.id}\x1b[0m`);
+	logMessages.push(`\t\t\x1b[1;33mcustomerID (search with Match Case)\x1b[0m: \x1b[0;31m${customerData.id}\x1b[0m`);
 	logMessages.push(`\t\t\x1b[1;33mapplicationCustomerId\x1b[0m: \x1b[0;31m${applicationCustomerId}\x1b[0m`);
 });
 
@@ -92,7 +92,7 @@ test('generateCustomer with same applicationCustomerId', async () => {
 		metadata: { "test": "test" },
 		name: `Jest Customer ${now}`,
 		phone: `1234567890`,
-		address: { "line1": "1234 Main St", "city": "San Francisco", "state": "CA", "postal_code": "94111" },
+		address: { "line1": "4515 15th Ave S", "city": "Seattle", "state": "WA", "postal_code": "98108" },
 		publicDomain: "https://development.eseme.one:61983",
 		successRoute: "/generate-customer-success-route",
 		cancelRoute: "/generate-customer-cancel-route",

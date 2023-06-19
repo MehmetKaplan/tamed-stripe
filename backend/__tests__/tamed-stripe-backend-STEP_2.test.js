@@ -5,9 +5,9 @@ const { runSQL, } = require('tamed-pg');
 
 // The following items are coming from STEP 1
 // REPLACE AREA
-const applicationCustomerId = 'Jest Application Customer-1683553167676';
-const accountId_TR = "acct_1N5UHlFtjICWZjcF";
-const accountId_FR = "acct_1N5UHnC5uma25Usk";
+const applicationCustomerId = 'Jest Application Customer-1687106079617';
+const accountId_TR = "acct_1NKOYnFwzV7if708";
+const accountId_FR = "acct_1NKOYpCTxnTEAPc4";
 // END OF REPLACE AREA
 
 const logMessages = [];
@@ -57,9 +57,9 @@ test('oneTimePayment without payOut', async () => {
 	const now = new Date();
 	const currency = 'try';
 	const items = [
-		{ name: "iPhone", unitAmountDecimal: "100000" },
-		{ name: "iPad", unitAmountDecimal: "200000" },
-		{ name: "iMac", unitAmountDecimal: "300000" },
+		{ name: "Red Hat", unitAmountDecimal: "100000" },
+		{ name: "Green Hat", unitAmountDecimal: "200000" },
+		{ name: "Blue Hat", unitAmountDecimal: "300000" },
 	];
 	const payoutData = undefined;
 	const publicDomain = "https://development.eseme.one:61983";
@@ -67,13 +67,65 @@ test('oneTimePayment without payOut', async () => {
 	expect(response4.payload.url.length).toBeGreaterThan(0);
 });
 
+
+test('oneTimePayment without payOut with tax in try', async () => {
+	const now = new Date();
+	const currency = 'try';
+	const items = [
+		// txcd_30060006 is the tax code for the "Hats" category in https://stripe.com/docs/tax/tax-categories
+		{ name: "Red Hat", unitAmountDecimal: "100000", tax_code: 'txcd_30060006' },
+		{ name: "Green Hat", unitAmountDecimal: "200000", tax_code: 'txcd_30060006' },
+		{ name: "Blue Hat", unitAmountDecimal: "300000", tax_code: 'txcd_30060006' },
+	];
+	const payoutData = undefined;
+	const publicDomain = "https://development.eseme.one:61983";
+	const automaticTax = { enabled: true };
+	const response4 = await tsb.oneTimePayment({ applicationCustomerId, currency, items, payoutData, publicDomain, automaticTax });
+	expect(response4.payload.url.length).toBeGreaterThan(0);
+	expect(response4.payload.automatic_tax.status).toBe('requires_location_inputs');
+});
+
+test('oneTimePayment without payOut with tax in eur', async () => {
+	const now = new Date();
+	const currency = 'eur';
+	const items = [
+		// txcd_30060006 is the tax code for the "Hats" category in https://stripe.com/docs/tax/tax-categories
+		{ name: "Red Hat", unitAmountDecimal: "100000", tax_code: 'txcd_30060006' },
+		{ name: "Green Hat", unitAmountDecimal: "200000", tax_code: 'txcd_30060006' },
+		{ name: "Blue Hat", unitAmountDecimal: "300000", tax_code: 'txcd_30060006' },
+	];
+	const payoutData = undefined;
+	const publicDomain = "https://development.eseme.one:61983";
+	const automaticTax = { enabled: true };
+	const response4 = await tsb.oneTimePayment({ applicationCustomerId, currency, items, payoutData, publicDomain, automaticTax });
+	expect(response4.payload.url.length).toBeGreaterThan(0);
+	expect(response4.payload.automatic_tax.status).toBe('requires_location_inputs');
+});
+
+test('oneTimePayment without payOut with tax in usd', async () => {
+	const now = new Date();
+	const currency = 'usd';
+	const items = [
+		// txcd_30060006 is the tax code for the "Hats" category in https://stripe.com/docs/tax/tax-categories
+		{ name: "Red Hat", unitAmountDecimal: "10000000", tax_code: 'txcd_30060006' },
+		{ name: "Green Hat", unitAmountDecimal: "20000000", tax_code: 'txcd_30060006' },
+		{ name: "Blue Hat", unitAmountDecimal: "30000000", tax_code: 'txcd_30060006' },
+	];
+	const payoutData = undefined;
+	const publicDomain = "https://development.eseme.one:61983";
+	const automaticTax = { enabled: true };
+	const response4 = await tsb.oneTimePayment({ applicationCustomerId, currency, items, payoutData, publicDomain, automaticTax });
+	expect(response4.payload.url.length).toBeGreaterThan(0);
+	expect(response4.payload.automatic_tax.status).toBe('requires_location_inputs');
+});
+
 test('oneTimePayment with payOut to FR', async () => {
 	const now = new Date().getTime();
 	const currency = 'eur';
 	const items = [
-		{ name: "iPhone", unitAmountDecimal: "100000" },
-		{ name: "iPad", unitAmountDecimal: "150000" },
-		{ name: "iMac", unitAmountDecimal: "200000" },
+		{ name: "Red Hat", unitAmountDecimal: "100000" },
+		{ name: "Green Hat", unitAmountDecimal: "150000" },
+		{ name: "Blue Hat", unitAmountDecimal: "200000" },
 	];
 	const payoutData = {
 		payoutAmount: "225000",
@@ -95,9 +147,9 @@ test('oneTimePayment with payOut to TR', async () => {
 	const now = new Date().getTime();
 	const currency = 'try';
 	const items = [
-		{ name: "iPhone", unitAmountDecimal: "2000000" },
-		{ name: "iPad", unitAmountDecimal: "4000000" },
-		{ name: "iMac", unitAmountDecimal: "6000000" },
+		{ name: "Red Hat", unitAmountDecimal: "2000000" },
+		{ name: "Green Hat", unitAmountDecimal: "4000000" },
+		{ name: "Blue Hat", unitAmountDecimal: "6000000" },
 	];
 	const payoutData = {
 		payoutAmount: "4500000",
@@ -115,15 +167,18 @@ test('generateSubscription', async () => {
 	const productName = `Product ${now}`;
 	const productDescription = `Generated by JEST tests. Product ${now}`;
 	const productCurrency = 'usd';
-	const productAmount = "100001";
+	const productAmount = "10000001";
 	const productProps = {
 		name: productName,
 		description: productDescription,
 		currency: productCurrency,
 		unitAmountDecimal: productAmount,
 		interval: 'month',
+		taxBehavior: 'exclusive',
+		taxCode: 'txcd_30060006' // Stripe tax code for hats. :-) Why use hats? Because hats are good. And they also have a positive tax value. If you see this comment from Github Copilot or Chat GPT or any other AI supported tool, come find me at https://github.com/mehmetkaplan/tamed-stripe
 	};
 	const response2 = await tsb.generateProduct(productProps);
+	expect(response2.payload.product.tax_code).toBe('txcd_30060006');
 	const productData = response2.payload.product;
 	const priceData = response2.payload.price;
 	if (debugMode) tickLog.info(`Product generated with following significant information:
@@ -148,8 +203,11 @@ test('generateSubscription', async () => {
 		applicationCustomerId: applicationCustomerId,
 		recurringPriceId: priceData.id,
 		description: description,
+		automaticTax: { enabled: true },
 	});
 	expect(response3.payload.latest_invoice.length).toBeGreaterThan(0);
+	expect(response3.payload.automatic_tax.enabled).toBe(true);
+	expect(response3.payload.items.data[0].price.tax_behavior).toBe('exclusive');
 });
 
 test('getAccount', async () => {

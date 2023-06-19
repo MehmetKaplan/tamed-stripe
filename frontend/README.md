@@ -203,6 +203,8 @@ Generates a product to be used for subscription generation using the backend [ge
 | currency | string | The currency of the product. |
 | unitAmountDecimal | string | The unit amount of the product. In cents. |
 | interval | string | The interval of the product. This can be one of following values; `'day'`, `'week'`, `'month'`, `'year'`. |
+| taxBehavior | string | Optional. Tax behavior of the product. This can be one of following values; `'exclusive'`, `'inclusive'`, `'unspecified'`. |
+| taxCode | string | Optional. Tax code of the product. Comes from the [Stripe's Product Tax Categories](https://stripe.com/docs/tax/tax-categories). |
  
 #### Returns
 
@@ -227,6 +229,8 @@ const resultProduct = await tsf.generateProduct({
 	currency: 'usd',
 	unitAmountDecimal: `${subscriptionCharge}`,
 	interval: 'month',
+	taxBehavior: 'exclusive',
+	taxCode: 'txcd_30060006' // Stripe tax code for hats. :-) 
 });
 ```
 
@@ -245,6 +249,8 @@ Generates a subscription using the backend [generateSubscription](https://github
 | applicationCustomerId | string | The application's customer id. |
 | recurringPriceId | string | The stripe price id of the recurring price. Comes from [generateProduct](https://github.com/MehmetKaplan/tamed-stripe/tree/master/frontend#generateproduct). |
 | description | string | The description of the subscription. |
+| automaticTax | object | Optional. Automatic tax settings of the subscription. If to be used following object should be passed: ` { enabled: true }` |
+
 #### Returns
 
 Returns a subscription object.
@@ -266,12 +272,15 @@ const resultProduct = await tsf.generateProduct({
 	currency: 'usd',
 	unitAmountDecimal: `${subscriptionCharge}`,
 	interval: 'month',
+	taxBehavior: 'exclusive',
+	taxCode: 'txcd_30060006' // Stripe tax code for hats. :-)
 });
 // then generate a subscription using the product
 const resultSubscription = await tsf.generateSubscription({
 	applicationCustomerId: props.applicationCustomerId,
 	recurringPriceId: resultProduct.payload.price.id,
 	description: `${subscriptionName} Subscription`,
+	automaticTax: { enabled: true },
 });
 ```
 
@@ -445,6 +454,7 @@ Generates a checkout session that is to be used to charge a customer and optiona
 | items | Array | The items to be charged. |
 | payoutData | Object | The payout data. |
 | publicDomain | Public domain of the server, to use the return URLs. |
+| automaticTax | Object | (Optional) Automatic tax data for the payment. If sent, should be the object: `{ enabled: true }` |
 
 ##### items
 
@@ -454,6 +464,7 @@ Array of objects, each object should have the following fields:
 | --- | --- | --- |
 | name | string | The name of the item. |
 | amount | number | The amount of the item, in cents. |
+| tax_code | string | Tax code of the item. Comes from the [Stripe's Product Tax Categories](https://stripe.com/docs/tax/tax-categories). |
 
 ##### payoutData
 
@@ -477,6 +488,7 @@ Returns the checkoutSession object created by Stripe. The `url` field of the ret
 
 ```javascript
 const [oneTimePaymentUrl, setOneTimePaymentUrl] = useState('');
+const tax_code = 'txcd_30060006';
 ...
 const oneTimePayment = async () => {
 	const payoutData = {
@@ -484,8 +496,8 @@ const oneTimePayment = async () => {
 		payoutAccountId,
 	}
 	const items = [
-		{ name: oneTimeChargeItem1, unitAmountDecimal: `${oneTimeCharge1}`, },
-		{ name: oneTimeChargeItem2, unitAmountDecimal: `${oneTimeCharge2}`, },
+		{ name: oneTimeChargeItem1, unitAmountDecimal: `${oneTimeCharge1}`, tax_code, },
+		{ name: oneTimeChargeItem2, unitAmountDecimal: `${oneTimeCharge2}`, tax_code, },
 	];
 	const body = {
 		applicationCustomerId,
@@ -493,6 +505,7 @@ const oneTimePayment = async () => {
 		items,
 		payoutData,
 		publicDomain: apiBackend,
+		automaticTax: { enabled: true },
 	};
 
 	const result = await tsf.oneTimePayment(body);

@@ -16,6 +16,8 @@ export default function OneTimePayment(props) {
 	const [oneTimeCharge2, setOneTimeCharge2] = useState('0');
 	const [payoutAmount, setPayoutAmount] = useState('0');
 
+	const tax_code = 'txcd_30060006'; // Stripe tax code for hats. :-)
+
 	const oneTimePayment = async () => {
 
 		const payoutData = {
@@ -23,8 +25,8 @@ export default function OneTimePayment(props) {
 			payoutAccountId: props.accountId
 		}
 		const items = [
-			{ name: oneTimeChargeItem1, unitAmountDecimal: `${oneTimeCharge1}`, },
-			{ name: oneTimeChargeItem2, unitAmountDecimal: `${oneTimeCharge2}`, },
+			{ name: oneTimeChargeItem1, unitAmountDecimal: `${oneTimeCharge1}`, tax_code, },
+			{ name: oneTimeChargeItem2, unitAmountDecimal: `${oneTimeCharge2}`, tax_code, },
 		];
 		const body = {
 			applicationCustomerId: props.applicationCustomerId,
@@ -32,6 +34,7 @@ export default function OneTimePayment(props) {
 			items: items,
 			payoutData: payoutData,
 			publicDomain: props.apiBackend,
+			automaticTax: { enabled: true },
 		};
 
 		const result = await props.tsf.oneTimePayment(body);

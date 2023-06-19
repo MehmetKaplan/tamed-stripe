@@ -79,6 +79,8 @@ export const generateProduct = (props) => new Promise(async (resolve, reject) =>
 			unitAmountDecimal: props.unitAmountDecimal,
 			interval: props.interval,
 		};
+		if (props?.taxBehavior) body.taxBehavior = props.taxBehavior;
+		if (props?.taxCode) body.taxCode = props.taxCode;
 		const response = await backendCaller('POST', routes.generateProduct, header, body);
 		return resolve(response);
 	} catch (error) /* istanbul ignore next */ {
@@ -95,6 +97,7 @@ export const generateSubscription = (props) => new Promise(async (resolve, rejec
 			recurringPriceId: props.recurringPriceId,
 			description: props.description,
 		};
+		if (props?.automaticTax) body.automaticTax = props.automaticTax;
 		const response = await backendCaller('POST', routes.generateSubscription, header, body);
 		return resolve(response);
 	} catch (error) /* istanbul ignore next */ {
@@ -165,6 +168,8 @@ export const oneTimePayment = (props) => new Promise(async (resolve, reject) => 
 
 		body.successRoute = props?.successRoute;
 		body.cancelRoute = props?.cancelRoute;
+
+		body.automaticTax = props?.automaticTax;
 
 		const response = await backendCaller('POST', routes.oneTimePayment, header, body);
 		return resolve(response);

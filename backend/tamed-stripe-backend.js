@@ -74,6 +74,7 @@ const generateCustomer = (body) => new Promise(async (resolve, reject) => {
 			name,
 			phone,
 			address,
+			expand: ['tax'],
 		};
 		/* istanbul ignore else */
 		if (paymentMethodId) {
@@ -165,24 +166,23 @@ const getCustomer = (body) => new Promise(async (resolve, reject) => {
 
 const generateProduct = (body) => new Promise(async (resolve, reject) => {
 	try {
-		const { name, description, currency, unitAmountDecimal, interval } = body;
-		// interval can be one of day, week, month, or year
-		const product = await stripe.products.create({ name, description });
+		const { name, description, currency, unitAmountDecimal, interval, taxBehavior, taxCode } = body;
+		const productData = { name, description };
+		if (taxCode) productData.tax_code = taxCode;
+		const product = await stripe.products.create(productData);
 		const priceData = {
 			product: product.id,
 			unit_amount_decimal: unitAmountDecimal,
 			currency: currency,
 		}
+		// interval can be one of day, week, month, or year
 		/* istanbul ignore else */
 		if (['day', 'week', 'month', 'year'].includes(interval)) priceData.recurring = { interval };
+		// taxBehavior can be one of 'unspecified', 'exclusive', or 'inclusive'
+		/* istanbul ignore else */
+		if (['unspecified', 'exclusive', 'inclusive'].includes(taxBehavior)) priceData.tax_behavior = taxBehavior;
 		const price = await stripe.prices.create(priceData);
-		/* istanbul ignore next  */
-		if (debugMode) tickLog.success(`generated product: ${JSON.stringify(product)}`, true);
-		/* istanbul ignore next */
-		if (debugMode) tickLog.success(`generated price: ${JSON.stringify(price)}`, true);
 		const insertResult = await runSQL(poolName, sqls.insertProduct, [product.id, name, description, currency, unitAmountDecimal, /* istanbul ignore next */(interval ? interval : ''), JSON.stringify(product), JSON.stringify(price)]);
-		/* istanbul ignore next */
-		if (debugMode) tickLog.info(`Product insert result: ${JSON.stringify(insertResult)}`, true);
 		return resolve({
 			result: 'OK',
 			payload: {
@@ -199,7 +199,7 @@ const generateProduct = (body) => new Promise(async (resolve, reject) => {
 // Scenario 2: subscription first and next recurring payments (success & failed)
 const generateSubscription = (body) => new Promise(async (resolve, reject) => {
 	try {
-		const { applicationCustomerId, recurringPriceId, description } = body;
+		const { applicationCustomerId, recurringPriceId, description, automaticTax } = body;
 		let customerId;
 		const customer = await runSQL(poolName, sqls.getCustomer, [applicationCustomerId], debugMode);
 		/* istanbul ignore else */
@@ -214,11 +214,14 @@ const generateSubscription = (body) => new Promise(async (resolve, reject) => {
 		if (existingSubscription.rows.length > 0) {
 			return reject("Customer already has a subscription with the same recurringPriceId");
 		}
-		const subscription = await stripe.subscriptions.create({
+		const subscriptionData = {
 			customer: customerId,
 			items: [{ price: recurringPriceId }], // for subscriptions, we assume there is only one item
 			description: description,
-		});
+		};
+		if (automaticTax) subscriptionData.automatic_tax = automaticTax;
+		const subscription = await stripe.subscriptions.create(subscriptionData);
+
 		/* istanbul ignore next */
 		if (debugMode) tickLog.success(`generated subscription: ${JSON.stringify(subscription)}`, true);
 		// stripe_subscription_id, stripe_customer_id, stripe_product_id, description, currency, 
@@ -292,18 +295,6 @@ const cancelSubscription = (body) => new Promise(async (resolve, reject) => {
 		return reject(error);
 	}
 });
-
-const convertItems = (currency, items) => {
-	const retVal = [];
-	for (let i = 0; i < items.length; i++) {
-		const item = items[i];
-		retVal.push({
-			price_data: { currency, currency, product_data: { name: item.name, }, unit_amount_decimal: item.unitAmountDecimal, },
-			quantity: 1,
-		});
-	}
-	return retVal;
-}
 
 const generateAccount = (body) => new Promise(async (resolve, reject) => {
 	let { applicationCustomerId, email, publicDomain, refreshUrlRoute, returnUrlRoute, country, capabilities } = body;
@@ -422,11 +413,27 @@ const getItemsTotalPrice = (items) => {
 	return totalPrice;
 }
 
+const convertItems = (currency, items) => {
+	const retVal = [];
+	for (let i = 0; i < items.length; i++) {
+		const item = items[i];
+		retVal.push({
+			price_data: {
+				currency,
+				product_data: { name: item.name, tax_code: item.tax_code },
+				unit_amount_decimal: item.unitAmountDecimal,
+			},
+			quantity: 1,
+		});
+	}
+	return retVal;
+}
+
 const oneTimePayment = (body) => new Promise(async (resolve, reject) => {
 	try {
 		// payoutData: {payoutAmount, payoutAccountId}
 		// items: [{name, unitAmountDecimal}]
-		const { applicationCustomerId, currency, items, payoutData, publicDomain, } = body;
+		const { applicationCustomerId, currency, items, payoutData, publicDomain, automaticTax } = body;
 		const successRoute = body?.successRoute || '/one-time-payment-success-route';
 		const cancelRoute = body?.cancelRoute || '/one-time-payment-cancel-route';
 
@@ -463,6 +470,12 @@ const oneTimePayment = (body) => new Promise(async (resolve, reject) => {
 			payment_intent_data: paymentIntentParams,
 			success_url: successUrl,
 			cancel_url: cancelUrl,
+		};
+
+		// automaticTax can be {enabled: true}		
+		if (automaticTax) {
+			checkoutSessionParams["automatic_tax"] = automaticTax;
+			checkoutSessionParams["customer_update"] = { address: 'auto' };
 		};
 		const checkoutSession = await stripe.checkout.sessions.create(checkoutSessionParams);
 		/* istanbul ignore next */
