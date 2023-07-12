@@ -224,8 +224,9 @@ const generateSubscription = (body) => new Promise(async (resolve, reject) => {
 		try {
 			subscription = await stripe.subscriptions.create(subscriptionData);
 		} catch (err) /* istanbul ignore next */ {
+			tickLog.info(`Subscription generation failed for body: ${JSON.stringify(body)} with error ${JSON.stringify(err)}`, true);
 			if (unlinkIfSubscriptionFails) await runSQL(poolName, sqls.unlinkCustomer, [customerId]);
-			throw err;
+			throw "UnlinkedApplicationCustomerBecauseSubscriptionFailed";
 		}
 
 		/* istanbul ignore next */

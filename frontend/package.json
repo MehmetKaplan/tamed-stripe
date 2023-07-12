@@ -1,6 +1,6 @@
 {
   "name": "tamed-stripe-frontend",
-  "version": "1.1.9",
+  "version": "1.1.10",
   "description": "test",
   "main": "lib/commonjs/index",
   "module": "lib/module/index",
