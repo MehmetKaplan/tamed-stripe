@@ -250,6 +250,7 @@ Generates a subscription using the backend [generateSubscription](https://github
 | recurringPriceId | string | The stripe price id of the recurring price. Comes from [generateProduct](https://github.com/MehmetKaplan/tamed-stripe/tree/master/frontend#generateproduct). |
 | description | string | The description of the subscription. |
 | automaticTax | object | Optional. Automatic tax settings of the subscription. If to be used following object should be passed: ` { enabled: true }` |
+| unlinkIfSubscriptionFails | boolean | Optional. If set to true, the customer will be unlinked from the application if the subscription fails. |
 
 #### Returns
 
@@ -281,6 +282,7 @@ const resultSubscription = await tsf.generateSubscription({
 	recurringPriceId: resultProduct.payload.price.id,
 	description: `${subscriptionName} Subscription`,
 	automaticTax: { enabled: true },
+	unlinkIfSubscriptionFails: true,
 });
 ```
 

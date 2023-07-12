@@ -204,6 +204,7 @@ test('generateSubscription', async () => {
 		recurringPriceId: priceData.id,
 		description: description,
 		automaticTax: { enabled: true },
+		unlinkIfSubscriptionFails: true,
 	});
 	expect(response3.payload.latest_invoice.length).toBeGreaterThan(0);
 	expect(response3.payload.automatic_tax.enabled).toBe(true);

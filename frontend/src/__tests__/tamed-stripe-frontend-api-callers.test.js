@@ -68,6 +68,7 @@ test('generateSubscription and getSubscriptionPayments', async () => {
 		applicationCustomerId: applicationCustomerId,
 		recurringPriceId: resultProduct.payload.price.id,
 		description: `Frontend Jest Subscription - ${now}`,
+		unlinkIfSubscriptionFails: true,
 	});
 	tickLog.info(`Subscription : ${JSON.stringify(resultSubscription.payload, null, 2)}`, true);
 	// wait 10 seconds for the webhook to fire

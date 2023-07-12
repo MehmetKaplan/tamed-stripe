@@ -96,6 +96,7 @@ export const generateSubscription = (props) => new Promise(async (resolve, rejec
 			applicationCustomerId: props.applicationCustomerId,
 			recurringPriceId: props.recurringPriceId,
 			description: props.description,
+			unlinkIfSubscriptionFails: props.unlinkIfSubscriptionFails,
 		};
 		if (props?.automaticTax) body.automaticTax = props.automaticTax;
 		const response = await backendCaller('POST', routes.generateSubscription, header, body);

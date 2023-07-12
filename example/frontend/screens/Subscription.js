@@ -23,6 +23,7 @@ export default function Subscription(props) {
 			recurringPriceId: resultProduct.payload.price.id,
 			description: `${subscriptionName} Subscription`,
 			automaticTax: { enabled: true },
+			unlinkIfSubscriptionFails: true,
 		});
 		console.log(`Subscription : ${JSON.stringify(resultSubscription.payload, null, 2)}`);
 		props.setSubscriptionId(resultSubscription.payload.id);

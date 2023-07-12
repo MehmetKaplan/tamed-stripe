@@ -86,6 +86,7 @@ test('subscriptionPayment - next 2 months', async () => {
 		applicationCustomerId: l_applicationCustomerId,
 		recurringPriceId: priceData.id,
 		description: description,
+		unlinkIfSubscriptionFails: true,
 	});
 	expect(response3.payload.latest_invoice.length).toBeGreaterThan(0);
 

@@ -28,7 +28,7 @@
     "test": "jest",
     "lint": "eslint \"**/*.{js,ts,tsx}\"",
     "prepack": "bob build",
-    "release": "release-it"
+    "release": "release-it --no-requireCleanWorkingDir"
   },
   "keywords": [
     "react-native",

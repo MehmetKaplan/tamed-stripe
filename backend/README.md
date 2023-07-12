@@ -247,6 +247,7 @@ For example below row from the `tamedstripe.subscription_payments` table indicat
 | recurringPriceId | string | Stripe price id of the recurring price, which should be previously generated using `generateProduct` function. |
 | description | string | Description of the subscription. |
 | automaticTax | object | Optional. Automatic tax settings of the subscription. If to be used following object should be passed: ` { enabled: true }` |
+| unlinkIfSubscriptionFails | boolean | Optional. If set to `true`, then the customer will be unlinked from the application if the subscription fails. |
 
 #### Returns
 
@@ -277,6 +278,7 @@ await tsb.generateSubscription({
 	recurringPriceId: priceData.id,
 	description: description,
 	automaticTax: { enabled: true },
+	unlinkIfSubscriptionFails: true,
 });
 
 ```

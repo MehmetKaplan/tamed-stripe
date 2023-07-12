@@ -90,6 +90,7 @@ test('cancelSubscription', async () => {
 		applicationCustomerId: applicationCustomerId,
 		recurringPriceId: priceData.id,
 		description: description,
+		unlinkIfSubscriptionFails: true,
 	});
 
 	const subscriptionAtDB = await runSQL(poolName, sqls.selectSubscription, [response3.payload.id], debugMode);

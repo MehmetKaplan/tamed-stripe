@@ -199,7 +199,7 @@ const generateProduct = (body) => new Promise(async (resolve, reject) => {
 // Scenario 2: subscription first and next recurring payments (success & failed)
 const generateSubscription = (body) => new Promise(async (resolve, reject) => {
 	try {
-		const { applicationCustomerId, recurringPriceId, description, automaticTax } = body;
+		const { applicationCustomerId, recurringPriceId, description, automaticTax, unlinkIfSubscriptionFails } = body;
 		let customerId;
 		const customer = await runSQL(poolName, sqls.getCustomer, [applicationCustomerId], debugMode);
 		/* istanbul ignore else */
@@ -220,7 +220,13 @@ const generateSubscription = (body) => new Promise(async (resolve, reject) => {
 			description: description,
 		};
 		if (automaticTax) subscriptionData.automatic_tax = automaticTax;
-		const subscription = await stripe.subscriptions.create(subscriptionData);
+		let subscription;
+		try {
+			subscription = await stripe.subscriptions.create(subscriptionData);
+		} catch (err) /* istanbul ignore next */ {
+			if (unlinkIfSubscriptionFails) await runSQL(poolName, sqls.unlinkCustomer, [customerId]);
+			throw err;
+		}
 
 		/* istanbul ignore next */
 		if (debugMode) tickLog.success(`generated subscription: ${JSON.stringify(subscription)}`, true);
