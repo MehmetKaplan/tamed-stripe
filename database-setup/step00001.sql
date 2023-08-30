@@ -39,7 +39,7 @@ create table tamedstripe.customers (
 	update_time timestamp not null,
 	email varchar(255) not null,
 	name varchar(255) not null,
-	phone varchar(255) not null,
+	phone varchar(255),
 	address jsonb not null,
 	metadata jsonb not null,
 	checkout_session_id varchar(255), -- initial checkout to define payment method
