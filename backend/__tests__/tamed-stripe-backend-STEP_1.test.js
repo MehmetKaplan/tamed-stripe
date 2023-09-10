@@ -145,7 +145,7 @@ test('generateAccount (connected account for payouts) in TR', async () => {
 	expect(accountAtDB.rows[0].account_object).toEqual(accountData);
 	logMessages.push(`\t\t\x1b[1;33mAccount URL\x1b[0m: \x1b[0;31m${accountData.accountLinkURL}\x1b[0m`);
 	logMessages.push(`\t\t\x1b[1;33maccountId_TR\x1b[0m: \x1b[0;31m${accountData.id}\x1b[0m`);
-	logMessages.push(`\t\t\x1b[1;33mapplicationCustomerId_TR\x1b[0m: \x1b[0;31m${applicationCustomerIdTR}\x1b[0m`);
+	logMessages.push(`\t\t\x1b[1;33mapplicationCustomerId_TR (no need to replace)\x1b[0m: \x1b[0;31m${applicationCustomerIdTR}\x1b[0m`);
 });
 
 test('generateAccount (connected account for payouts) in FR', async () => {
@@ -175,6 +175,6 @@ test('generateAccount (connected account for payouts) in FR', async () => {
 	expect(accountAtDB.rows[0].account_object).toEqual(accountData);
 	logMessages.push(`\t\t\x1b[1;33mAccount URL\x1b[0m: \x1b[0;31m${accountData.accountLinkURL}\x1b[0m`);
 	logMessages.push(`\t\t\x1b[1;33maccountId_FR\x1b[0m: \x1b[0;31m${accountData.id}\x1b[0m`);
-	logMessages.push(`\t\t\x1b[1;33mapplicationCustomerId_FR\x1b[0m: \x1b[0;31m${applicationCustomerIdFR}\x1b[0m`);
+	logMessages.push(`\t\t\x1b[1;33mapplicationCustomerId_FR (no need to replace)\x1b[0m: \x1b[0;31m${applicationCustomerIdFR}\x1b[0m`);
 });
 

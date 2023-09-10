@@ -9,9 +9,9 @@ const applicationCustomerIdNEW = `Frontend Jest Test Customer-${(new Date()).get
 
 // The following items are coming from BACKEND TESTS STEP 1
 // REPLACE AREA
-const customerID = 'cus_O6bmqCOgPWOWF5';
-const applicationCustomerId = 'Jest Application Customer-1687106079617';
-const accountId_TR = "acct_1NKOYnFwzV7if708";
+const customerID = 'cus_Oc6zvSZ7gXNwkg';
+const applicationCustomerId = 'Jest Application Customer-1694372002256';
+const accountId_TR = "acct_1Nosl6CKPFNZJmuR";
 // END OF REPLACE AREA
 
 beforeAll(async () => {
