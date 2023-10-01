@@ -158,7 +158,7 @@ export const oneTimePayment = (props) => new Promise(async (resolve, reject) => 
 	try {
 		// payoutData: {payoutAmount, payoutAccountId}
 		// items: [{name, unitAmountDecimal}]
-		// applicationCustomerId, customerId, currency, items, payoutData, publicDomain,
+		// applicationCustomerId, customerId, currency, items, payoutData, publicDomain, newCustomerParams
 		const header = props?.header ? props.header : {};
 		const body = {};
 		body.applicationCustomerId = props.applicationCustomerId;
@@ -166,6 +166,8 @@ export const oneTimePayment = (props) => new Promise(async (resolve, reject) => 
 		body.items = props.items;
 		body.payoutData = props.payoutData;
 		body.publicDomain = props.publicDomain;
+
+		if (props?.newCustomerParams) body.newCustomerParams = props.newCustomerParams;
 
 		body.successRoute = props?.successRoute;
 		body.cancelRoute = props?.cancelRoute;

@@ -34,6 +34,7 @@ beforeAll(async () => {
 	});
 });
 
+
 test('generateCustomer', async () => {
 	const now = new Date().getTime();
 	const result = await tsf.generateCustomer({
@@ -131,6 +132,35 @@ test('oneTimePayment', async () => {
 	const result2 = await tsf.getOneTimePaymentStatus({ checkoutSessionId });
 	console.log(`One Time Payment Status : ${JSON.stringify(result2.payload.rows[0], null, 2)}`);
 	expect(result2.payload.rows[0].payout_amount).toBe(payoutData.payoutAmount);
+}, 10000);
+
+test('oneTimePayment with newCustomerParams', async () => {
+	const now = new Date().getTime();
+	const items = [
+		{ name: `Frontend Jest Test Item 1`, unitAmountDecimal: `11111111`, },
+		{ name: `Frontend Jest Test Item 2`, unitAmountDecimal: `22222222`, },
+	];
+	const newCustomerParams = {
+		email: `test-${now}@yopmail.com`,
+		name: `Test Customer ${now}`,
+		address: {country: 'TR', city:'İstanbul'},
+	};
+	const body = {
+		applicationCustomerId: `oneTimePayment with newCustomerParams Test ${new Date().getTime()}`,
+		currency: 'usd',
+		items: items,
+		publicDomain: apiBackend,
+		newCustomerParams
+	};
+
+	const result = await tsf.oneTimePayment(body);
+	console.log(`One Time Payment Checkout : ${JSON.stringify(result.payload, null, 2)}`);
+	expect(result.payload.url.length).toBeGreaterThan(30);
+
+	const checkoutSessionId = result.payload.id;
+	const result2 = await tsf.getOneTimePaymentStatus({ checkoutSessionId });
+	console.log(`One Time Payment Status : ${JSON.stringify(result2.payload.rows[0], null, 2)}`);
+	expect(result2.payload.rows[0].checkout_session_id.length).toBeGreaterThan(30);
 }, 10000);
 
 test('refundOneTimePayment', async () => {

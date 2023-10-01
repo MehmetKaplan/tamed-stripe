@@ -440,13 +440,29 @@ const oneTimePayment = (body) => new Promise(async (resolve, reject) => {
 	try {
 		// payoutData: {payoutAmount, payoutAccountId}
 		// items: [{name, unitAmountDecimal}]
-		const { applicationCustomerId, currency, items, payoutData, publicDomain, automaticTax } = body;
+		const { applicationCustomerId, currency, items, payoutData, publicDomain, automaticTax, newCustomerParams } = body;
 		const successRoute = body?.successRoute || '/one-time-payment-success-route';
 		const cancelRoute = body?.cancelRoute || '/one-time-payment-cancel-route';
 
-		const customerData = await runSQL(poolName, sqls.getCustomer, [applicationCustomerId], debugMode);
+		let customerData = await runSQL(poolName, sqls.getCustomer, [applicationCustomerId], debugMode);
+		
+		// If there is no customer, generate one
+		if ((customerData.rows.length === 0) && (newCustomerParams)){
+			newCustomerParams.expand = ['tax'];
+			if (newCustomerParams.email) newCustomerParams.email = newCustomerParams.email.toLowerCase().trim();
+			// description,
+			// metadata,
+			// name,
+			// phone,
+			// address,
+			const customer = await stripe.customers.create(newCustomerParams);
+			// should be same as generateCustomer
+			await runSQL(poolName, sqls.insertCustomer, [applicationCustomerId, customer.id, 'A', customer.email, customer.name, customer.phone, customer.address, JSON.stringify(customer.metadata), null, '', JSON.stringify(customer)]);
+			// re-fetch the new data, unnecessary but assures data is in same format as initial customerData
+			customerData = await runSQL(poolName, sqls.getCustomer, [applicationCustomerId], debugMode);
+		}
 		/* istanbul ignore next */
-		if (customerData.rows.length === 0) {
+		else if (customerData.rows.length === 0) {
 			return reject("No customer found for one time payment");
 		}
 		const customerId = customerData.rows[0].stripe_customer_id;

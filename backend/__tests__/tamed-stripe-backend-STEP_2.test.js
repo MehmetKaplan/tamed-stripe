@@ -67,6 +67,26 @@ test('oneTimePayment without payOut', async () => {
 	expect(response4.payload.url.length).toBeGreaterThan(0);
 });
 
+test('oneTimePayment with newCustomerParams', async () => {
+	const now = Date.now();
+	let applicationCustomerId = `oneTimePayment with newCustomerParams test - ${now}`;
+	const currency = 'try';
+	const items = [
+		{ name: "Red Hat", unitAmountDecimal: "100000" },
+		{ name: "Green Hat", unitAmountDecimal: "200000" },
+		{ name: "Blue Hat", unitAmountDecimal: "300000" },
+	];
+	const payoutData = undefined;
+	const publicDomain = "https://development.eseme.one:61983";
+	const newCustomerParams = {
+		email: `test-${now}@yopmail.com`,
+		name: `Test Customer ${now}`,
+		address: {country: 'TR', city:'İstanbul'},
+	};
+	const response4 = await tsb.oneTimePayment({ applicationCustomerId, currency, items, payoutData, publicDomain, newCustomerParams });
+	expect(response4.payload.url.length).toBeGreaterThan(0);
+});
+
 
 test('oneTimePayment without payOut with tax in try', async () => {
 	const now = new Date();

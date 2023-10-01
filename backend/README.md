@@ -485,6 +485,7 @@ Additionally, for successfully paid customers, if you need to show your customer
 | payoutData | Object | Payout data for the payment. |
 | publicDomain | String | Public domain of the server, to use the return URLs. |
 | automaticTax | Object | (Optional) Automatic tax data for the payment. If sent, should be the object: `{ enabled: true }` |
+| newCustomerParams | Object | (Optional) This is only for oneTimePayment scenarios where no persistent customer exists, like the subscription or saved payment method scenarios. If sent, a new customer will be generated with the given parameters if there is no existing customer with the `applicationCustomerId` parameter. |
 
 
 ##### items
@@ -501,6 +502,17 @@ Additionally, for successfully paid customers, if you need to show your customer
 | --- | --- | --- |
 | payoutAmount | string | Amount to be paid to the payee, in cents. |
 | payoutAccountId | string | Stripe account id of the payee. |
+
+##### newCustomerParams
+
+| Key | Type | Value |
+| --- | --- | --- |
+| email | string | Email of the customer. |
+| description | string | Description of the customer. |
+| metadata | Object | Metadata for the customer, you can embed andy data within this object, it is kept in Stripe servers also. |
+| name | string | Name of the customer. |
+| phone | string | Phone number of the customer. |
+| address | Object | Address of the customer. |
 
 #### Returns
 

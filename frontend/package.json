@@ -1,6 +1,6 @@
 {
   "name": "tamed-stripe-frontend",
-  "version": "1.1.11",
+  "version": "1.1.12",
   "description": "test",
   "main": "lib/commonjs/index",
   "module": "lib/module/index",
@@ -28,7 +28,7 @@
     "test": "jest",
     "lint": "eslint \"**/*.{js,ts,tsx}\"",
     "prepack": "bob build",
-    "release": "release-it --no-requireCleanWorkingDir"
+    "release": "release-it --no-git.requireCleanWorkingDir"
   },
   "keywords": [
     "react-native",
