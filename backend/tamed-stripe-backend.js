@@ -449,6 +449,7 @@ const oneTimePayment = (body) => new Promise(async (resolve, reject) => {
 		// If there is no customer, generate one
 		if ((customerData.rows.length === 0) && (newCustomerParams)){
 			newCustomerParams.expand = ['tax'];
+			/* istanbul ignore next */
 			if (newCustomerParams.email) newCustomerParams.email = newCustomerParams.email.toLowerCase().trim();
 			// description,
 			// metadata,
@@ -461,8 +462,7 @@ const oneTimePayment = (body) => new Promise(async (resolve, reject) => {
 			// re-fetch the new data, unnecessary but assures data is in same format as initial customerData
 			customerData = await runSQL(poolName, sqls.getCustomer, [applicationCustomerId], debugMode);
 		}
-		/* istanbul ignore next */
-		else if (customerData.rows.length === 0) {
+		else /* istanbul ignore next */ if (customerData.rows.length === 0) {
 			return reject("No customer found for one time payment");
 		}
 		const customerId = customerData.rows[0].stripe_customer_id;
