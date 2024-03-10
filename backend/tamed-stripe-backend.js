@@ -128,7 +128,7 @@ const generateCustomer = (body) => new Promise(async (resolve, reject) => {
 
 const generateCustomerSuccessRoute = (body) => new Promise(async (resolve, reject) => {
 	/* istanbul ignore next */
-	return resolve(closePage(`<h1>Success!</h1><p>You can close this window now.</p><br>${debugMode ? JSON.stringify(body) : ''}`, 3000));
+	return resolve(closePage(`<br><br><h1>Success!</h1><p>You can close this window now.</p><br><br>`, 3000));
 });
 
 const generateCustomerCancelRoute = (body) => new Promise(async (resolve, reject) => {
