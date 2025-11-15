@@ -102,9 +102,61 @@ Values `'saturday'` and `'sunday'` removed from:
 
 ---
 
-## 3. Promotion Codes and Discount Structure Changes
+## 3. Account Link Type Breaking Changes
 
-### 3.1 Coupon Field Removed from Discount Object
+### 3.1 Deprecated Account Link Types Removed
+
+**Affected Files:**
+- `/backend/tamed-stripe-backend.js` (lines 326-331, 363-368)
+
+#### Current Code:
+```javascript
+// Line 326-331
+const accountLinkForW = await stripe.accountLinks.create({
+  account: result.rows[0].stripe_account_id,
+  refresh_url: refreshUrl,
+  return_url: returnUrl,
+  type: 'account_onboarding'
+});
+
+// Line 363-368
+const accountLink = await stripe.accountLinks.create({
+  account: account.id,
+  refresh_url: refreshUrl,
+  return_url: returnUrl,
+  type: 'account_onboarding'
+});
+```
+
+#### Breaking Change:
+**⚠️ Removed in API version 2023-08-16 (Stripe v13.0.0):**
+
+The following values were removed from `AccountLinkCreateParams.type`:
+- `custom_account_update` 
+- `custom_account_verification`
+
+**Required Values:**
+Use these standard values instead:
+- `account_onboarding` - For initial account setup
+- `account_update` - For updating existing account information
+
+**Reference:** 
+- [Stripe Node.js v13.0.0 Changelog](https://github.com/stripe/stripe-node/blob/master/CHANGELOG.md#1300---2023-08-16)
+- [Stripe API Reference - Account Links](https://stripe.com/docs/api/account_links/create#create_account_link-type)
+- [PR #1872](https://github.com/stripe/stripe-node/pull/1872)
+
+**Action Required:**  
+✅ **No code change needed** - Code already uses `'account_onboarding'` which is correct.  
+✅ **Parameters `refresh_url` and `return_url` remain unchanged** - These parameters are still required and functional.
+
+**Impact Analysis:**
+The current codebase correctly uses `account_onboarding` for the AccountLink type parameter. Both `refresh_url` and `return_url` parameters continue to work as expected in all API versions from 2022-11-15 through 2025-10-29.clover.
+
+---
+
+## 4. Promotion Codes and Discount Structure Changes
+
+### 4.1 Coupon Field Removed from Discount Object
 
 **Affected Files:**
 - Potentially webhook handlers if they access `discount.coupon` directly
@@ -135,9 +187,9 @@ grep -r "discount\|coupon" backend/
 
 ---
 
-## 4. Account Session Components Removed
+## 5. Account Session Components Removed
 
-### 4.1 Balance Report Components Removed
+### 5.1 Balance Report Components Removed
 
 **Breaking Changes:**
 Removed from `AccountSession.components` and `AccountSessionCreateParams.components`:
@@ -154,9 +206,9 @@ The codebase doesn't currently use `AccountSession`, so no changes needed.
 
 ---
 
-## 5. Payment Method Update Restrictions
+## 6. Payment Method Update Restrictions
 
-### 5.1 Link and Pay By Bank Update Removed
+### 6.1 Link and Pay By Bank Update Removed
 
 **Breaking Change:**
 Removed support for updating `link` and `pay_by_bank` payment methods via `PaymentMethodUpdateParams`.
@@ -171,9 +223,9 @@ The codebase doesn't currently call `stripe.paymentMethods.update()` for these p
 
 ---
 
-## 6. Subscription Schedule Iterations Parameter Removed
+## 7. Subscription Schedule Iterations Parameter Removed
 
-### 6.1 Iterations Field Removed
+### 7.1 Iterations Field Removed
 
 **Affected Structures:**
 - `InvoiceCreatePreviewParams.schedule_details.phases[].iterations`
@@ -191,27 +243,27 @@ The codebase doesn't currently use `SubscriptionSchedule` functionality with ite
 
 ---
 
-## 7. New Features and Enhancements (Non-Breaking)
+## 8. New Features and Enhancements (Non-Breaking)
 
 The following are **additions** to the API that don't require code changes but may be useful:
 
-### 7.1 New Payment Methods Added
+### 8.1 New Payment Methods Added
 - `mb_way` (MB WAY payments - Portugal)
 - `crypto` (Cryptocurrency payments)
 - `twint` (Swiss mobile payment)
 - `satispay` (Italian payment method)
 - `pix` (Brazilian instant payment - already supported but enhanced)
 
-### 7.2 Payment Intent Enhancements
+### 8.2 Payment Intent Enhancements
 - `amount_details` field added for detailed amount breakdown
 - `payment_details` field for extended payment information
 - `excluded_payment_method_types` to exclude specific payment types
 
-### 7.3 Customer Enhancements
+### 8.3 Customer Enhancements
 - `business_name` and `individual_name` fields added to Customer object
 - Tax provider configuration support
 
-### 7.4 Checkout Session Enhancements
+### 8.4 Checkout Session Enhancements
 - `name_collection` for collecting customer names
 - `branding_settings` for custom branding
 - `excluded_payment_method_types` support
@@ -220,9 +272,9 @@ The following are **additions** to the API that don't require code changes but m
 
 ---
 
-## 8. Test Files Update Required
+## 9. Test Files Update Required
 
-### 8.1 Mock Event API Versions
+### 9.1 Mock Event API Versions
 
 **Affected Files:**
 - `/backend/__tests__/generate-subscription-event.json`
@@ -257,9 +309,9 @@ Test fixtures should match the target API version to ensure tests validate again
 
 ---
 
-## 9. Webhook Event Changes
+## 10. Webhook Event Changes
 
-### 9.1 New Webhook Events Available
+### 10.1 New Webhook Events Available
 
 Your webhook configuration should be reviewed for these new events:
 
@@ -288,9 +340,9 @@ account.updated
 
 ---
 
-## 10. Error Codes Updates
+## 11. Error Codes Updates
 
-### 10.1 New Error Codes
+### 11.1 New Error Codes
 
 New error codes that may be returned:
 
@@ -316,9 +368,9 @@ New error codes that may be returned:
 
 ---
 
-## 11. Compatibility and Type Changes
+## 12. Compatibility and Type Changes
 
-### 11.1 Nullable vs Optional Property Changes
+### 12.1 Nullable vs Optional Property Changes
 
 For TypeScript users or those checking property existence:
 
@@ -336,9 +388,9 @@ JavaScript-based, no TypeScript types used - minimal impact.
 
 ---
 
-## 12. Summary of Required Actions
+## 13. Summary of Required Actions
 
-### 12.1 Mandatory Changes
+### 13.1 Mandatory Changes
 
 | Priority | File/Area | Change Required | Breaking? |
 |----------|-----------|-----------------|-----------|
@@ -347,7 +399,7 @@ JavaScript-based, no TypeScript types used - minimal impact.
 | 🟡 MEDIUM | Test fixtures | Update `api_version` in JSON test files | No |
 | 🟢 LOW | Webhook config | Review and potentially add new event types | No |
 
-### 12.2 Code Changes Required: **NONE**
+### 13.2 Code Changes Required: **NONE**
 
 **✅ Good News:** The current codebase does NOT require direct code modifications for this upgrade!
 
@@ -357,8 +409,9 @@ The breaking changes in the API primarily affect features NOT currently used:
 - Account session components (not used)
 - Payment method updates for link/pay_by_bank (not used)
 - Subscription schedule iterations (not used)
+- AccountLink deprecated types (already using correct values)
 
-### 12.3 Testing Required
+### 13.3 Testing Required
 
 After upgrading the Stripe library:
 
@@ -386,7 +439,7 @@ After upgrading the Stripe library:
 
 ---
 
-## 13. Migration Steps (Recommended Order)
+## 14. Migration Steps (Recommended Order)
 
 ### Step 1: Preparation
 1. ✅ Review this entire document
@@ -424,7 +477,7 @@ After upgrading the Stripe library:
 
 ---
 
-## 14. Rollback Plan
+## 15. Rollback Plan
 
 If issues are discovered post-deployment:
 
@@ -441,7 +494,7 @@ If issues are discovered post-deployment:
 
 ---
 
-## 15. Additional Resources
+## 16. Additional Resources
 
 ### Official Stripe Documentation:
 - [Stripe API Versioning Guide](https://stripe.com/docs/api/versioning)
@@ -460,7 +513,7 @@ If issues are discovered post-deployment:
 
 ---
 
-## 16. Questions and Support
+## 17. Questions and Support
 
 If you encounter issues during the upgrade:
 
@@ -480,7 +533,7 @@ This upgrade from Stripe API version 2022-11-15 to 2025-10-29.clover is **SAFE**
 3. ✅ Update test fixtures
 4. ✅ Thorough testing
 
-All breaking changes affect features not currently used by this library. However, comprehensive testing is critical due to this being a library dependency for multiple systems.
+All breaking changes affect features not currently used by this library, or the codebase already uses the correct values (e.g., AccountLink types). However, comprehensive testing is critical due to this being a library dependency for multiple systems.
 
 **Generated:** 2025-11-15  
 **Analyst:** GitHub Copilot  

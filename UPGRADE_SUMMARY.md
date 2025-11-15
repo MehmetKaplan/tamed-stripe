@@ -71,6 +71,7 @@ npm test
 3. ✅ Account session components removed - **Not used**
 4. ✅ Payment method update restrictions - **Not used**
 5. ✅ Subscription schedule iterations removed - **Not used**
+6. ✅ AccountLink deprecated types removed - **Already using correct values**
 
 ### New Features Available (Optional to use):
 - New payment methods: MB WAY, Crypto, Twint, Satispay
