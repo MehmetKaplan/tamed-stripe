@@ -272,9 +272,92 @@ The following are **additions** to the API that don't require code changes but m
 
 ---
 
-## 9. Test Files Update Required
+## 9. Checkout Session Return URL Requirements
 
-### 9.1 Mock Event API Versions
+### 9.1 New UI Mode and Return URL Parameter
+
+**Affected Files:**
+- `/backend/tamed-stripe-backend.js` (lines 87-93, 487-496, 503)
+
+#### API Changes in v2023-10-11 (Stripe v13.10.0):
+
+New parameters added to `Checkout.SessionCreateParams`:
+- `ui_mode` - Controls whether Checkout is hosted or embedded
+- `return_url` - Required when using `ui_mode: 'embedded'`
+- `redirect_on_completion` - Controls post-completion behavior
+- `success_url` changed from required to **optional**
+
+**Reference:** 
+- [Stripe Node.js v13.10.0 Changelog](https://github.com/stripe/stripe-node/blob/master/CHANGELOG.md#13100---2023-10-11)
+- [PR #1920](https://github.com/stripe/stripe-node/pull/1920)
+
+#### Current Code (Traditional Hosted Checkout):
+```javascript
+// Line 87-93 - Customer generation
+const checkoutSession = await stripe.checkout.sessions.create({
+  payment_method_types: ['card'],
+  mode: 'setup',
+  customer: customer.id,
+  success_url: successUrl,
+  cancel_url: cancelUrl,
+});
+
+// Line 487-503 - One-time payment
+const checkoutSessionParams = {
+  mode: 'payment',
+  customer: customerId,
+  currency: currency,
+  line_items: stripeItems,
+  invoice_creation: { enabled: true },
+  payment_intent_data: paymentIntentParams,
+  success_url: successUrl,
+  cancel_url: cancelUrl,
+};
+const checkoutSession = await stripe.checkout.sessions.create(checkoutSessionParams);
+```
+
+#### Impact Analysis:
+
+**Current Implementation:**
+- ✅ Uses traditional hosted Checkout mode (default when `ui_mode` not specified)
+- ✅ Uses `success_url` and `cancel_url` (correct for hosted mode)
+- ✅ Does NOT use `ui_mode: 'embedded'`
+
+**Embedded Checkout Requirements (if migrating):**
+When using embedded Checkout (`ui_mode: 'embedded'`), the requirements change:
+- `return_url` becomes **required**
+- `success_url` is **not used** (will be ignored)
+- `cancel_url` is **not used** (will be ignored)
+
+**Example for Embedded Mode (NOT currently used):**
+```javascript
+const checkoutSession = await stripe.checkout.sessions.create({
+  payment_method_types: ['card'],
+  mode: 'setup',
+  customer: customer.id,
+  ui_mode: 'embedded',        // NEW: enables embedded checkout
+  return_url: returnUrl,       // REQUIRED with embedded mode
+  // success_url and cancel_url are not used in embedded mode
+});
+```
+
+**Action Required:**  
+✅ **No code change needed** - Current code uses traditional hosted Checkout mode.  
+ℹ️ **Future consideration**: If migrating to embedded Checkout, replace `success_url`/`cancel_url` with `return_url` and add `ui_mode: 'embedded'`.
+
+**Breaking Change Context:**
+The user's concern about `return_url` being required relates to the new embedded Checkout feature. However, this is NOT a breaking change for existing code using hosted Checkout. It's an **additive change** - existing code continues to work without modification.
+
+**Key Points:**
+1. Traditional hosted Checkout (current usage) - uses `success_url` and `cancel_url` ✅
+2. New embedded Checkout (optional) - uses `return_url` and `ui_mode: 'embedded'` 
+3. The codebase is not affected as it doesn't use embedded Checkout
+
+---
+
+## 10. Test Files Update Required
+
+### 10.1 Mock Event API Versions
 
 **Affected Files:**
 - `/backend/__tests__/generate-subscription-event.json`
@@ -309,9 +392,9 @@ Test fixtures should match the target API version to ensure tests validate again
 
 ---
 
-## 10. Webhook Event Changes
+## 11. Webhook Event Changes
 
-### 10.1 New Webhook Events Available
+### 11.1 New Webhook Events Available
 
 Your webhook configuration should be reviewed for these new events:
 
@@ -340,9 +423,9 @@ account.updated
 
 ---
 
-## 11. Error Codes Updates
+## 12. Error Codes Updates
 
-### 11.1 New Error Codes
+### 12.1 New Error Codes
 
 New error codes that may be returned:
 
@@ -368,9 +451,9 @@ New error codes that may be returned:
 
 ---
 
-## 12. Compatibility and Type Changes
+## 13. Compatibility and Type Changes
 
-### 12.1 Nullable vs Optional Property Changes
+### 13.1 Nullable vs Optional Property Changes
 
 For TypeScript users or those checking property existence:
 
@@ -388,9 +471,9 @@ JavaScript-based, no TypeScript types used - minimal impact.
 
 ---
 
-## 13. Summary of Required Actions
+## 14. Summary of Required Actions
 
-### 13.1 Mandatory Changes
+### 14.1 Mandatory Changes
 
 | Priority | File/Area | Change Required | Breaking? |
 |----------|-----------|-----------------|-----------|
@@ -399,7 +482,7 @@ JavaScript-based, no TypeScript types used - minimal impact.
 | 🟡 MEDIUM | Test fixtures | Update `api_version` in JSON test files | No |
 | 🟢 LOW | Webhook config | Review and potentially add new event types | No |
 
-### 13.2 Code Changes Required: **NONE**
+### 14.2 Code Changes Required: **NONE**
 
 **✅ Good News:** The current codebase does NOT require direct code modifications for this upgrade!
 
@@ -410,8 +493,9 @@ The breaking changes in the API primarily affect features NOT currently used:
 - Payment method updates for link/pay_by_bank (not used)
 - Subscription schedule iterations (not used)
 - AccountLink deprecated types (already using correct values)
+- Embedded Checkout return_url requirement (not using embedded mode)
 
-### 13.3 Testing Required
+### 14.3 Testing Required
 
 After upgrading the Stripe library:
 
@@ -439,7 +523,7 @@ After upgrading the Stripe library:
 
 ---
 
-## 14. Migration Steps (Recommended Order)
+## 15. Migration Steps (Recommended Order)
 
 ### Step 1: Preparation
 1. ✅ Review this entire document
@@ -477,7 +561,7 @@ After upgrading the Stripe library:
 
 ---
 
-## 15. Rollback Plan
+## 16. Rollback Plan
 
 If issues are discovered post-deployment:
 
@@ -494,7 +578,7 @@ If issues are discovered post-deployment:
 
 ---
 
-## 16. Additional Resources
+## 17. Additional Resources
 
 ### Official Stripe Documentation:
 - [Stripe API Versioning Guide](https://stripe.com/docs/api/versioning)
@@ -513,7 +597,7 @@ If issues are discovered post-deployment:
 
 ---
 
-## 17. Questions and Support
+## 18. Questions and Support
 
 If you encounter issues during the upgrade:
 

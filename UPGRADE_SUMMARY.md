@@ -72,8 +72,10 @@ npm test
 4. ✅ Payment method update restrictions - **Not used**
 5. ✅ Subscription schedule iterations removed - **Not used**
 6. ✅ AccountLink deprecated types removed - **Already using correct values**
+7. ✅ Embedded Checkout return_url requirement - **Not using embedded mode**
 
 ### New Features Available (Optional to use):
+- **Embedded Checkout** with `ui_mode` and `return_url` parameters
 - New payment methods: MB WAY, Crypto, Twint, Satispay
 - Enhanced payment intent details
 - Customer business/individual name fields
