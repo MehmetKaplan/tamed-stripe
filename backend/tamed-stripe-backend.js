@@ -626,7 +626,8 @@ const webhookSubscriptionInvoicePaid = (event) => new Promise(async (resolve, re
 		const periodStart = new Date(invoice.lines.data[0].period.start * 1000);
 		const periodEnd = new Date(invoice.lines.data[0].period.end * 1000);
 		// stripe_subscription_id, invoice_id, hosted_invoice_url, insert_time, unit_amount_decimal, currency, state, subscription_covered_from, subscription_covered_to, subscription_payment_object
-		await runSQL(poolName, sqls.insertSubscriptionPayment, [invoice.subscription, invoice.id, invoice.hosted_invoice_url, `${invoice.amount_paid}`, invoice.currency, /* istanbul ignore next */ (invoice.status === 'paid') ? 'P' : 'F', periodStart, periodEnd, event], debugMode);
+		// await runSQL(poolName, sqls.insertSubscriptionPayment, [invoice.subscription, invoice.id, invoice.hosted_invoice_url, `${invoice.amount_paid}`, invoice.currency, /* istanbul ignore next */ (invoice.status === 'paid') ? 'P' : 'F', periodStart, periodEnd, event], debugMode); // API level 2022-11-15 
+		await runSQL(poolName, sqls.insertSubscriptionPayment, [invoice.parent.subscription_details.subscription, invoice.id, invoice.hosted_invoice_url, `${invoice.amount_paid}`, invoice.currency, /* istanbul ignore next */ (invoice.status === 'paid') ? 'P' : 'F', periodStart, periodEnd, event], debugMode); // API level 2025-10-29.clover		
 		return resolve({
 			result: 'OK',
 			payload: undefined,

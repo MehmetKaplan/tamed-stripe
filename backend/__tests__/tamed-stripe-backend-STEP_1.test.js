@@ -30,13 +30,13 @@ beforeAll(async () => {
 });
 
 afterAll(async () => {
-	tickLog.info(`\x1b[1;33m***************************************************************\x1b[0m`,true);
-	tickLog.info(`\x1b[1;33m******************____ _____ _____ ____    _ ******************\x1b[0m`,true);
-	tickLog.info(`\x1b[1;33m******************/ ___|_   _| ____|  _ \  / |******************\x1b[0m`,true);
-	tickLog.info(`\x1b[1;33m******************\___ \ | | |  _| | |_) | | |******************\x1b[0m`,true);
-	tickLog.info(`\x1b[1;33m****************** ___) || | | |___|  __/  | |******************\x1b[0m`,true);
-	tickLog.info(`\x1b[1;33m******************|____/ |_| |_____|_|     |_|******************\x1b[0m`,true);
-	tickLog.info(`\x1b[1;33m***************************************************************\x1b[0m`,true);
+	tickLog.info(`\x1b[1;33m*********************************************************************\x1b[0m`,true);
+	tickLog.info(`\x1b[1;33m******************   ____ _____ _____ ____    _    ******************\x1b[0m`,true);
+	tickLog.info(`\x1b[1;33m******************  / ___|_   _| ____|  _ \  / |   ******************\x1b[0m`,true);
+	tickLog.info(`\x1b[1;33m******************  \___ \ | | |  _| | |_) | | |   ******************\x1b[0m`,true);
+	tickLog.info(`\x1b[1;33m******************   ___) || | | |___|  __/  | |   ******************\x1b[0m`,true);
+	tickLog.info(`\x1b[1;33m******************  |____/ |_| |_____|_|     |_|   ******************\x1b[0m`,true);
+	tickLog.info(`\x1b[1;33m*********************************************************************\x1b[0m`,true);
 	logMessages.forEach((message) => {
 		tickLog.info(message, true);
 	});
@@ -78,8 +78,8 @@ test('generateCustomer', async () => {
 	expect(customerAtDB.rows[0].stripe_customer_id).toEqual(customerData.id);
 	expect(customerAtDB.rows[0].customer_object).toEqual(customerData);
 	logMessages.push(`\t\t\x1b[1;33mCustomer payment URL\x1b[0m: \x1b[0;31m${checkoutSessionData.url}\x1b[0m`);
-	logMessages.push(`\t\t\x1b[1;33mcustomerID (search with Match Case)\x1b[0m: \x1b[0;31m${customerData.id}\x1b[0m`);
-	logMessages.push(`\t\t\x1b[1;33mapplicationCustomerId\x1b[0m: \x1b[0;31m${applicationCustomerId}\x1b[0m`);
+	logMessages.push(`\t\t\x1b[1;33mcustomerID (no need to replace)\x1b[0m: \x1b[0;31m${customerData.id}\x1b[0m`);
+	logMessages.push(`\t\t\x1b[1;33mapplicationCustomerId (3 places)\x1b[0m: \x1b[0;31m${applicationCustomerId}\x1b[0m`);
 });
 
 test('generateCustomer with same applicationCustomerId', async () => {
@@ -144,7 +144,7 @@ test('generateAccount (connected account for payouts) in TR', async () => {
 	expect(accountAtDB.rows[0].stripe_account_id).toEqual(accountData.id);
 	expect(accountAtDB.rows[0].account_object).toEqual(accountData);
 	logMessages.push(`\t\t\x1b[1;33mAccount URL\x1b[0m: \x1b[0;31m${accountData.accountLinkURL}\x1b[0m`);
-	logMessages.push(`\t\t\x1b[1;33maccountId_TR\x1b[0m: \x1b[0;31m${accountData.id}\x1b[0m`);
+	logMessages.push(`\t\t\x1b[1;33maccountId_TR (2 replaces in Step 2 and Step 1 files, 1 each)\x1b[0m: \x1b[0;31m${accountData.id}\x1b[0m`);
 	logMessages.push(`\t\t\x1b[1;33mapplicationCustomerId_TR (no need to replace)\x1b[0m: \x1b[0;31m${applicationCustomerIdTR}\x1b[0m`);
 });
 
@@ -174,7 +174,7 @@ test('generateAccount (connected account for payouts) in FR', async () => {
 	expect(accountAtDB.rows[0].stripe_account_id).toEqual(accountData.id);
 	expect(accountAtDB.rows[0].account_object).toEqual(accountData);
 	logMessages.push(`\t\t\x1b[1;33mAccount URL\x1b[0m: \x1b[0;31m${accountData.accountLinkURL}\x1b[0m`);
-	logMessages.push(`\t\t\x1b[1;33maccountId_FR\x1b[0m: \x1b[0;31m${accountData.id}\x1b[0m`);
+	logMessages.push(`\t\t\x1b[1;33maccountId_FR (1 replace)\x1b[0m: \x1b[0;31m${accountData.id}\x1b[0m`);
 	logMessages.push(`\t\t\x1b[1;33mapplicationCustomerId_FR (no need to replace)\x1b[0m: \x1b[0;31m${applicationCustomerIdFR}\x1b[0m`);
 });
 

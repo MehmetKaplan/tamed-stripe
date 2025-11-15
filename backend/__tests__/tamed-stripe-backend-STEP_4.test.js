@@ -118,6 +118,20 @@ test('subscriptionPayment - next 2 months', async () => {
 		await new Promise(r => setTimeout(r, 1000));
 	} while (curState2.status !== 'ready');
 
+	// REMINDER 
+	// For below code to have correct data Stripe webhook should be processed.
+	// And it is processed by the tamed-stripe-backend.
+	// And it uses the last released version.
+	// So when modifying tamed-stripe-backend, to test a version is needed and by definition it becomes circular dependency, not tested.
+	// To solve this:
+	// pm2 delete tamed-stripe-backend-example
+	// cd /home/ubuntu/tamed-stripe-backend-example/node_modules/tamed-stripe-backend
+	// rm tamed-stripe-backend.js
+	// vi tamed-stripe-backend.js
+	// paste the modified code from local machine
+	// cd /home/ubuntu/tamed-stripe-backend-example
+	// pm2 start run-server.sh --name tamed-stripe-backend-example
+	// Then run the test again.
 	const response4 = await tsb.getSubscriptionPayments({ 
 		applicationCustomerId: l_applicationCustomerId,
 	});
