@@ -10,9 +10,9 @@ export default function OneTimePayment(props) {
 
 	const [oneTimePaymentUrl, setOneTimePaymentUrl] = useState('');
 	const [checkoutSessionId, setCheckoutSessionId] = useState('');
-	const [oneTimeChargeItem1, setOneTimeChargeItem1] = useState('Test item 1');
+	const [oneTimeChargeItem1, setOneTimeChargeItem1] = useState('Test item 1 - tax exclusive');
 	const [oneTimeCharge1, setOneTimeCharge1] = useState('0');
-	const [oneTimeChargeItem2, setOneTimeChargeItem2] = useState('Test item 2');
+	const [oneTimeChargeItem2, setOneTimeChargeItem2] = useState('Test item 2 - tax inclusive');
 	const [oneTimeCharge2, setOneTimeCharge2] = useState('0');
 	const [payoutAmount, setPayoutAmount] = useState('0');
 
@@ -25,8 +25,8 @@ export default function OneTimePayment(props) {
 			payoutAccountId: props.accountId
 		}
 		const items = [
-			{ name: oneTimeChargeItem1, unitAmountDecimal: `${oneTimeCharge1}`, tax_code, },
-			{ name: oneTimeChargeItem2, unitAmountDecimal: `${oneTimeCharge2}`, tax_code, },
+			{ name: oneTimeChargeItem1, unitAmountDecimal: `${oneTimeCharge1}`, tax_code, taxBehavior: "exclusive" },
+			{ name: oneTimeChargeItem2, unitAmountDecimal: `${oneTimeCharge2}`, tax_code, taxBehavior: "inclusive" },
 		];
 		const body = {
 			applicationCustomerId: props.applicationCustomerId,

@@ -5,9 +5,9 @@ const { runSQL, } = require('tamed-pg');
 
 // The following items are coming from STEP 1
 // REPLACE AREA
-const applicationCustomerId = 'Jest Application Customer-1763229396751';
-const accountId_TR = "acct_1STniECIl9XcS2jl";
-const accountId_FR = "acct_1STniHC5dLtn3rR4";
+const applicationCustomerId = 'Jest Application Customer-1767450112350';
+const accountId_TR = "acct_1SlViIFfq8ubUmek";
+const accountId_FR = "acct_1SlViKFxBHt13DpO";
 // END OF REPLACE AREA
 
 const logMessages = [];
@@ -57,9 +57,10 @@ test('oneTimePayment without payOut', async () => {
 	const now = new Date();
 	const currency = 'try';
 	const items = [
-		{ name: "Red Hat", unitAmountDecimal: "100000" },
-		{ name: "Green Hat", unitAmountDecimal: "200000" },
-		{ name: "Blue Hat", unitAmountDecimal: "300000" },
+		// taxBehavior added to test tax_behavior property in convertItems function
+		{ name: "Red Hat", unitAmountDecimal: "100000", taxBehavior: "exclusive" },
+		{ name: "Green Hat", unitAmountDecimal: "200000", taxBehavior: "exclusive" },
+		{ name: "Blue Hat", unitAmountDecimal: "300000", taxBehavior: "exclusive" },
 	];
 	const payoutData = undefined;
 	const publicDomain = "https://development.eseme.one:61983";
@@ -72,9 +73,10 @@ test('oneTimePayment with newCustomerParams', async () => {
 	let applicationCustomerId = `oneTimePayment with newCustomerParams test - ${now}`;
 	const currency = 'try';
 	const items = [
-		{ name: "Red Hat", unitAmountDecimal: "100000" },
-		{ name: "Green Hat", unitAmountDecimal: "200000" },
-		{ name: "Blue Hat", unitAmountDecimal: "300000" },
+		// taxBehavior added to test tax_behavior property in convertItems function
+		{ name: "Red Hat", unitAmountDecimal: "100000", taxBehavior: "inclusive" },
+		{ name: "Green Hat", unitAmountDecimal: "200000", taxBehavior: "inclusive" },
+		{ name: "Blue Hat", unitAmountDecimal: "300000", taxBehavior: "inclusive" },
 	];
 	const payoutData = undefined;
 	const publicDomain = "https://development.eseme.one:61983";
@@ -93,9 +95,10 @@ test('oneTimePayment without payOut with tax in try', async () => {
 	const currency = 'try';
 	const items = [
 		// txcd_30060006 is the tax code for the "Hats" category in https://stripe.com/docs/tax/tax-categories
-		{ name: "Red Hat", unitAmountDecimal: "100000", tax_code: 'txcd_30060006' },
-		{ name: "Green Hat", unitAmountDecimal: "200000", tax_code: 'txcd_30060006' },
-		{ name: "Blue Hat", unitAmountDecimal: "300000", tax_code: 'txcd_30060006' },
+		// taxBehavior added to test tax_behavior property in convertItems function
+		{ name: "Red Hat", unitAmountDecimal: "100000", tax_code: 'txcd_30060006', taxBehavior: "exclusive" },
+		{ name: "Green Hat", unitAmountDecimal: "200000", tax_code: 'txcd_30060006', taxBehavior: "exclusive" },
+		{ name: "Blue Hat", unitAmountDecimal: "300000", tax_code: 'txcd_30060006', taxBehavior: "exclusive" },
 	];
 	const payoutData = undefined;
 	const publicDomain = "https://development.eseme.one:61983";
@@ -110,9 +113,10 @@ test('oneTimePayment without payOut with tax in eur', async () => {
 	const currency = 'eur';
 	const items = [
 		// txcd_30060006 is the tax code for the "Hats" category in https://stripe.com/docs/tax/tax-categories
-		{ name: "Red Hat", unitAmountDecimal: "100000", tax_code: 'txcd_30060006' },
-		{ name: "Green Hat", unitAmountDecimal: "200000", tax_code: 'txcd_30060006' },
-		{ name: "Blue Hat", unitAmountDecimal: "300000", tax_code: 'txcd_30060006' },
+		// taxBehavior added to test tax_behavior property in convertItems function
+		{ name: "Red Hat", unitAmountDecimal: "100000", tax_code: 'txcd_30060006', taxBehavior: "inclusive" },
+		{ name: "Green Hat", unitAmountDecimal: "200000", tax_code: 'txcd_30060006', taxBehavior: "inclusive" },
+		{ name: "Blue Hat", unitAmountDecimal: "300000", tax_code: 'txcd_30060006', taxBehavior: "inclusive" },
 	];
 	const payoutData = undefined;
 	const publicDomain = "https://development.eseme.one:61983";
@@ -127,9 +131,10 @@ test('oneTimePayment without payOut with tax in usd', async () => {
 	const currency = 'usd';
 	const items = [
 		// txcd_30060006 is the tax code for the "Hats" category in https://stripe.com/docs/tax/tax-categories
-		{ name: "Red Hat", unitAmountDecimal: "10000000", tax_code: 'txcd_30060006' },
-		{ name: "Green Hat", unitAmountDecimal: "20000000", tax_code: 'txcd_30060006' },
-		{ name: "Blue Hat", unitAmountDecimal: "30000000", tax_code: 'txcd_30060006' },
+		// taxBehavior added to test tax_behavior property in convertItems function
+		{ name: "Red Hat tax unspecified", unitAmountDecimal: "10000000", tax_code: 'txcd_30060006', taxBehavior: "unspecified" },
+		{ name: "Green Hat tax exclusive", unitAmountDecimal: "20000000", tax_code: 'txcd_30060006', taxBehavior: "exclusive" },
+		{ name: "Blue Hat tax inclusive", unitAmountDecimal: "30000000", tax_code: 'txcd_30060006', taxBehavior: "inclusive" },
 	];
 	const payoutData = undefined;
 	const publicDomain = "https://development.eseme.one:61983";
@@ -143,9 +148,10 @@ test('oneTimePayment with payOut to FR', async () => {
 	const now = new Date().getTime();
 	const currency = 'eur';
 	const items = [
-		{ name: "Red Hat", unitAmountDecimal: "100000" },
-		{ name: "Green Hat", unitAmountDecimal: "150000" },
-		{ name: "Blue Hat", unitAmountDecimal: "200000" },
+		// taxBehavior added to test tax_behavior property in convertItems function
+		{ name: "Red Hat", unitAmountDecimal: "100000", taxBehavior: "exclusive" },
+		{ name: "Green Hat", unitAmountDecimal: "150000", taxBehavior: "exclusive" },
+		{ name: "Blue Hat", unitAmountDecimal: "200000", taxBehavior: "exclusive" },
 	];
 	const payoutData = {
 		payoutAmount: "225000",
@@ -167,9 +173,10 @@ test('oneTimePayment with payOut to TR', async () => {
 	const now = new Date().getTime();
 	const currency = 'try';
 	const items = [
-		{ name: "Red Hat", unitAmountDecimal: "2000000" },
-		{ name: "Green Hat", unitAmountDecimal: "4000000" },
-		{ name: "Blue Hat", unitAmountDecimal: "6000000" },
+		// taxBehavior added to test tax_behavior property in convertItems function
+		{ name: "Red Hat", unitAmountDecimal: "2000000", taxBehavior: "inclusive" },
+		{ name: "Green Hat", unitAmountDecimal: "4000000", taxBehavior: "inclusive" },
+		{ name: "Blue Hat", unitAmountDecimal: "6000000", taxBehavior: "inclusive" },
 	];
 	const payoutData = {
 		payoutAmount: "4500000",

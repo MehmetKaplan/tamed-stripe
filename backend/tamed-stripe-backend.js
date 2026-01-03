@@ -429,6 +429,7 @@ const convertItems = (currency, items) => {
 				currency,
 				product_data: { name: item.name, tax_code: item.tax_code },
 				unit_amount_decimal: item.unitAmountDecimal,
+				tax_behavior: item?.taxBehavior,
 			},
 			quantity: 1,
 		});

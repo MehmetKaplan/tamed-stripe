@@ -9,8 +9,8 @@ const applicationCustomerIdNEW = `Frontend Jest Test Customer-${(new Date()).get
 
 // The following items are coming from BACKEND TESTS STEP 1
 // REPLACE AREA
-const applicationCustomerId = 'Jest Application Customer-1763229396751';
-const accountId_TR = "acct_1STniECIl9XcS2jl";
+const applicationCustomerId = 'Jest Application Customer-1767450112350';
+const accountId_TR = "acct_1SlViIFfq8ubUmek";
 // END OF REPLACE AREA
 
 beforeAll(async () => {
@@ -112,8 +112,9 @@ test('oneTimePayment', async () => {
 		payoutAccountId: accountId_TR
 	}
 	const items = [
-		{ name: `Frontend Jest Test Item 1`, unitAmountDecimal: `11111111`, },
-		{ name: `Frontend Jest Test Item 2`, unitAmountDecimal: `22222222`, },
+		// taxBehavior added to test tax_behavior property in convertItems function
+		{ name: `Frontend Jest Test Item 1`, unitAmountDecimal: `11111111`, taxBehavior: "exclusive" },
+		{ name: `Frontend Jest Test Item 2`, unitAmountDecimal: `22222222`, taxBehavior: "exclusive" },
 	];
 	const body = {
 		applicationCustomerId: applicationCustomerId,
@@ -136,8 +137,9 @@ test('oneTimePayment', async () => {
 test('oneTimePayment with newCustomerParams', async () => {
 	const now = new Date().getTime();
 	const items = [
-		{ name: `Frontend Jest Test Item 1`, unitAmountDecimal: `11111111`, },
-		{ name: `Frontend Jest Test Item 2`, unitAmountDecimal: `22222222`, },
+		// taxBehavior added to test tax_behavior property in convertItems function
+		{ name: `Frontend Jest Test Item 1`, unitAmountDecimal: `11111111`, taxBehavior: "inclusive" },
+		{ name: `Frontend Jest Test Item 2`, unitAmountDecimal: `22222222`, taxBehavior: "inclusive" },
 	];
 	const newCustomerParams = {
 		email: `test-${now}@yopmail.com`,
