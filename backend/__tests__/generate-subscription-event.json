@@ -1,11 +1,11 @@
 {
-	"id": "evt_1SlVpICDKfcpGwAftYuNghgb",
+	"id": "evt_1TEpSGCDKfcpGwAfEvOw5Q5C",
 	"object": "event",
 	"api_version": "2025-10-29.clover",
-	"created": 1767450547,
+	"created": 1774437511,
 	"data": {
 		"object": {
-			"id": "in_1SlVpECDKfcpGwAfe99dsLcf",
+			"id": "in_1TEpSBCDKfcpGwAf6s0VahYr",
 			"object": "invoice",
 			"account_country": "US",
 			"account_name": "Test LLC",
@@ -31,10 +31,10 @@
 			"automatically_finalizes_at": null,
 			"billing_reason": "subscription_create",
 			"collection_method": "charge_automatically",
-			"created": 1767450544,
+			"created": 1774437507,
 			"currency": "usd",
 			"custom_fields": null,
-			"customer": "cus_TixdZruq8i0ILZ",
+			"customer": "cus_UDFrxTa8vYeq1y",
 			"customer_account": null,
 			"customer_address": {
 				"city": "Cambridge",
@@ -44,8 +44,8 @@
 				"postal_code": "02139",
 				"state": "MA"
 			},
-			"customer_email": "test-1767450112350@yopmail.com",
-			"customer_name": "Jest Customer 1767450112350",
+			"customer_email": "test-1774437129499@yopmail.com",
+			"customer_name": "Jest Customer 1774437129499",
 			"customer_phone": "1234567890",
 			"customer_shipping": null,
 			"customer_tax_exempt": "none",
@@ -56,12 +56,12 @@
 			"description": null,
 			"discounts": [],
 			"due_date": null,
-			"effective_at": 1767450544,
+			"effective_at": 1774437507,
 			"ending_balance": 0,
 			"footer": null,
 			"from_invoice": null,
-			"hosted_invoice_url": "https://invoice.stripe.com/i/acct_1MVglyCDKfcpGwAf/test_YWNjdF8xTVZnbHlDREtmY3BHd0FmLF9UaXhreEdERlJGcDk1ZU9PZjJkUVNJR2RSMUhDWDF1LDE1Nzk5MTM0OA0200FOhvTqwN?s=ap",
-			"invoice_pdf": "https://pay.stripe.com/invoice/acct_1MVglyCDKfcpGwAf/test_YWNjdF8xTVZnbHlDREtmY3BHd0FmLF9UaXhreEdERlJGcDk1ZU9PZjJkUVNJR2RSMUhDWDF1LDE1Nzk5MTM0OA0200FOhvTqwN/pdf?s=ap",
+			"hosted_invoice_url": "https://invoice.stripe.com/i/acct_1MVglyCDKfcpGwAf/test_YWNjdF8xTVZnbHlDREtmY3BHd0FmLF9VREZ5czBPTEVSNDdIc2pCRFdnMXI4ZWpzVW1iaDFQLDE2NDk3ODMxMg0200BfxvHU4P?s=ap",
+			"invoice_pdf": "https://pay.stripe.com/invoice/acct_1MVglyCDKfcpGwAf/test_YWNjdF8xTVZnbHlDREtmY3BHd0FmLF9VREZ5czBPTEVSNDdIc2pCRFdnMXI4ZWpzVW1iaDFQLDE2NDk3ODMxMg0200BfxvHU4P/pdf?s=ap",
 			"issuer": {
 				"type": "self"
 			},
@@ -71,44 +71,46 @@
 				"object": "list",
 				"data": [
 					{
-						"id": "il_1SlVpECDKfcpGwAfEMOr0s0F",
+						"id": "il_1TEpSBCDKfcpGwAfHpimTIqm",
 						"object": "line_item",
 						"amount": 10000001,
 						"currency": "usd",
-						"description": "1 × Product 1767450543931 (at $100,000.01 / month)",
+						"description": "1 × Product 1774437507017 (at $100,000.01 / month)",
 						"discount_amounts": [],
 						"discountable": true,
 						"discounts": [],
-						"invoice": "in_1SlVpECDKfcpGwAfe99dsLcf",
+						"invoice": "in_1TEpSBCDKfcpGwAf6s0VahYr",
 						"livemode": false,
 						"metadata": {},
 						"parent": {
 							"invoice_item_details": null,
+							"license_fee_subscription_details": null,
 							"subscription_item_details": {
 								"invoice_item": null,
 								"proration": false,
 								"proration_details": {
 									"credited_items": null
 								},
-								"subscription": "sub_1SlVpECDKfcpGwAfO8F0ixkP",
-								"subscription_item": "si_TixkUObxBbf9cQ"
+								"subscription": "sub_1TEpSBCDKfcpGwAfwqCzefMS",
+								"subscription_item": "si_UDFyj73jnoLh6i"
 							},
 							"type": "subscription_item_details"
 						},
 						"period": {
-							"end": 1770128944,
-							"start": 1767450544
+							"end": 1777115907,
+							"start": 1774437507
 						},
 						"pretax_credit_amounts": [],
 						"pricing": {
 							"price_details": {
-								"price": "price_1SlVpECDKfcpGwAfG4N3QK2i",
-								"product": "prod_TixkMWMT9O1Z9E"
+								"price": "price_1TEpSBCDKfcpGwAfcMcKMsOt",
+								"product": "prod_UDFyoVJmRK5iz7"
 							},
 							"type": "price_details",
 							"unit_amount_decimal": "10000001"
 						},
 						"quantity": 1,
+						"quantity_decimal": "1",
 						"subtotal": 10000001,
 						"taxes": [
 							{
@@ -126,18 +128,18 @@
 				],
 				"has_more": false,
 				"total_count": 1,
-				"url": "/v1/invoices/in_1SlVpECDKfcpGwAfe99dsLcf/lines"
+				"url": "/v1/invoices/in_1TEpSBCDKfcpGwAf6s0VahYr/lines"
 			},
 			"livemode": false,
 			"metadata": {},
 			"next_payment_attempt": null,
-			"number": "D1RBAXCT-0001",
+			"number": "KL57XDYN-0001",
 			"on_behalf_of": null,
 			"parent": {
 				"quote_details": null,
 				"subscription_details": {
 					"metadata": {},
-					"subscription": "sub_1SlVpECDKfcpGwAfO8F0ixkP"
+					"subscription": "sub_1TEpSBCDKfcpGwAfwqCzefMS"
 				},
 				"type": "subscription_details"
 			},
@@ -146,8 +148,8 @@
 				"payment_method_options": null,
 				"payment_method_types": null
 			},
-			"period_end": 1767450544,
-			"period_start": 1767450544,
+			"period_end": 1774437507,
+			"period_start": 1774437507,
 			"post_payment_credit_notes_amount": 0,
 			"pre_payment_credit_notes_amount": 0,
 			"receipt_number": null,
@@ -158,9 +160,9 @@
 			"statement_descriptor": null,
 			"status": "paid",
 			"status_transitions": {
-				"finalized_at": 1767450544,
+				"finalized_at": 1774437507,
 				"marked_uncollectible_at": null,
-				"paid_at": 1767450544,
+				"paid_at": 1774437507,
 				"voided_at": null
 			},
 			"subtotal": 10000001,
@@ -182,14 +184,14 @@
 					"type": "tax_rate_details"
 				}
 			],
-			"webhooks_delivered_at": 1767450544
+			"webhooks_delivered_at": 1774437507
 		}
 	},
 	"livemode": false,
 	"pending_webhooks": 1,
 	"request": {
-		"id": "req_T7TeORQPK1oouJ",
-		"idempotency_key": "fa9c4151-8792-4610-b97c-8394bae11eef"
+		"id": "req_98ZeYJ5ZpRSf7N",
+		"idempotency_key": "ca27507e-b235-4465-ace5-82f4d5b23ca2"
 	},
 	"type": "invoice.paid"
 }

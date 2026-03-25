@@ -25,7 +25,7 @@ beforeAll(async () => {
 	logMessages.push(`\n\n\n\x1b[1;33mFirst arrange the PM2 actions:\x1b[0m\n`);
 	logMessages.push(`\t\t\t\x1b[0;31mcd ~/.pm2/logs\x1b[0m`);
 	logMessages.push(`\t\t\t\x1b[0;31mpm2 flush tamed-stripe-backend-example\x1b[0m`);
-	logMessages.push(`\n\n\n\x1b[1;33mThen complete below actions in URLs and then replace following customer and account id data in tamed-stripe-backend-STEP_\x1b[0;31m2\x1b[1;33m.test.js and tamed-stripe-backend-STEP_\x1b[0;31m3\x1b[1;33m.test.js files.\x1b[0m\n`);
+	logMessages.push(`\n\n\n\x1b[1;33mThen complete below actions in URLs and then replace following customer and account id data in tamed-stripe-backend-STEP_\x1b[0;31m2\x1b[1;33m.test.js, tamed-stripe-backend-STEP_\x1b[0;31m3\x1b[1;33m.test.js and tamed-stripe-\x1b[0;31mfrontend\x1b[1;33m-api-callers.test files.\x1b[0m\n`);
 
 });
 
@@ -144,7 +144,7 @@ test('generateAccount (connected account for payouts) in TR', async () => {
 	expect(accountAtDB.rows[0].stripe_account_id).toEqual(accountData.id);
 	expect(accountAtDB.rows[0].account_object).toEqual(accountData);
 	logMessages.push(`\t\t\x1b[1;33mAccount URL\x1b[0m: \x1b[0;31m${accountData.accountLinkURL}\x1b[0m`);
-	logMessages.push(`\t\t\x1b[1;33maccountId_TR (2 replaces in Step 2 and Step 1 files, 1 each)\x1b[0m: \x1b[0;31m${accountData.id}\x1b[0m`);
+	logMessages.push(`\t\t\x1b[1;33maccountId_TR (Total 2 replaces in Step 2 and frontend files, 1 each)\x1b[0m: \x1b[0;31m${accountData.id}\x1b[0m`);
 	logMessages.push(`\t\t\x1b[1;33mapplicationCustomerId_TR (no need to replace)\x1b[0m: \x1b[0;31m${applicationCustomerIdTR}\x1b[0m`);
 });
 
@@ -174,7 +174,7 @@ test('generateAccount (connected account for payouts) in FR', async () => {
 	expect(accountAtDB.rows[0].stripe_account_id).toEqual(accountData.id);
 	expect(accountAtDB.rows[0].account_object).toEqual(accountData);
 	logMessages.push(`\t\t\x1b[1;33mAccount URL\x1b[0m: \x1b[0;31m${accountData.accountLinkURL}\x1b[0m`);
-	logMessages.push(`\t\t\x1b[1;33maccountId_FR (1 replace)\x1b[0m: \x1b[0;31m${accountData.id}\x1b[0m`);
+	logMessages.push(`\t\t\x1b[1;33maccountId_FR (1 replace in Step 2)\x1b[0m: \x1b[0;31m${accountData.id}\x1b[0m`);
 	logMessages.push(`\t\t\x1b[1;33mapplicationCustomerId_FR (no need to replace)\x1b[0m: \x1b[0;31m${applicationCustomerIdFR}\x1b[0m`);
 });
 

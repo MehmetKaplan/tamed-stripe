@@ -441,7 +441,7 @@ const oneTimePayment = (body) => new Promise(async (resolve, reject) => {
 	try {
 		// payoutData: {payoutAmount, payoutAccountId}
 		// items: [{name, unitAmountDecimal}]
-		const { applicationCustomerId, currency, items, payoutData, publicDomain, automaticTax, newCustomerParams } = body;
+		const { applicationCustomerId, currency, items, metadata, payoutData, publicDomain, automaticTax, newCustomerParams } = body;
 		const successRoute = body?.successRoute || '/one-time-payment-success-route';
 		const cancelRoute = body?.cancelRoute || '/one-time-payment-cancel-route';
 
@@ -490,6 +490,7 @@ const oneTimePayment = (body) => new Promise(async (resolve, reject) => {
 			customer: customerId,
 			currency: currency,
 			line_items: stripeItems,
+			metadata: metadata,
 			invoice_creation: { enabled: true },
 			payment_intent_data: paymentIntentParams,
 			success_url: successUrl,

@@ -5,9 +5,9 @@ const { runSQL, } = require('tamed-pg');
 
 // The following items are coming from STEP 1
 // REPLACE AREA
-const applicationCustomerId = 'Jest Application Customer-1767450112350';
-const accountId_TR = "acct_1SlViIFfq8ubUmek";
-const accountId_FR = "acct_1SlViKFxBHt13DpO";
+const applicationCustomerId = 'Jest Application Customer-1774437129499';
+const accountId_TR = 'acct_1TEpM7CSCdPxAf1X';
+const accountId_FR = 'acct_1TEpMA2ItZu69AmV';
 // END OF REPLACE AREA
 
 const logMessages = [];
@@ -153,14 +153,16 @@ test('oneTimePayment with payOut to FR', async () => {
 		{ name: "Green Hat", unitAmountDecimal: "150000", taxBehavior: "exclusive" },
 		{ name: "Blue Hat", unitAmountDecimal: "200000", taxBehavior: "exclusive" },
 	];
+	const metadata = { "testKey": "testValue", "source": "STEP_2" };
 	const payoutData = {
 		payoutAmount: "225000",
 		payoutAccountId: accountId_FR,
 		useOnBehalfOf: true
 	};
 	const publicDomain = "https://development.eseme.one:61983";
-	const response4 = await tsb.oneTimePayment({ applicationCustomerId, currency, items, payoutData, publicDomain, });
+	const response4 = await tsb.oneTimePayment({ applicationCustomerId, currency, items, metadata, payoutData, publicDomain });
 	expect(response4.payload.url.length).toBeGreaterThan(0);
+	expect(response4.payload.metadata).toEqual(metadata);
 	logMessages.push(`\x1b[1;33m Flush before this URL \x1b[0m`);
 	logMessages.push(`\t\t\t\x1b[0;31mcd ~/.pm2/logs\x1b[0m`);
 	logMessages.push(`\t\t\t\x1b[0;31mpm2 flush tamed-stripe-backend-example\x1b[0m`);

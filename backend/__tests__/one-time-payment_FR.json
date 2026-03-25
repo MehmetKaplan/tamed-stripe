@@ -1,11 +1,11 @@
 {
-	"id": "evt_1SlVrnCDKfcpGwAfgdLzc0AW",
+	"id": "evt_1TEpThCDKfcpGwAfp8SSzNqe",
 	"object": "event",
 	"api_version": "2025-10-29.clover",
-	"created": 1767450703,
+	"created": 1774437601,
 	"data": {
 		"object": {
-			"id": "cs_test_b1s6sVDynSJtGIosNIag3O5ct4XdJy1TeT4XQAaOE55QtEDO6Mr3aI7B45",
+			"id": "cs_test_b1f3EJf2Q3l9smu63DlWfSXmiFhf93fdFCtiahPIGFxm1mJ8zFZzKNhic1",
 			"object": "checkout.session",
 			"adaptive_pricing": {
 				"enabled": true
@@ -40,7 +40,7 @@
 			},
 			"consent": null,
 			"consent_collection": null,
-			"created": 1767450543,
+			"created": 1774437506,
 			"currency": "eur",
 			"currency_conversion": null,
 			"custom_fields": [],
@@ -50,7 +50,7 @@
 				"submit": null,
 				"terms_of_service_acceptance": null
 			},
-			"customer": "cus_TixdZruq8i0ILZ",
+			"customer": "cus_UDFrxTa8vYeq1y",
 			"customer_account": null,
 			"customer_creation": null,
 			"customer_details": {
@@ -63,17 +63,18 @@
 					"state": "MA"
 				},
 				"business_name": null,
-				"email": "test-1767450112350@yopmail.com",
+				"email": "test-1774437129499@yopmail.com",
 				"individual_name": null,
-				"name": "Jest Customer 1767450112350",
+				"name": "Jest Customer 1774437129499",
 				"phone": null,
 				"tax_exempt": "none",
 				"tax_ids": []
 			},
 			"customer_email": null,
 			"discounts": [],
-			"expires_at": 1767536943,
-			"invoice": "in_1SlVrkCDKfcpGwAfnkKGVRbc",
+			"expires_at": 1774523906,
+			"integration_identifier": null,
+			"invoice": "in_1TEpTeCDKfcpGwAfp0ve47AF",
 			"invoice_creation": {
 				"enabled": true,
 				"invoice_data": {
@@ -90,10 +91,13 @@
 			},
 			"livemode": false,
 			"locale": null,
-			"metadata": {},
+			"metadata": {
+				"source": "STEP_2",
+				"testKey": "testValue"
+			},
 			"mode": "payment",
 			"origin_context": null,
-			"payment_intent": "pi_3SlVriCDKfcpGwAf12cHVsFh",
+			"payment_intent": "pi_3TEpTcCDKfcpGwAf15HEVQBf",
 			"payment_link": null,
 			"payment_method_collection": "if_required",
 			"payment_method_configuration_details": {

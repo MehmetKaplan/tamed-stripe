@@ -5,7 +5,7 @@ const { runSQL, } = require('tamed-pg');
 
 // The following items are coming from STEP 1
 // REPLACE AREA
-const applicationCustomerId = 'Jest Application Customer-1767450112350';
+const applicationCustomerId = 'Jest Application Customer-1774437129499';
 // END OF REPLACE AREA
 
 const logMessages = [];
@@ -48,6 +48,7 @@ test('webhook for oneTimePayment with payOut to FR from step2', async () => {
 	expect(oneTimePaymentRecord.rows[0].state).toBe('P');
 	expect(oneTimePaymentRecord.rows[0].invoice_id.length).toBeGreaterThan(0);
 	expect(oneTimePaymentRecord.rows[0].hosted_invoice_url.length).toBeGreaterThan(0);
+	expect(event.data.object.metadata).toEqual({"testKey": "testValue", "source": "STEP_2"}); // coming from tamed-stripe-backend-STEP_2.test.js
 })
 // Independent tests
 
@@ -99,7 +100,7 @@ test('cancelSubscription', async () => {
 	const subscriptionAtDB2 = await runSQL(poolName, sqls.selectSubscription, [response3.payload.id], debugMode);
 	expect(subscriptionAtDB2.rows.length).toBe(0);
 
-});
+}, 30000);
 
 test('generateAccount same account in state A again', async () => {
 	const country = undefined;
