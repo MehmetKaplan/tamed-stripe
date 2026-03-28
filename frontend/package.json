@@ -1,6 +1,6 @@
 {
   "name": "tamed-stripe-frontend",
-  "version": "1.2.0",
+  "version": "1.2.2",
   "description": "test",
   "main": "lib/commonjs/index",
   "module": "lib/module/index",
@@ -65,7 +65,7 @@
     "react": "18.2.0",
     "react-native": "0.71.7",
     "react-native-builder-bob": "^0.20.0",
-    "release-it": "^15.0.0",
+    "release-it": "^19.2.4",
     "tick-log": "^1.1.4",
     "typescript": "^4.5.2"
   },

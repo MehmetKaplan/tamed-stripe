@@ -167,6 +167,7 @@ export const oneTimePayment = (props) => new Promise(async (resolve, reject) => 
 		body.payoutData = props.payoutData;
 		body.publicDomain = props.publicDomain;
 
+		if (props?.metadata) body.metadata = props.metadata;
 		if (props?.newCustomerParams) body.newCustomerParams = props.newCustomerParams;
 
 		body.successRoute = props?.successRoute;
